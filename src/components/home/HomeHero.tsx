@@ -4,70 +4,13 @@ import Image from 'next/image';
 
 export default function HomeHero() {
     return (
-        <section className="relative overflow-hidden py-16 md:py-20 lg:py-24">
-            {/* arrière-plan très léger */}
-            <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -top-32 right-[-10%] h-[420px] w-[420px] rounded-full bg-sage/10 blur-[120px]" />
-                <div className="absolute -bottom-40 left-[-15%] h-[480px] w-[480px] rounded-full bg-rose/10 blur-[140px]" />
-            </div>
-
-            <div className="container-page relative">
-                <div className="grid gap-12 lg:gap-16 lg:grid-cols-[1.05fr,1fr] items-center">
+        <section className="relative overflow-hidden bg-ivory pt-20 pb-24 md:pt-24 md:pb-28">
+            <div className="container-page relative animate-fade-in">
+                <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.05fr)] gap-10 lg:gap-14 items-stretch">
                     {/* ======================
-                       COLONNE IMAGE / VISUEL
-                       (en premier sur mobile)
+                       COLONNE TEXTE / NARRATION
                     ====================== */}
-                    <div className="order-1 lg:order-2">
-                        <div className="relative rounded-3xl border border-perl/60 bg-ivory shadow-xl overflow-hidden">
-                            {/* IMAGE */}
-                            <div className="relative h-[260px] sm:h-80 md:h-[380px] lg:h-[420px]">
-                                <Image
-                                    src="/images/hero/hero-explor-art.png"
-                                    alt="Atelier artistique calme avec carnets de croquis, pinceaux et nuancier de couleurs"
-                                    fill
-                                    priority
-                                    className="object-cover"
-                                />
-                                {/* léger filtre pour calmer l'image */}
-                                <div className="absolute inset-0 bg-linear-to-t from-black/45 via-black/20 to-black/5" />
-
-                                {/* BADGE EN HAUT */}
-                                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                    <span className="inline-flex items-center rounded-full bg-black/55 backdrop-blur-sm px-3 py-1.5 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-ivory">
-                                        Atelier Explor&apos;Art
-                                    </span>
-                                    <span className="inline-flex items-center rounded-full bg-rose/90 px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.18em] text-ivory shadow-sm">
-                                        Nouveau · Parcours &quot;Commencer ici&quot;
-                                    </span>
-                                </div>
-
-                                {/* CARTOUCHE EN BAS : PILIERS SUR L'IMAGE */}
-                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[88%] rounded-2xl bg-ivory/95 backdrop-blur-md px-4 py-3 shadow-xl border border-perl/60">
-                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="space-y-0.5">
-                                            <p className="text-[0.7rem] uppercase tracking-[0.18em] font-semibold text-main/70">Explorer par piliers</p>
-                                            <p className="text-[0.78rem] text-main/75">Du trait aux émotions : 7 portes d’entrée pour apprivoiser l’art.</p>
-                                        </div>
-                                        <div className="flex items-center gap-1.5 pt-1 sm:pt-0">
-                                            <span className="h-2.5 w-2.5 rounded-full bg-vert" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-bleu" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-ocre" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-terre" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-sage" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-rose" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-prune" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ======================
-                       COLONNE TEXTE / EDITO
-                       (en second sur mobile)
-                    ====================== */}
-                    <div className="order-2 lg:order-1 space-y-7">
+                    <div className="space-y-7 lg:pr-6 animate-fade-up">
                         <div className="flex flex-wrap items-center gap-3">
                             <p className="section-label section-label-sage">Blog d&apos;art lumineux</p>
                             <span className="text-[0.72rem] uppercase tracking-[0.18em] text-main/60">Dessin · Œuvres · Couleurs · Émotions</span>
@@ -75,10 +18,9 @@ export default function HomeHero() {
 
                         <div className="space-y-4">
                             <h1 className="font-serif-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.08] tracking-tight">
-                                Laisse l’art devenir <span className="inline-block bg-ivory px-2 pb-1 rounded-lg shadow-sm">clair</span>
-                                .
+                                Apprends à <span className="inline-block bg-background px-2 pb-2 rounded-lg shadow-sm relative animate-underline-reveal">regarder</span> l’art,
                                 <br />
-                                <span className="text-sage">Sensible. Lumineux. Vivant.</span>
+                                <span className="text-sage">pas seulement à l’analyser.</span>
                             </h1>
 
                             <p className="text-main/75 text-base md:text-lg max-w-xl leading-relaxed">
@@ -88,12 +30,12 @@ export default function HomeHero() {
                         </div>
 
                         {/* CTA */}
-                        <div className="space-y-3">
+                        <div className="space-y-3 animate-fade-up-delay">
                             <div className="flex flex-wrap gap-3">
                                 <Link href="/commencer-ici" className="btn btn-primary">
                                     Commencer ici
                                 </Link>
-                                <Link href="/articles" className="btn btn-ghost border border-perl/60 bg-ivory/80 hover:bg-ivory text-main">
+                                <Link href="/articles" className="btn btn-secondary border border-perl text-main">
                                     Voir les articles
                                 </Link>
                             </div>
@@ -101,20 +43,77 @@ export default function HomeHero() {
                                 Un mini-parcours guidé pour te lancer en douceur, puis des articles classés par thèmes pour explorer l’art comme tu veux.
                             </p>
                         </div>
+                    </div>
 
-                        {/* micro-stats / marqueurs */}
-                        <div className="flex flex-wrap gap-4 pt-2 text-xs text-main/65">
-                            <div className="flex items-center gap-2">
-                                <span className="h-2.5 w-2.5 rounded-full bg-vert" />
-                                <span>Débutants & amateurs sensibles bienvenus</span>
+                    {/* ======================
+                       COLONNE IMAGE / ATELIER
+                       (désormais à DROITE)
+                    ====================== */}
+                    <div className="relative lg:pl-4 animate-fade-up-delay">
+                        {/* cadre décalé derrière pour effet tendance */}
+                        <div
+                            className="hidden lg:block absolute -top-6 -right-6 w-[92%] h-[94%] rounded-3xl border border-perl bg-background animate-slide-frame"
+                            aria-hidden="true"
+                        />
+
+                        <div className="relative overflow-hidden rounded-3xl border border-perl/60 bg-ivory shadow-xl group">
+                            {/* IMAGE HERO */}
+                            <div className="relative h-[260px] sm:h-[360px] md:h-[420px] lg:h-[480px]">
+                                <Image
+                                    src="/images/hero/hero-explor-art.png"
+                                    alt="Atelier calme avec carnets de croquis, pinceaux et nuancier de couleurs"
+                                    fill
+                                    priority
+                                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03] animate-parallax"
+                                />
+
+                                {/* gradient lisibilité */}
+                                <div className="absolute inset-0 bg-linear-to-t from-black/45 via-black/10 to-transparent" />
+
+                                {/* badges overlay */}
+                                <div className="absolute top-4 left-4 flex flex-col gap-2 animate-fade-up">
+                                    <span className="px-3 py-1.5 rounded-full bg-black/55 text-ivory text-[0.7rem] uppercase tracking-[0.18em] backdrop-blur-sm">
+                                        Atelier Explor&apos;Art
+                                    </span>
+
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose/90 text-ivory text-[0.68rem] uppercase tracking-[0.18em] shadow-sm">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-ivory" />
+                                        Nouveau — Parcours &quot;Commencer ici&quot;
+                                    </span>
+                                </div>
+
+                                {/* cartouche vertical à droite (piliers en couleur) */}
+                                <div className="absolute right-4 bottom-4 hidden md:flex flex-col gap-2 rounded-2xl bg-black/35 backdrop-blur-md px-3 py-3 text-[0.68rem] text-ivory animate-fade-up-delay">
+                                    <span className="uppercase tracking-[0.18em] text-[0.66rem] text-ivory/85">7 piliers</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="h-2 w-2 rounded-full bg-vert" />
+                                        <span className="h-2 w-2 rounded-full bg-bleu" />
+                                        <span className="h-2 w-2 rounded-full bg-ocre" />
+                                        <span className="h-2 w-2 rounded-full bg-terre" />
+                                        <span className="h-2 w-2 rounded-full bg-sage" />
+                                        <span className="h-2 w-2 rounded-full bg-rose" />
+                                        <span className="h-2 w-2 rounded-full bg-prune" />
+                                    </div>
+                                    <p className="text-[0.68rem] text-ivory/85">Du premier trait jusqu&apos;aux émotions que l’art réveille en toi.</p>
+                                </div>
+
+                                {/* cartouche POUR QUI (mobile) */}
+                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[88%] rounded-3xl bg-ivory/95 backdrop-blur-lg px-5 py-4 shadow-2xl border border-perl/60 md:hidden animate-fade-up-delay">
+                                    <p className="text-[0.72rem] uppercase tracking-[0.20em] font-semibold text-main/70 mb-2">Pour qui ?</p>
+                                    <ul className="space-y-1.5 text-xs text-main/80">
+                                        <li>• Tu veux reprendre le dessin sans pression.</li>
+                                        <li>• Tu veux comprendre une œuvre sans te sentir illégitime.</li>
+                                        <li>• Tu cherches un endroit où l’art parle aussi à tes émotions.</li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="h-2.5 w-2.5 rounded-full bg-sage" />
-                                <span>7 piliers pédagogiques</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-perl/60 bg-ivory/80 backdrop-blur-sm">
-                                <span className="h-1.5 w-1.5 rounded-full bg-rose" />
-                                <span className="uppercase tracking-[0.18em] text-[0.67rem]">pédagogie douce</span>
+
+                            {/* bandeau bas sur desktop */}
+                            <div className="hidden md:flex items-center justify-between px-5 py-3 border-t border-perl bg-background backdrop-blur-sm">
+                                <div className="flex flex-col">
+                                    <span className="text-[0.7rem] tracking-[0.18em] uppercase text-main/60">Pour qui ?</span>
+                                    <span className="text-xs text-main/75">Débutants, amateurs sensibles, amoureux·ses d’art qui veulent avancer en douceur.</span>
+                                </div>
                             </div>
                         </div>
                     </div>

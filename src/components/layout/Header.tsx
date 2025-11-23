@@ -83,8 +83,8 @@ export function Header() {
 
     const isActive = (href: string) => pathname === href;
 
-    // Explorer est considéré "actif" sur toutes les pages de contenu
-    const explorerActive = openExplorer || pathname.startsWith('/categories') || pathname.startsWith('/articles');
+    // Explorer actif UNIQUEMENT sur pages blog / catégories
+    const explorerActive = pathname.startsWith('/articles') || pathname.startsWith('/categories');
 
     // Scroll : change juste le style du header (ne ferme plus le menu)
     useEffect(() => {
@@ -114,8 +114,8 @@ export function Header() {
         return () => window.removeEventListener('click', handleClick);
     }, [openExplorer]);
 
-    // Explorer actif en mobile / tablette
-    const explorerMobileActive = pathname.startsWith('/categories') || pathname.startsWith('/articles');
+    // Explorer actif en mobile / tablette (même logique URL)
+    const explorerMobileActive = explorerActive;
 
     return (
         <header className={`navbar sticky top-0 z-40 border-b border-perl/40 backdrop-blur-md transition-all duration-200 ${scrolled ? 'bg-page/95 shadow-sm' : 'bg-page/80'}`}>
@@ -129,7 +129,7 @@ export function Header() {
                         setOpenExplorer(false);
                     }}
                 >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-vert/90 text-[0.75rem] font-semibold text-ivory shadow-sm">EA</span>
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sage/90 text-[0.75rem] font-semibold text-ivory shadow-sm" />
                     <div className="flex flex-col leading-tight">
                         <span className="font-serif-title text-base md:text-lg tracking-tight">Explor&apos;Art</span>
                         <span className="hidden text-[0.7rem] uppercase tracking-[0.18em] text-main/50 sm:block">Dessiner · Comprendre · Ressentir</span>
@@ -161,7 +161,7 @@ export function Header() {
                         );
                     })()}
 
-                    {/* BOUTON EXPLORER – même UI que les autres liens, placé entre les deux */}
+                    {/* BOUTON EXPLORER – actif uniquement selon l'URL */}
                     <button
                         type="button"
                         ref={explorerButtonRef}
@@ -296,7 +296,7 @@ export function Header() {
                                             <Link
                                                 href="/commencer-ici"
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-ivory/70 transition-colors"
+                                                className="flex items<center justify-between rounded-lg px-2 py-1.5 hover:bg-ivory/70 transition-colors"
                                             >
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-main">Commencer ici</span>
