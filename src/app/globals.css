@@ -6,40 +6,47 @@
 @import "tailwindcss";
 
 /* -------------------------------------------
-   🌿 PALETTE OFFICIELLE (UI DESIGN)
-   -> Palette retravaillée : plus profonde, plus contrastée
+   🌿 PALETTE EXPLOR'ART
+   Papier dessin + encres colorées
 ------------------------------------------- */
 :root {
   /* Base */
-  --background: #f7f3ed;
-  /* fond global légèrement chaleureux */
-  --foreground: #1f2933;
+  --background: #f9f5ef;
+  /* fond global type papier chaud */
+  --foreground: #111827;
   /* texte principal très lisible */
 
-  /* Surfaces & bordures */
-  --color-bg: #f7f3ed;
-  --color-ivory: #f1ebe0;
-  --color-perl: #d5ccc0;
+  /* Surfaces & bordures douces */
+  --color-bg: #f9f5ef;
+  --color-ivory: #f3ece1;
+  --color-perl: #ddd1c2;
 
-  /* Piliers – Teintes terre / encre, plus sombres & cohérentes */
+  /* 7 PILIERS — encres colorées, assez foncées pour texte blanc */
   /* Dessin & Peinture */
-  --color-vert: #2f5d50;
+  /* vert pin doux */
+  --color-vert: #3c6e5a;
   /* Couleurs & harmonie */
-  --color-sage: #365b63;
+  /* sarcelle profonde */
+  --color-sage: #2f6973;
   /* Histoire de l’art */
-  --color-ocre: #8a5a23;
+  /* ocre brûlé */
+  --color-ocre: #c07a2c;
   /* Histoires d’artistes */
-  --color-terre: #8c4432;
+  /* terre rouge */
+  --color-terre: #a3412a;
   /* Inspirations */
-  --color-rose: #a9445a;
+  /* rose minéral */
+  --color-rose: #b45c77;
   /* Comprendre une œuvre */
-  --color-bleu: #234a6d;
+  /* bleu nuit */
+  --color-bleu: #1e3d72;
   /* Psychologie de l’art */
-  --color-prune: #53325f;
+  /* violet encre */
+  --color-prune: #5a3c74;
 
-  --color-text-main: #1f2933;
+  --color-text-main: #111827;
 
-  /* --- IMPORTANT : FONTS VARIABLES INJECTÉES PAR NEXT --- */
+  /* --- FONTS VARIABLES INJECTÉES PAR NEXT --- */
   --font-inter: var(--font-inter);
   --font-playfair: var(--font-playfair);
 }
@@ -83,7 +90,7 @@ body {
 ------------------------------------------- */
 
 .container-page {
-  @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8;
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
 /* Titres serif */
@@ -112,15 +119,14 @@ body {
   @apply inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
 }
 
-/* CTA principal : couleur terre très lisible (fond sombre + texte blanc) */
+/* CTA principal : terre cuite + texte blanc */
 .btn-primary {
   background: var(--color-terre);
-  color: #fdfbf5;
+  color: #fdfbf7;
 }
 
 .btn-primary:hover {
-  background: #723126;
-  /* terre un peu plus foncé au hover */
+  background: #8b3723;
 }
 
 /* Bouton fantôme : texte foncé, fond clair au hover */
@@ -159,77 +165,38 @@ body {
   color: var(--color-main);
 }
 
-/* Badge de pilier : texte sombre + bordure colorée + petit point coloré */
+/* Badges piliers : fond couleur pilier + texte blanc */
 .badge-pillar {
-  @apply inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border;
-  background-color: #ffffff;
-  color: var(--color-main);
+  @apply inline-flex items-center px-3 py-1 text-xs font-medium rounded-full;
+  color: #f9fafb;
 }
 
-/* Point coloré avant le texte (porte la couleur de la catégorie) */
-.badge-pillar::before {
-  content: "";
-  display: inline-block;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 9999px;
-  margin-right: 0.45rem;
-}
-
-/* Une couleur par pilier */
+/* 1 couleur par pilier */
 .badge-vert {
-  border-color: var(--color-vert);
-}
-
-.badge-vert::before {
   background-color: var(--color-vert);
 }
 
 .badge-bleu {
-  border-color: var(--color-bleu);
-}
-
-.badge-bleu::before {
   background-color: var(--color-bleu);
 }
 
 .badge-terre {
-  border-color: var(--color-terre);
-}
-
-.badge-terre::before {
   background-color: var(--color-terre);
 }
 
 .badge-ocre {
-  border-color: var(--color-ocre);
-}
-
-.badge-ocre::before {
   background-color: var(--color-ocre);
 }
 
 .badge-sage {
-  border-color: var(--color-sage);
-}
-
-.badge-sage::before {
   background-color: var(--color-sage);
 }
 
 .badge-rose {
-  border-color: var(--color-rose);
-}
-
-.badge-rose::before {
   background-color: var(--color-rose);
 }
 
 .badge-prune {
-  border-color: var(--color-prune);
-}
-
-.badge-prune::before {
   background-color: var(--color-prune);
 }
 
@@ -249,10 +216,10 @@ body {
   letter-spacing: 0.18em;
 
   color: var(--color-main);
-  background-color: var(--color-ivory);
+  background-color: #fdf7ef;
   border: 1px solid var(--color-perl);
 
-  /* couleur d’accent par défaut pour le point */
+  /* accent par défaut pour le point */
   --section-label-accent: var(--color-sage);
 }
 
@@ -267,7 +234,7 @@ body {
   background-color: var(--section-label-accent);
 }
 
-/* Variantes de couleur : on ne touche qu’à l’accent */
+/* Variantes : on ne change que l’accent */
 .section-label-vert {
   --section-label-accent: var(--color-vert);
 }
@@ -290,5 +257,41 @@ body {
 
 .navbar {
   @apply sticky top-0 z-50 backdrop-blur-md border-b border-perl/40;
-  background-color: rgba(247, 243, 237, 0.9);
+  background-color: rgba(249, 245, 239, 0.9);
+}
+
+/* -------------------------------------------
+    ANIMATIONS
+------------------------------------------- */
+
+@keyframes subtle-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-subtle-fade-up {
+  animation: subtle-fade-up 180ms ease-out forwards;
+}
+
+@keyframes mobile-sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-mobile-sheet {
+  animation: mobile-sheet-up 220ms ease-out forwards;
 }
