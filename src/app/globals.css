@@ -1,26 +1,294 @@
+/* -----------------------------------------------------------
+   GLOBAL CSS — EXPLOR'ART
+   Palette + Fonts + Tailwind v4 mapping
+----------------------------------------------------------- */
+
 @import "tailwindcss";
 
+/* -------------------------------------------
+   🌿 PALETTE OFFICIELLE (UI DESIGN)
+   -> Palette retravaillée : plus profonde, plus contrastée
+------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base */
+  --background: #f7f3ed;
+  /* fond global légèrement chaleureux */
+  --foreground: #1f2933;
+  /* texte principal très lisible */
+
+  /* Surfaces & bordures */
+  --color-bg: #f7f3ed;
+  --color-ivory: #f1ebe0;
+  --color-perl: #d5ccc0;
+
+  /* Piliers – Teintes terre / encre, plus sombres & cohérentes */
+  /* Dessin & Peinture */
+  --color-vert: #2f5d50;
+  /* Couleurs & harmonie */
+  --color-sage: #365b63;
+  /* Histoire de l’art */
+  --color-ocre: #8a5a23;
+  /* Histoires d’artistes */
+  --color-terre: #8c4432;
+  /* Inspirations */
+  --color-rose: #a9445a;
+  /* Comprendre une œuvre */
+  --color-bleu: #234a6d;
+  /* Psychologie de l’art */
+  --color-prune: #53325f;
+
+  --color-text-main: #1f2933;
+
+  /* --- IMPORTANT : FONTS VARIABLES INJECTÉES PAR NEXT --- */
+  --font-inter: var(--font-inter);
+  --font-playfair: var(--font-playfair);
 }
 
+/* -------------------------------------------
+   🎨 TAILWIND V4 THEME MAPPING
+------------------------------------------- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-page: var(--color-bg);
+  --color-ivory: var(--color-ivory);
+  --color-perl: var(--color-perl);
+  --color-main: var(--color-text-main);
+
+  --color-vert: var(--color-vert);
+  --color-sage: var(--color-sage);
+  --color-ocre: var(--color-ocre);
+  --color-terre: var(--color-terre);
+  --color-rose: var(--color-rose);
+  --color-bleu: var(--color-bleu);
+  --color-prune: var(--color-prune);
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* -------------------------------------------
+   🌞 MODE CLAIR
+------------------------------------------- */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-main);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* -------------------------------------------
+   📦 UTILITAIRES
+------------------------------------------- */
+
+.container-page {
+  @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Titres serif */
+.font-serif-title {
+  font-family: var(--font-serif), serif;
+}
+
+/* Prose (articles) */
+.prose-article p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.prose-article h2,
+.prose-article h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-serif), serif;
+}
+
+/* -------------------------------------------
+   🎛️ BOUTONS
+------------------------------------------- */
+
+.btn {
+  @apply inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
+}
+
+/* CTA principal : couleur terre très lisible (fond sombre + texte blanc) */
+.btn-primary {
+  background: var(--color-terre);
+  color: #fdfbf5;
+}
+
+.btn-primary:hover {
+  background: #723126;
+  /* terre un peu plus foncé au hover */
+}
+
+/* Bouton fantôme : texte foncé, fond clair au hover */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-main);
+}
+
+.btn-ghost:hover {
+  background: var(--color-ivory);
+}
+
+/* -------------------------------------------
+   🧾 CARDS
+------------------------------------------- */
+
+.card {
+  @apply rounded-xl bg-white shadow-sm border border-perl/40 p-4 transition-all;
+}
+
+.card:hover {
+  @apply shadow-md;
+}
+
+/* -------------------------------------------
+   🏷️ BADGES
+------------------------------------------- */
+
+.badge {
+  @apply inline-flex items-center px-3 py-1 text-xs font-medium rounded-full;
+}
+
+/* Badge de niveau (Débutant, etc.) */
+.badge-level {
+  background: var(--color-perl);
+  color: var(--color-main);
+}
+
+/* Badge de pilier : texte sombre + bordure colorée + petit point coloré */
+.badge-pillar {
+  @apply inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border;
+  background-color: #ffffff;
+  color: var(--color-main);
+}
+
+/* Point coloré avant le texte (porte la couleur de la catégorie) */
+.badge-pillar::before {
+  content: "";
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  margin-right: 0.45rem;
+}
+
+/* Une couleur par pilier */
+.badge-vert {
+  border-color: var(--color-vert);
+}
+
+.badge-vert::before {
+  background-color: var(--color-vert);
+}
+
+.badge-bleu {
+  border-color: var(--color-bleu);
+}
+
+.badge-bleu::before {
+  background-color: var(--color-bleu);
+}
+
+.badge-terre {
+  border-color: var(--color-terre);
+}
+
+.badge-terre::before {
+  background-color: var(--color-terre);
+}
+
+.badge-ocre {
+  border-color: var(--color-ocre);
+}
+
+.badge-ocre::before {
+  background-color: var(--color-ocre);
+}
+
+.badge-sage {
+  border-color: var(--color-sage);
+}
+
+.badge-sage::before {
+  background-color: var(--color-sage);
+}
+
+.badge-rose {
+  border-color: var(--color-rose);
+}
+
+.badge-rose::before {
+  background-color: var(--color-rose);
+}
+
+.badge-prune {
+  border-color: var(--color-prune);
+}
+
+.badge-prune::before {
+  background-color: var(--color-prune);
+}
+
+/* -------------------------------------------
+   ✨ SUR-TITRES DE SECTION (KICKERS)
+------------------------------------------- */
+
+.section-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.9rem 0.25rem 1.8rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+
+  color: var(--color-main);
+  background-color: var(--color-ivory);
+  border: 1px solid var(--color-perl);
+
+  /* couleur d’accent par défaut pour le point */
+  --section-label-accent: var(--color-sage);
+}
+
+/* Petit point coloré avant le texte */
+.section-label::before {
+  content: "";
+  position: absolute;
+  left: 0.8rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background-color: var(--section-label-accent);
+}
+
+/* Variantes de couleur : on ne touche qu’à l’accent */
+.section-label-vert {
+  --section-label-accent: var(--color-vert);
+}
+
+.section-label-sage {
+  --section-label-accent: var(--color-sage);
+}
+
+.section-label-ocre {
+  --section-label-accent: var(--color-ocre);
+}
+
+.section-label-terre {
+  --section-label-accent: var(--color-terre);
+}
+
+/* -------------------------------------------
+   🌫️ NAVBAR
+------------------------------------------- */
+
+.navbar {
+  @apply sticky top-0 z-50 backdrop-blur-md border-b border-perl/40;
+  background-color: rgba(247, 243, 237, 0.9);
 }
