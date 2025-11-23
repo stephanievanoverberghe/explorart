@@ -132,7 +132,7 @@ export function Footer() {
                                 />
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 cursor-pointer rounded-md bg-rose text-ivory text-xs sm:text-sm uppercase tracking-[0.16em] hover:bg-terre transition"
+                                    className="px-4 py-2 cursor-pointer rounded-md bg-sage text-ivory text-xs sm:text-sm uppercase tracking-[0.16em] hover:bg-terre transition"
                                 >
                                     S&apos;inscrire
                                 </button>

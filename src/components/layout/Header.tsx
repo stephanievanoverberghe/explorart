@@ -132,7 +132,7 @@ export function Header() {
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sage/90 text-[0.75rem] font-semibold text-ivory shadow-sm" />
                     <div className="flex flex-col leading-tight">
                         <span className="font-serif-title text-base md:text-lg tracking-tight">Explor&apos;Art</span>
-                        <span className="hidden text-[0.7rem] uppercase tracking-[0.18em] text-main/50 sm:block">Dessiner · Comprendre · Ressentir</span>
+                        <span className="hidden text-[0.7rem] uppercase tracking-[0.18em] text-main/70 sm:block">Dessiner · Comprendre · Ressentir</span>
                     </div>
                 </Link>
 

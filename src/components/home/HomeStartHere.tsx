@@ -16,7 +16,7 @@ export default function HomeStartHere() {
                     <div className="space-y-3 max-w-2xl">
                         <div className="flex flex-wrap items-center gap-3">
                             <p className="section-label section-label-vert">Première étape</p>
-                            <div className="inline-flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.18em] text-main/55">
+                            <div className="inline-flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.18em] text-main/60">
                                 <span className="h-1.5 w-1.5 rounded-full bg-vert" />
                                 <span className="h-1.5 w-1.5 rounded-full bg-bleu" />
                                 <span className="h-1.5 w-1.5 rounded-full bg-rose" />
@@ -35,7 +35,7 @@ export default function HomeStartHere() {
                     {/* timeline visuelle des 3 étapes */}
                     <div className="w-full md:w-auto">
                         <div className="rounded-3xl border border-perl/60 bg-ivory/80 px-4 py-3 md:px-5 md:py-3.5 shadow-sm">
-                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/55 mb-2">Parcours en 3 petites étapes</p>
+                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70 mb-2">Parcours en 3 petites étapes</p>
                             <div className="flex items-center gap-3">
                                 <div className="flex-1 flex items-center justify-between">
                                     <div className="flex flex-col items-center gap-1">
@@ -54,7 +54,7 @@ export default function HomeStartHere() {
                                     </div>
                                 </div>
                             </div>
-                            <p className="mt-2 text-[0.75rem] text-main/60">
+                            <p className="mt-2 text-[0.75rem] text-main/70">
                                 En moins de <span className="font-medium">30 minutes</span>, une première traversée douce entre dessin, regard et couleur.
                             </p>
                         </div>
@@ -92,7 +92,7 @@ export default function HomeStartHere() {
                             </h3>
                             <p className="text-sm text-main/70">Un exercice très accessible pour reprendre un crayon sans pression et retrouver le plaisir de tracer.</p>
 
-                            <div className="mt-auto flex items-center justify-between pt-3 border-t border-perl/40 text-[0.78rem] text-main/60">
+                            <div className="mt-auto flex items-center justify-between pt-3 border-t border-perl/40 text-[0.78rem] text-main">
                                 <span>~ 10 min</span>
                                 <span className="inline-flex items-center gap-1 text-sage group-hover:text-terre transition-colors">Découvrir l’étape ↗</span>
                             </div>
@@ -126,7 +126,7 @@ export default function HomeStartHere() {
                             <h3 className="font-serif-title text-lg sm:text-xl leading-snug transition-all duration-300 group-hover:text-terre">Lire une image en 3 questions</h3>
                             <p className="text-sm text-main/70">Une méthode claire pour regarder un tableau sans te perdre dans les détails ou le vocabulaire compliqué.</p>
 
-                            <div className="mt-auto flex items-center justify-between pt-3 border-t border-perl/40 text-[0.78rem] text-main/60">
+                            <div className="mt-auto flex items-center justify-between pt-3 border-t border-perl/40 text-[0.78rem] text-main">
                                 <span>~ 8 min</span>
                                 <span className="inline-flex items-center gap-1 text-sage group-hover:text-terre transition-colors">Découvrir l’étape ↗</span>
                             </div>
@@ -164,7 +164,7 @@ export default function HomeStartHere() {
                                 Une introduction douce à la psychologie des couleurs, pour mettre des mots sur ce que tu ressens devant une palette.
                             </p>
 
-                            <div className="mt-auto flex items-center justify-between pt-3 border-t border-perl/40 text-[0.78rem] text-main/60">
+                            <div className="mt-auto flex items-center justify-between pt-3 border-t border-perl/40 text-[0.78rem] text-main">
                                 <span>~ 7 min</span>
                                 <span className="inline-flex items-center gap-1 text-sage group-hover:text-terre transition-colors">Découvrir l’étape ↗</span>
                             </div>
