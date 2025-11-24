@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌟 Explor’Art
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=flat&logo=tailwindcss)](https://tailwindcss.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-%20-green?style=flat&logo=mongodb)](https://www.mongodb.com/)
+[![License](https://img.shields.io/badge/license-Personal-lightgrey)]()
 
-First, run the development server:
+![Open Graph](/public/og.png)
+
+---
+
+**Explor’Art** est un blog d’art moderne construit avec **Next.js 15, TypeScript, Tailwind CSS 4 et MongoDB**.  
+Il propose une expérience lumineuse, accessible et pédagogique autour du dessin, de la couleur et de l’histoire de l’art.
+
+Le projet inclut :
+
+-   un **blog complet** basé sur 7 piliers éditoriaux
+-   un **espace Admin** (articles, catégories, ressources, palettes, utilisateurs)
+-   un **espace Utilisateur** (profil, favoris, téléchargements, progression)
+-   une architecture prête pour évoluer en **plateforme de formation artistique**
+
+---
+
+## 🚀 Stack Technique
+
+-   **Next.js 15** — App Router
+-   **TypeScript**
+-   **Tailwind CSS 4**
+-   **MongoDB + Mongoose**
+-   Déployable sur **Vercel**
+
+---
+
+## ✨ Fonctionnalités principales
+
+### 📚 Blog public
+
+-   Articles classés par thèmes
+-   7 piliers éditoriaux (dessin, analyse d’œuvre, histoire de l’art, couleurs, etc.)
+-   Page “Commencer ici” (parcours débutant)
+
+### 🔐 Espace Utilisateur
+
+-   Profil (avatar, cover, bio)
+-   Favoris
+-   Ressources téléchargées
+-   Suivi du parcours “Commencer ici”
+
+### 🛠️ Espace Admin complet
+
+-   Gestion articles
+-   Gestion catégories
+-   Gestion ressources
+-   Gestion palettes
+-   Gestion utilisateurs
+
+### 🧱 Architecture évolutive
+
+Pensée pour accueillir :
+
+-   mini-formations
+-   parcours pédagogiques
+-   ateliers
+-   téléchargement de ressources premium
+
+---
+
+## 📁 Structure du projet
+
+-   src/
+-   app/ → routes publiques, admin, utilisateur
+-   components/ → UI, home, posts, catégories, admin
+-   models/ → schémas MongoDB (User, Post, Category…)
+-   lib/ → auth, DB, utils, SEO
+-   styles/ → tokens + prose
+-   public/ → images, favicon, uploads
+
+---
+
+## ▶️ Installation & Développement
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Le site sera disponible ici :
+http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📝 Licence
 
-## Learn More
+Projet personnel.
+Usage non commercial et distribution interdite.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 💛 Auteur
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Projet designé, imaginé et développé par Steph.
+Un espace doux, clair et moderne pour apprendre et ressentir l’art autrement.
