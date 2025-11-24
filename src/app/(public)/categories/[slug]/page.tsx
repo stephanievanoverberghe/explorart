@@ -1,15 +1,78 @@
-export default function PageEnConstruction() {
+// src/app/(public)/categories/[slug]/page.tsx
+'use client';
+
+import * as React from 'react';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+import { allPosts, pillarConfig, subcategoriesByPillar, type Level, type PillarSlug, type SubcategorySlug } from '@/components/categories/category-data';
+import { CategoryHero } from '@/components/categories/CategoryHero';
+import { CategorySubunivers } from '@/components/categories/CategorySubunivers';
+import { CategoryFilters } from '@/components/categories/CategoryFilters';
+import { CategoryPostGrid } from '@/components/categories/CategoryPostGrid';
+import { CategoryBreadcrumb } from '@/components/categories/CategoryBreadcrumb';
+
+interface CategoryPageProps {
+    params: Promise<{ slug: string }>;
+}
+
+export default function CategoryPage({ params }: CategoryPageProps) {
+    const { slug } = React.use(params);
+    const pillarSlug = slug as PillarSlug;
+
+    const pillar = pillarConfig[pillarSlug];
+    if (!pillar) {
+        notFound();
+    }
+
+    const pillarSubcategories = subcategoriesByPillar[pillarSlug];
+    const posts = allPosts.filter((post) => post.pillarSlug === pillarSlug);
+
+    const [levelFilter, setLevelFilter] = React.useState<'all' | Level>('all');
+    const [subcategoryFilter, setSubcategoryFilter] = React.useState<'all' | SubcategorySlug>('all');
+
+    const postsByLevel = levelFilter === 'all' ? posts : posts.filter((post) => post.level === levelFilter);
+    const filteredPosts = subcategoryFilter === 'all' ? postsByLevel : postsByLevel.filter((post) => post.subcategory === subcategoryFilter);
+
+    const currentSubcategory = subcategoryFilter === 'all' ? undefined : pillarSubcategories.find((s) => s.slug === subcategoryFilter);
+
+    const resetFilters = () => {
+        setSubcategoryFilter('all');
+        setLevelFilter('all');
+    };
+
     return (
-        <main className="min-h-[60vh] flex flex-col items-center justify-center text-center px-6 py-20">
-            <div className="max-w-md space-y-4">
-                <h1 className="font-serif-title text-2xl md:text-3xl text-main">Page en construction</h1>
-
-                <p className="text-main/70 text-sm md:text-base">Cette section d’Explor’Art est en cours de création. Reviens un peu plus tard, de belles choses arrivent ✨</p>
-
-                <div className="mt-6">
-                    <span className="inline-block px-4 py-2 rounded-full bg-ivory border border-perl/60 text-main text-sm">🚧 Construction en cours</span>
-                </div>
+        <section className="relative overflow-hidden bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
+            {/* Halos décoratifs */}
+            <div className="pointer-events-none absolute inset-0 -z-10">
+                <div className="absolute -top-32 right-[-10%] h-72 w-72 rounded-full bg-sage/14 blur-[110px]" />
+                <div className="absolute bottom-[-25%] left-[-10%] h-80 w-80 rounded-full bg-rose/14 blur-[120px]" />
             </div>
-        </main>
+
+            <div className="container-page space-y-10 animate-fade-up">
+                {/* ⭐ Fil d’Ariane */}
+                <CategoryBreadcrumb pillar={pillar} />
+
+                <CategoryHero pillar={pillar} />
+
+                <CategorySubunivers pillar={pillar} subcategories={pillarSubcategories} subcategoryFilter={subcategoryFilter} setSubcategoryFilter={setSubcategoryFilter} />
+
+                <CategoryFilters levelFilter={levelFilter} setLevelFilter={setLevelFilter} articlesCount={filteredPosts.length} />
+
+                <CategoryPostGrid pillar={pillar} posts={filteredPosts} currentSubcategory={currentSubcategory} resetFilters={resetFilters} />
+
+                {/* CTA DE SORTIE */}
+                <section className="card bg-background/80 space-y-3 max-w-3xl">
+                    <h3 className="font-serif-title text-lg">Continuer ton voyage dans {pillar.title.toLowerCase()} ?</h3>
+                    <p className="text-sm text-main/75">
+                        Tu peux rester ici un moment… ou{' '}
+                        <Link href="/categories" className="underline decoration-1 underline-offset-4 hover:decoration-2">
+                            retourner voir les 7 piliers
+                        </Link>{' '}
+                        pour suivre ce qui t’appelle aujourd’hui.
+                    </p>
+                </section>
+            </div>
+        </section>
     );
 }
