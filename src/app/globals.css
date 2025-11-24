@@ -153,7 +153,7 @@ body {
 ------------------------------------------- */
 
 .card {
-  @apply rounded-xl bg-white shadow-sm border border-perl/40 p-4 transition-all;
+  @apply rounded-xl bg-background shadow-sm border border-perl/40 p-4 transition-all;
 }
 
 .card:hover {

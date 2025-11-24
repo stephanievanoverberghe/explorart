@@ -6,7 +6,7 @@ export function Footer() {
     const year = new Date().getFullYear();
 
     return (
-        <footer className="relative overflow-hidden mt-20 bg-foreground text-ivory">
+        <footer className="relative overflow-hidden bg-foreground text-ivory">
             {/* Halos artistiques */}
             <div className="pointer-events-none absolute inset-0 -z-10">
                 <div className="absolute -top-24 left-[-10%] h-72 w-72 rounded-full bg-rose/20 blur-[120px]" />

@@ -72,7 +72,7 @@ export default function HomeHero() {
                     <div className="space-y-7 lg:pr-6 order-2 lg:order-1 animate-fade-up">
                         <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
                             <p className="section-label section-label-sage">Blog d&apos;art lumineux</p>
-                            <span className="text-[0.72rem] uppercase tracking-[0.18em] text-main/60">Dessin · Œuvres · Couleurs · Émotions</span>
+                            <span className="text-[0.72rem] uppercase tracking-[0.18em] text-main/70">Dessin · Œuvres · Couleurs · Émotions</span>
                         </div>
 
                         <div className="space-y-4 text-center md:text-start">
