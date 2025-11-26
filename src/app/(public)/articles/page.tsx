@@ -1,15 +1,48 @@
-export default function PageEnConstruction() {
+// src/app/(public)/articles/page.tsx
+import { ARTICLES } from '@/lib/content/articles';
+import { TUTORIALS } from '@/lib/content/tutorials';
+import { getFormatConfigByKey } from '@/lib/content/articleFormats';
+import { ArticleCard } from '@/components/articles/ArticleCard';
+
+export default function ArticlesPage() {
+    // 1) Tutoriels (source = TUTORIALS)
+    const tutorialCards = TUTORIALS.map((tuto) => ({
+        href: `/articles/tutoriels/${tuto.slug}`,
+        label: 'Tutoriel',
+        levelLabel: tuto.level === 'beginner' ? 'Débutant' : 'Intermédiaire',
+        title: tuto.title,
+        excerpt: tuto.excerpt,
+    }));
+
+    // 2) Autres formats (source = ARTICLES)
+    const otherCards = ARTICLES.map((article) => {
+        const config = getFormatConfigByKey(article.format);
+
+        return {
+            href: `/articles/${config.pathSegment}/${article.slug}`,
+            label: config.label,
+            levelLabel: article.level === 'beginner' ? 'Débutant' : 'Intermédiaire',
+            title: article.title,
+            excerpt: article.excerpt,
+        };
+    });
+
+    // 3) Tout mélanger
+    const cards = [...tutorialCards, ...otherCards];
+
     return (
-        <main className="min-h-[60vh] flex flex-col items-center justify-center text-center px-6 py-20">
-            <div className="max-w-md space-y-4">
-                <h1 className="font-serif-title text-2xl md:text-3xl text-main">Page en construction</h1>
+        <section className="container-page py-10">
+            <header className="mb-8">
+                <p className="section-label section-label-sage">Articles</p>
+                <h1 className="mt-3 text-3xl font-serif-title font-semibold">Explorer les articles</h1>
+                <p className="mt-2 text-sm text-slate-700 max-w-2xl">Tutoriels, analyses, inspirations et plus encore (pour l’instant, surtout des tutoriels 😊).</p>
+            </header>
 
-                <p className="text-main/70 text-sm md:text-base">Cette section d’Explor’Art est en cours de création. Reviens un peu plus tard, de belles choses arrivent ✨</p>
-
-                <div className="mt-6">
-                    <span className="inline-block px-4 py-2 rounded-full bg-ivory border border-perl/60 text-main text-sm">🚧 Construction en cours</span>
-                </div>
+            <div className="grid gap-6 md:grid-cols-2">
+                {cards.map((card) => (
+                    <ArticleCard key={card.href} href={card.href} label={card.label} levelLabel={card.levelLabel} title={card.title} excerpt={card.excerpt} />
+                ))}
             </div>
-        </main>
+        </section>
     );
 }

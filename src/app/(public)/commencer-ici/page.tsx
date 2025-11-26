@@ -6,12 +6,6 @@ import StartHere from '@/components/start-here/StartHere';
 export default function StartHerePage() {
     return (
         <section className="relative overflow-hidden bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
-            {/* halos doux en fond */}
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute -top-24 right-[-10%] h-72 w-72 rounded-full bg-sage/14 blur-[110px]" />
-                <div className="absolute bottom-[-28%] left-[-10%] h-80 w-80 rounded-full bg-rose/14 blur-[120px]" />
-            </div>
-
             <div className="container-page space-y-10">
                 {/* HEADER GLOBAL FORMATION */}
                 <div className="space-y-4 max-w-3xl animate-fade-up">

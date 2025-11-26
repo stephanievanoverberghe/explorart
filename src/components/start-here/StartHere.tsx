@@ -1,3 +1,5 @@
+// src/components/start-here/StartHere.tsx
+
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
@@ -269,7 +271,7 @@ export default function StartHere() {
 
             {/* 🔹 Overlay plein écran (scroll bloqué derrière) */}
             {isOutlineOpen && (
-                <div className="fixed inset-0 z-40 m-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsOutlineOpen(false)} aria-label="Fermer le plan du parcours" />
+                <div className="fixed inset-0 z-50 m-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsOutlineOpen(false)} aria-label="Fermer le plan du parcours" />
             )}
 
             {/* 🔹 Handle flottant, qui suit l'ouverture/fermeture */}

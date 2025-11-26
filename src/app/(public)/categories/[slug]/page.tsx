@@ -43,24 +43,13 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
     return (
         <section className="relative overflow-hidden bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
-            {/* Halos décoratifs */}
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute -top-32 right-[-10%] h-72 w-72 rounded-full bg-sage/14 blur-[110px]" />
-                <div className="absolute bottom-[-25%] left-[-10%] h-80 w-80 rounded-full bg-rose/14 blur-[120px]" />
-            </div>
-
             <div className="container-page space-y-10 animate-fade-up">
                 {/* ⭐ Fil d’Ariane */}
                 <CategoryBreadcrumb pillar={pillar} />
-
                 <CategoryHero pillar={pillar} />
-
                 <CategorySubunivers pillar={pillar} subcategories={pillarSubcategories} subcategoryFilter={subcategoryFilter} setSubcategoryFilter={setSubcategoryFilter} />
-
                 <CategoryFilters levelFilter={levelFilter} setLevelFilter={setLevelFilter} articlesCount={filteredPosts.length} />
-
                 <CategoryPostGrid pillar={pillar} posts={filteredPosts} currentSubcategory={currentSubcategory} resetFilters={resetFilters} />
-
                 {/* CTA DE SORTIE */}
                 <section className="card bg-background/80 space-y-3 max-w-3xl">
                     <h3 className="font-serif-title text-lg">Continuer ton voyage dans {pillar.title.toLowerCase()} ?</h3>

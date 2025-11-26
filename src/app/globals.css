@@ -183,6 +183,7 @@ body {
 /* 1 couleur par pilier */
 .badge-vert {
   background-color: var(--color-vert);
+  color: var(--color-ivory)
 }
 
 .badge-bleu {

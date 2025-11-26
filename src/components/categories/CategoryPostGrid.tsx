@@ -28,7 +28,7 @@ export function CategoryPostGrid({ pillar, posts, currentSubcategory, resetFilte
                     {posts.map((post) => (
                         <Link
                             key={post.slug}
-                            href={`/articles/${post.slug}`}
+                            href={`/articles/tutoriels/${post.slug}`}
                             className="group relative overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                         >
                             {/* Bandeau vertical couleur */}
