@@ -1,5 +1,17 @@
 // src/types/tutorial.ts
 import type { ArticleLevel, PillarKey } from '@/types/article';
+import type { PostFormat, SubcategorySlug, Level } from '@/components/categories/category-data';
+
+export type TutorialRelatedPost = {
+    slug: string;
+    title: string;
+    excerpt: string;
+    coverImage: string;
+    level: Level; // 'beginner' | 'intermediate'
+    format: PostFormat; // 'tutorial' | 'artwork-analysis' | ...
+    subcategory: SubcategorySlug; // dp-fondamentaux-du-dessin, etc.
+    readingTime: string;
+};
 
 // 🔹 Blocs "simples"
 export type TutorialSimpleBlock =
@@ -149,9 +161,18 @@ export interface Tutorial {
     excerpt: string;
     level: ArticleLevel;
     pillar: PillarKey;
+
+    // 🆕 meta pour le catalogue
+    format: PostFormat; // ex: 'tutorial'
+    readingTime: string; // ex: '8 min'
+    coverImage: string; // ex: '/images/articles/exemple-dessin-1.png'
+    subcategory: SubcategorySlug; // ex: 'dp-fondamentaux-du-dessin'
+
     hero?: {
         src: string;
         alt: string;
     };
     sections: TutorialSection[];
+
+    relatedPosts?: TutorialRelatedPost[];
 }

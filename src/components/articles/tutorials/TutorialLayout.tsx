@@ -4,6 +4,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Tutorial } from '@/types/tutorial';
 import { ArticleHero } from '@/components/articles/common/ArticleHero';
+import { pillarConfig } from '@/components/categories/category-data';
+import type { PillarSlug } from '@/components/categories/category-data';
+import { ArticleRelatedGrid } from '@/components/articles/common/ArticleRelatedGrid';
 import { TutorialPlanBanner } from './TutorialPlanBanner';
 import { TutorialOutlineHandle } from './TutorialOutlineHandle';
 import { TutorialOutlineDrawer } from './TutorialOutlineDrawer';
@@ -27,6 +30,8 @@ export function TutorialLayout({ tutorial }: Props) {
     );
 
     const totalSections = outlineItems.length;
+    // 🟢 config pilier à partir du tuto
+    const pillarCfg = pillarConfig[tutorial.pillar as PillarSlug];
 
     // 🔒 Bloquer le scroll derrière quand le drawer est ouvert (comme avant)
     useEffect(() => {
@@ -70,7 +75,7 @@ export function TutorialLayout({ tutorial }: Props) {
                     title={tutorial.title}
                     excerpt={tutorial.excerpt}
                     pillar={tutorial.pillar}
-                    levelLabel="Débutant"
+                    levelLabel={tutorial.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Tutoriel guidé"
                     hero={tutorial.hero}
                     meta={['⏱️ 20–30 min de pratique douce', '✏️ 3 exercices progressifs']}
@@ -95,6 +100,11 @@ export function TutorialLayout({ tutorial }: Props) {
 
                 {/* ✅ Contenu structuré par grandes sections */}
                 <TutorialSections sections={tutorial.sections} />
+
+                {/* 🆕 Articles liés sous le tutoriel */}
+                {tutorial.relatedPosts && tutorial.relatedPosts.length > 0 && (
+                    <ArticleRelatedGrid pillar={pillarCfg} posts={tutorial.relatedPosts} hrefBase="/articles/tutoriels" />
+                )}
             </article>
 
             {/* Overlay plein écran */}

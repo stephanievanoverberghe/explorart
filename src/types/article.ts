@@ -1,6 +1,7 @@
 // src/types/article.ts
+import type { PostFormat, SubcategorySlug, Level as CategoryLevel } from '@/components/categories/category-data';
 
-export type ArticleLevel = 'beginner' | 'intermediate';
+export type ArticleLevel = CategoryLevel;
 
 export type PillarKey = 'dessin-peinture' | 'comprendre-une-oeuvre' | 'histoires-artistes' | 'histoire-art' | 'couleurs-harmonie' | 'inspirations' | 'psychologie-art';
 
@@ -20,10 +21,15 @@ export interface Article {
     slug: string;
     title: string;
     excerpt: string;
-    level: ArticleLevel;
-    format: ArticleFormat;
-    pillar: PillarKey;
+
+    level: ArticleLevel; // 'beginner' | 'intermediate'
+    format: PostFormat; // 'tutorial' | 'artwork-analysis' | etc.
+
+    // 🟢 meta nécessaires pour ALL_ARTICLES
+    coverImage: string; // visuel de card
+    pillar: PillarKey; // clé “piliers” côté contenu
+    subcategory: SubcategorySlug; // sous-univers
     content: string; // markdown
-    readingTime?: number;
+    readingTime: string;
     publishedAt?: string;
 }
