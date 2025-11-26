@@ -5,8 +5,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Play } from 'lucide-react';
-import type { TutorialBlock, TutorialSimpleBlock, TutorialTwoColsBlock, TutorialSection, TutorialExercisesGroupBlock } from '@/types/tutorial';
+import { Play, ChevronDown } from 'lucide-react';
+import type { TutorialBlock, TutorialSimpleBlock, TutorialTwoColsBlock, TutorialSection, TutorialExercisesGroupBlock, TutorialSectionCardBlock } from '@/types/tutorial';
 import { MarkdownProse } from '@/components/articles/common/MarkdownProse';
 
 type SectionsProps = {
@@ -36,6 +36,10 @@ function TutorialBlockRenderer({ block }: { block: TutorialBlock }) {
 
     if (block.kind === 'exercises-group') {
         return <ExercisesGroupBlock block={block} />;
+    }
+
+    if (block.kind === 'section-card') {
+        return <SectionCardBlock block={block} />; // 🆕
     }
 
     return <SimpleBlock block={block} />;
@@ -196,17 +200,17 @@ function SimpleBlock({ block }: { block: TutorialSimpleBlock }) {
 
         case 'resources-grid':
             return (
-                <section {...wrapperProps} className="animate-subtle-fade-up space-y-2">
+                <section {...wrapperProps} className="rounded-2xl border border-sage bg-sage/5 p-4 md:p-5 shadow-sm space-y-2">
                     {block.title && <h2 className="text-xl md:text-2xl font-serif-title font-semibold">{block.title}</h2>}
                     <div className="grid gap-4 md:grid-cols-3">
                         {block.items.map((item, i) => (
                             <Link
                                 key={i}
                                 href={item.href}
-                                className="group rounded-2xl border border-perl/50 bg-ivory/80 px-4 py-3 text-sm shadow-sm hover:-translate-y-0.5 hover:border-vert/60 hover:bg-vert/5 transition"
+                                className="group rounded-2xl border border-sage/50 bg-background px-4 py-3 text-sm shadow-sm hover:-translate-y-0.5 hover:border-sage/80 hover:bg-sage/5 transition"
                             >
                                 {item.badge && (
-                                    <span className="inline-flex items-center rounded-full bg-vert/10 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.16em] text-vert mb-2">
+                                    <span className="inline-flex items-center rounded-full bg-sage/10 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.16em] text-sage mb-2">
                                         {item.badge}
                                     </span>
                                 )}
@@ -217,6 +221,9 @@ function SimpleBlock({ block }: { block: TutorialSimpleBlock }) {
                     </div>
                 </section>
             );
+
+        case 'faq':
+            return <FAQBlock block={block} wrapperProps={wrapperProps} />;
 
         default:
             return null;
@@ -281,6 +288,28 @@ function TwoColsBlock({ block }: { block: TutorialTwoColsBlock }) {
             <div className="space-y-4">
                 {right.map((b) => (
                     <SimpleBlock key={b.id} block={b} />
+                ))}
+            </div>
+        </section>
+    );
+}
+
+type SectionCardBlockProps = {
+    block: TutorialSectionCardBlock;
+};
+
+function SectionCardBlock({ block }: SectionCardBlockProps) {
+    return (
+        <section id={block.id} className="animate-subtle-fade-up">
+            <div
+                className="
+                    rounded-3xl border border-perl/60 bg-background
+                    px-4 py-4 md:px-6 md:py-6
+                    shadow-sm space-y-6
+                "
+            >
+                {block.blocks.map((child) => (
+                    <TutorialBlockRenderer key={child.id} block={child as TutorialBlock} />
                 ))}
             </div>
         </section>
@@ -353,6 +382,75 @@ function ExercisesGroupBlock({ block }: ExercisesGroupBlockProps) {
                         ))}
                     </div>
                 ))}
+            </div>
+        </section>
+    );
+}
+
+type FAQBlockProps = {
+    block: Extract<TutorialSimpleBlock, { kind: 'faq' }>;
+    wrapperProps: { id: string };
+};
+
+function FAQBlock({ block, wrapperProps }: FAQBlockProps) {
+    const [openIndex, setOpenIndex] = useState<number | null>(0); // 1ère question ouverte par défaut
+
+    const toggle = (index: number) => {
+        setOpenIndex((prev) => (prev === index ? null : index));
+    };
+
+    return (
+        <section {...wrapperProps} className="animate-subtle-fade-up rounded-3xl border border-perl/60 bg-background px-4 py-4 md:px-6 md:py-6 shadow-sm space-y-4">
+            {block.title && (
+                <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-xl md:text-2xl font-serif-title font-semibold text-main">{block.title}</h2>
+                    <span className="hidden md:inline-flex items-center rounded-full bg-vert/8 px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-vert">FAQ</span>
+                </div>
+            )}
+
+            <div className="space-y-3">
+                {block.items.map((item, index) => {
+                    const isOpen = openIndex === index;
+
+                    return (
+                        <div key={index} className="rounded-2xl border border-sage/40 bg-sage/5 shadow-sm">
+                            <button
+                                type="button"
+                                onClick={() => toggle(index)}
+                                className="
+                                    flex w-full items-center justify-between gap-3
+                                    px-3 py-3 md:px-4 md:py-3
+                                    text-left cursor-pointer
+                                "
+                            >
+                                <span className="text-[0.9rem] md:text-[0.95rem] font-semibold text-sage">{item.question}</span>
+
+                                <span
+                                    className={`
+                                        inline-flex h-6 w-6 items-center justify-center rounded-full border border-sage bg-sage
+                                        transition-transform duration-200
+                                        ${isOpen ? 'rotate-180' : ''}
+                                    `}
+                                >
+                                    <ChevronDown className="h-3 w-3 text-ivory" />
+                                </span>
+                            </button>
+
+                            <div
+                                className={`
+                                    grid overflow-hidden transition-[grid-template-rows,opacity] duration-200 ease-out
+                                    ${isOpen ? 'grid-rows-[1fr] block' : 'grid-rows-[0fr] hidden'}
+                                `}
+                            >
+                                <div className="min-h-0 px-3 pb-3 md:px-4 md:pb-4">
+                                    <div className="border-t border-sage/40 pt-3 text-[0.85rem] md:text-sm text-main/80">
+                                        <MarkdownProse content={item.answer} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </section>
     );

@@ -64,6 +64,15 @@ export type TutorialSimpleBlock =
           }[];
       }
     | {
+          kind: 'faq';
+          id: string;
+          title?: string;
+          items: {
+              question: string;
+              answer: string;
+          }[];
+      }
+    | {
           kind: 'exercises-tabs';
           id: string;
           items: {
@@ -98,7 +107,14 @@ export type TutorialTwoColsBlock = {
     right: TutorialSimpleBlock[];
 };
 
-export type TutorialBlock = TutorialSimpleBlock | TutorialTwoColsBlock | TutorialExercisesGroupBlock;
+// 🆕 Bloc "section-card" : container qui wrap plusieurs blocs
+export type TutorialSectionCardBlock = {
+    kind: 'section-card';
+    id: string;
+    blocks: (TutorialSimpleBlock | TutorialTwoColsBlock)[];
+};
+
+export type TutorialBlock = TutorialSimpleBlock | TutorialTwoColsBlock | TutorialSectionCardBlock | TutorialExercisesGroupBlock;
 
 // 🔹 Les grandes sections officielles du tutoriel
 export type TutorialSectionId =
