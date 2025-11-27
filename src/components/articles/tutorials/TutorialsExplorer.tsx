@@ -2,9 +2,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { CategoryPost, Level, SubcategorySlug } from '@/components/categories/category-data';
-import { pillarConfig, subcategoriesByPillar, subcatLabels, levelLabels } from '@/components/categories/category-data';
-import { ArticleRelatedGrid } from '@/components/articles/common/ArticleRelatedGrid';
+import type { CategoryPost, Level, SubcategorySlug, PillarConfig } from '@/components/categories/category-data';
+import { pillarConfig, subcategoriesByPillar, subcatLabels, levelLabels, formatLabels } from '@/components/categories/category-data';
+import Image from 'next/image';
+import Link from 'next/link';
 
 type TutorialsExplorerProps = {
     tutorials: CategoryPost[];
@@ -33,7 +34,7 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
 
     return (
         <div className="space-y-6">
-            {/* BARRE DE FILTRES */}
+            {/* 🔎 BARRE DE FILTRES */}
             <div
                 className="
                     rounded-3xl border border-perl/60 bg-background/80
@@ -41,12 +42,13 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                     shadow-sm flex flex-col gap-3
                 "
             >
-                {/* Ligne 1 : Recherche */}
+                {/* Ligne 1 : header + recherche */}
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-1">
                         <p className="text-xs font-medium uppercase tracking-[0.18em] text-main/60">Filtrer les tutoriels</p>
                         <p className="text-[0.78rem] text-main/60">
-                            {filtered.length} tutoriel{filtered.length > 1 ? 's' : ''} trouvé
+                            {filtered.length} tutoriel
+                            {filtered.length > 1 ? 's' : ''} trouvé
                             {query || level !== 'all' || subcat !== 'all' ? ' · filtres actifs' : ''}
                         </p>
                     </div>
@@ -148,14 +150,74 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                 </div>
             </div>
 
-            {/* GRID DE CARTES */}
-            <ArticleRelatedGrid
-                pillar={pillar}
-                posts={filtered}
-                title="Tous les tutoriels"
-                description="Affinés par tes filtres : niveau, sous-univers et mots-clés."
-                hrefBase="/articles/tutoriels"
-            />
+            {/* GRID DES TUTORIELS */}
+            {filtered.length === 0 ? (
+                <p className="text-sm text-main/60">
+                    Aucun tutoriel ne correspond à ces filtres pour le moment. Tu peux essayer un autre sous-univers ou remettre les niveaux sur <strong>Tous</strong>.
+                </p>
+            ) : (
+                <TutorialsGrid pillar={pillar} tutorials={filtered} hrefBase="/articles/tutoriels" />
+            )}
         </div>
+    );
+}
+
+/* 🔹 GRID DÉDIÉE AUX TUTORIELS (toutes les cards, pas limité à 3) */
+
+function TutorialsGrid({ pillar, tutorials, hrefBase }: { pillar: PillarConfig; tutorials: CategoryPost[]; hrefBase: string }) {
+    return (
+        <section className="space-y-4">
+            <div className="space-y-1">
+                <h2 className="font-serif-title text-lg md:text-xl">Tous les tutoriels</h2>
+                <p className="text-xs md:text-sm text-main/65 max-w-2xl">Affinés par tes filtres : niveau, sous-univers et mots-clés.</p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {tutorials.map((post) => (
+                    <Link
+                        key={post.slug}
+                        href={`${hrefBase}/${post.slug}`}
+                        className="group relative overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                        {/* Bandeau vertical couleur pilier */}
+                        <div className="absolute left-0 top-0 h-full w-1.5 z-20" style={{ backgroundColor: pillar.color }} />
+
+                        <div className="flex flex-col h-full">
+                            {/* IMAGE */}
+                            <div className="relative w-full aspect-4/3 overflow-hidden">
+                                <Image src={post.coverImage} alt={post.title} fill className="object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
+                                {/* Halo */}
+                                <div
+                                    className={`pointer-events-none absolute inset-0 ${pillar.dotClass}/15 opacity-0 blur-[60px] group-hover:opacity-100 transition-opacity duration-700`}
+                                />
+                                {/* Gradient */}
+                                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/25 to-transparent" />
+                                {/* Badges */}
+                                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-30">
+                                    <span className="badge-level text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1">{levelLabels[post.level]}</span>
+
+                                    <span className={`badge-pillar text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1 ${pillar.badgeClass}`}>
+                                        {formatLabels[post.format]}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* CONTENU */}
+                            <div className="flex flex-1 flex-col gap-2 p-4">
+                                <h3 className="font-serif-title text-base md:text-lg text-main group-hover:underline decoration-1 underline-offset-4">{post.title}</h3>
+                                <p className="text-sm text-main/75 leading-relaxed line-clamp-3">{post.excerpt}</p>
+
+                                <div className="mt-auto flex items-center justify-between pt-2 text-xs text-main/60">
+                                    <span>{post.readingTime} · Lecture douce</span>
+                                    <span className="inline-flex items-center gap-1 text-[0.7rem] uppercase tracking-[0.18em] group-hover:text-main">
+                                        Lire le tutoriel <span>↗</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </section>
     );
 }
