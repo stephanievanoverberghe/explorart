@@ -7,7 +7,7 @@ import { pillarConfig, type PillarSlug } from '@/components/categories/category-
 // Ordre officiel d’affichage (même que page /categories)
 const PILLAR_ORDER: PillarSlug[] = [
     'dessin-peinture',
-    'analyse-d-oeuvre',
+    'comprendre-une-oeuvre',
     'histoires-d-artistes',
     'histoire-de-l-art',
     'couleurs-harmonie',
