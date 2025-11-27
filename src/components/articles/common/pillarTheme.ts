@@ -57,7 +57,7 @@ export function getPillarTheme(pillar: PillarKey) {
                 ctaSecondaryClass: 'bg-rose/5 border-rose/60 text-rose hover:bg-rose/10',
             };
 
-        case 'analyse-d-oeuvre':
+        case 'comprendre-une-oeuvre':
             return {
                 label: 'Comprendre une œuvre',
                 borderClass: 'border-bleu/60',

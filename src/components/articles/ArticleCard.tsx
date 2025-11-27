@@ -2,8 +2,8 @@ import Link from 'next/link';
 
 interface ArticleCardProps {
     href: string;
-    label: string; // "Tutoriel", "Analyse d'œuvre", etc.
-    levelLabel: string; // "Débutant", "Intermédiaire" ou ""
+    label: string;
+    levelLabel: string;
     title: string;
     excerpt: string;
 }

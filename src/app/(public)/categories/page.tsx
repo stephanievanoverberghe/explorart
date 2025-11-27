@@ -6,7 +6,7 @@ import { pillarConfig, type PillarSlug } from '@/components/categories/category-
 // Pour contrôler l’ordre des cartes
 const PILLAR_ORDER: PillarSlug[] = [
     'dessin-peinture',
-    'analyse-d-oeuvre',
+    'comprendre-une-oeuvre',
     'histoires-d-artistes',
     'histoire-de-l-art',
     'couleurs-harmonie',
