@@ -51,18 +51,6 @@ export const ARTICLE_FORMATS: ArticleFormatConfig[] = [
         label: 'Inspirations',
         description: 'Idées, images et atmosphères pour nourrir ton regard.',
     },
-    {
-        key: 'three-things-to-know',
-        pathSegment: '3-choses-a-savoir',
-        label: '3 choses à savoir',
-        description: 'Formats courts pour retenir l’essentiel.',
-    },
-    {
-        key: 'exercise',
-        pathSegment: 'exercices',
-        label: 'Exercices du jour',
-        description: 'Exercices rapides à tester dans ton carnet.',
-    },
 ];
 
 export const ARTICLE_FORMATS_BY_KEY: Record<ArticleFormat, ArticleFormatConfig> = ARTICLE_FORMATS.reduce((acc, f) => {
