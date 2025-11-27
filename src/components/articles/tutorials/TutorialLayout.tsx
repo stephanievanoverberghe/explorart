@@ -12,6 +12,9 @@ import { TutorialOutlineHandle } from './TutorialOutlineHandle';
 import { TutorialOutlineDrawer } from './TutorialOutlineDrawer';
 import { TutorialSections } from './TutorialBlocks';
 
+import { ALL_ARTICLES } from '@/lib/content/allArticles';
+import type { TutorialRelatedPost } from '@/types/tutorial';
+
 interface Props {
     tutorial: Tutorial;
 }
@@ -19,7 +22,6 @@ interface Props {
 export function TutorialLayout({ tutorial }: Props) {
     const [isOutlineOpen, setIsOutlineOpen] = useState(false);
 
-    // ✅ Outline basé sur la structure officielle
     const outlineItems = useMemo(
         () =>
             tutorial.sections.map((section) => ({
@@ -30,10 +32,32 @@ export function TutorialLayout({ tutorial }: Props) {
     );
 
     const totalSections = outlineItems.length;
-    // 🟢 config pilier à partir du tuto
+
+    // 🟢 config pilier à partir du tuto (pour l’instant tes tutoriels sont en 'dessin-peinture')
     const pillarCfg = pillarConfig[tutorial.pillar as PillarSlug];
 
-    // 🔒 Bloquer le scroll derrière quand le drawer est ouvert (comme avant)
+    // 🆕 Suggestions d’articles liés (même pilier, format tutoriel)
+    const relatedPosts: TutorialRelatedPost[] = useMemo(() => {
+        // pour l’instant, on reste simple : même pilier + même format, slug différent
+        const candidates = ALL_ARTICLES.filter((post) => {
+            return (
+                post.slug !== tutorial.slug && post.format === 'tutorial' && post.pillarSlug === 'dessin-peinture' // tu pourras raffiner plus tard
+            );
+        });
+
+        return candidates.slice(0, 3).map<TutorialRelatedPost>((post) => ({
+            slug: post.slug,
+            title: post.title,
+            excerpt: post.excerpt,
+            coverImage: post.coverImage,
+            level: post.level,
+            format: post.format,
+            subcategory: post.subcategory,
+            readingTime: post.readingTime,
+        }));
+    }, [tutorial.slug]);
+
+    // 🔒 scroll body quand le drawer est ouvert
     useEffect(() => {
         if (typeof document === 'undefined') return;
 
@@ -56,10 +80,9 @@ export function TutorialLayout({ tutorial }: Props) {
 
         const rect = el.getBoundingClientRect();
         const absoluteTop = rect.top + window.scrollY;
-        const offset = 80; // ajuste selon ta navbar
-        const target = Math.max(absoluteTop - offset, 0);
+        const offset = 80;
 
-        window.scrollTo({ top: target, behavior: 'smooth' });
+        window.scrollTo({ top: Math.max(absoluteTop - offset, 0), behavior: 'smooth' });
     }, []);
 
     const handleClickItem = (id: string) => {
@@ -69,7 +92,6 @@ export function TutorialLayout({ tutorial }: Props) {
 
     return (
         <>
-            {/* 🔹 Hero : on ne le touche pas */}
             <article className="space-y-8 md:space-y-10">
                 <ArticleHero
                     title={tutorial.title}
@@ -79,6 +101,8 @@ export function TutorialLayout({ tutorial }: Props) {
                     formatLabel="Tutoriel guidé"
                     hero={tutorial.hero}
                     meta={['⏱️ 20–30 min de pratique douce', '✏️ 3 exercices progressifs']}
+                    publishedAt={tutorial.publishedAt}
+                    readingTime={tutorial.readingTime}
                     breadcrumb={[
                         { label: 'Accueil', href: '/' },
                         { label: 'Articles', href: '/articles' },
@@ -90,20 +114,24 @@ export function TutorialLayout({ tutorial }: Props) {
                         label: 'Commencer les exercices',
                     }}
                     secondaryCta={{
-                        href: '#video',
+                        href: '#video-tutoriel',
                         label: 'Voir la vidéo',
                     }}
                 />
 
-                {/* Banner plan : pareil qu’avant */}
                 <TutorialPlanBanner totalSections={totalSections} onOpen={() => setIsOutlineOpen(true)} />
 
-                {/* ✅ Contenu structuré par grandes sections */}
                 <TutorialSections sections={tutorial.sections} />
 
-                {/* 🆕 Articles liés sous le tutoriel */}
-                {tutorial.relatedPosts && tutorial.relatedPosts.length > 0 && (
-                    <ArticleRelatedGrid pillar={pillarCfg} posts={tutorial.relatedPosts} hrefBase="/articles/tutoriels" />
+                {/* 🆕 bloc “Articles liés” */}
+                {relatedPosts.length > 0 && (
+                    <ArticleRelatedGrid
+                        pillar={pillarCfg}
+                        posts={relatedPosts}
+                        hrefBase="/articles/tutoriels"
+                        title="Continuer avec d’autres gestes doux"
+                        description="Quelques tutoriels dans le même univers pour prolonger ce que tu viens de travailler."
+                    />
                 )}
             </article>
 
@@ -114,7 +142,6 @@ export function TutorialLayout({ tutorial }: Props) {
 
             <TutorialOutlineHandle isOpen={isOutlineOpen} onToggle={() => setIsOutlineOpen((o) => !o)} />
 
-            {/* 🔹 Sidebar / drawer : même composant, mais items fondés sur les sections */}
             <TutorialOutlineDrawer isOpen={isOutlineOpen} items={outlineItems} onSelect={handleClickItem} onClose={() => setIsOutlineOpen(false)} />
         </>
     );

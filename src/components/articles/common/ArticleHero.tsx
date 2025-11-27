@@ -15,10 +15,25 @@ interface ArticleHeroProps {
     meta?: string[];
     primaryCta?: { href: string; label: string };
     secondaryCta?: { href: string; label: string };
-    breadcrumb?: { label: string; href?: string }[]; // <── AJOUT
+    breadcrumb?: { label: string; href?: string }[];
+    publishedAt?: string;
+    readingTime?: string;
 }
 
-export function ArticleHero({ title, excerpt, pillar, levelLabel, formatLabel, hero, meta, primaryCta, secondaryCta, breadcrumb = [] }: ArticleHeroProps) {
+export function ArticleHero({
+    title,
+    excerpt,
+    pillar,
+    levelLabel,
+    formatLabel,
+    hero,
+    meta,
+    primaryCta,
+    secondaryCta,
+    breadcrumb = [],
+    publishedAt,
+    readingTime,
+}: ArticleHeroProps) {
     const theme = getPillarTheme(pillar);
 
     return (
@@ -68,6 +83,25 @@ export function ArticleHero({ title, excerpt, pillar, levelLabel, formatLabel, h
                             {levelLabel && <span className="badge badge-level">{levelLabel}</span>}
                             <span className={`badge ${theme.badgeClass}`}>{theme.label}</span>
                         </div>
+
+                        {/* Date + temps de lecture */}
+                        {(publishedAt || readingTime) && (
+                            <div className="flex flex-wrap items-center gap-2 text-[0.75rem] text-main/65">
+                                {publishedAt && (
+                                    <span>
+                                        {new Date(publishedAt).toLocaleDateString('fr-FR', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric',
+                                        })}
+                                    </span>
+                                )}
+
+                                {publishedAt && readingTime && <span className="opacity-50">•</span>}
+
+                                {readingTime && <span>{readingTime} · Lecture douce</span>}
+                            </div>
+                        )}
 
                         <h1 className="text-3xl md:text-4xl font-serif-title font-semibold">{title}</h1>
 

@@ -1,73 +1,34 @@
+// src/components/home/HomePillars.tsx
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { pillarConfig, type PillarSlug } from '@/components/categories/category-data';
 
-const pillars = [
-    {
-        key: 'dessin-peinture',
-        label: 'Dessiner & Peindre',
-        badge: 'badge-vert',
-        dotClass: 'bg-vert',
-        color: 'var(--color-vert)',
-        description: 'Techniques douces pour apprivoiser le trait, les formes et la matière.',
-        image: '/images/categories/dessin-peinture.png',
-    },
-    {
-        key: 'analyse-d-oeuvre',
-        label: 'Comprendre une œuvre',
-        badge: 'badge-bleu',
-        dotClass: 'bg-bleu',
-        color: 'var(--color-bleu)',
-        description: 'Apprendre à lire une image sans jargon, avec des questions simples.',
-        image: '/images/categories/analyse-oeuvre.png',
-    },
-    {
-        key: 'histoires-d-artistes',
-        label: 'Histoires d’artistes',
-        badge: 'badge-terre',
-        dotClass: 'bg-terre',
-        color: 'var(--color-terre)',
-        description: 'Récits d’atelier, parcours sensibles, coulisses et cheminements créatifs.',
-        image: '/images/categories/histoires-artistes.png',
-    },
-    {
-        key: 'histoire-de-l-art',
-        label: 'Histoire de l’art',
-        badge: 'badge-ocre',
-        dotClass: 'bg-ocre',
-        color: 'var(--color-ocre)',
-        description: 'Remonter le temps à travers quelques œuvres clés, sans liste de dates.',
-        image: '/images/categories/histoire-art.png',
-    },
-    {
-        key: 'couleurs-harmonie',
-        label: 'Couleurs & harmonie',
-        badge: 'badge-sage',
-        dotClass: 'bg-sage',
-        color: 'var(--color-sage)',
-        description: 'Comprendre comment vibrent les couleurs ensemble, en douceur.',
-        image: '/images/categories/couleurs-harmonie.png',
-    },
-    {
-        key: 'inspirations',
-        label: 'Inspirations',
-        badge: 'badge-rose',
-        dotClass: 'bg-rose',
-        color: 'var(--color-rose)',
-        description: 'Idées, ambiances et pistes pour nourrir ton regard au quotidien.',
-        image: '/images/categories/inspirations.png',
-    },
-    {
-        key: 'psychologie-de-l-art',
-        label: 'Psychologie de l’art',
-        badge: 'badge-prune',
-        dotClass: 'bg-prune',
-        color: 'var(--color-prune)',
-        description: 'Ce que l’art réveille en nous : émotions, blocages, élans intérieurs.',
-        image: '/images/categories/psychologie-art.png',
-    },
+// Ordre officiel d’affichage (même que page /categories)
+const PILLAR_ORDER: PillarSlug[] = [
+    'dessin-peinture',
+    'analyse-d-oeuvre',
+    'histoires-d-artistes',
+    'histoire-de-l-art',
+    'couleurs-harmonie',
+    'inspirations',
+    'psychologie-de-l-art',
 ];
 
 export default function HomePillars() {
+    const pillars = PILLAR_ORDER.map((slug) => {
+        const p = pillarConfig[slug];
+
+        return {
+            slug,
+            label: p.title,
+            description: p.tagline,
+            image: p.heroImage,
+            color: p.color,
+            dotClass: p.dotClass,
+        };
+    });
+
     return (
         <section className="bg-background py-16 md:py-20">
             <div className="container-page space-y-12">
@@ -86,15 +47,15 @@ export default function HomePillars() {
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
                     {pillars.map((pillar, index) => (
                         <Link
-                            key={pillar.key}
-                            href={`/categories/${pillar.key}`}
-                            className={`
+                            key={pillar.slug}
+                            href={`/categories/${pillar.slug}`}
+                            className="
                                 relative group rounded-3xl overflow-hidden shadow-sm border border-perl/50
                                 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 animate-fade-up
-                            `}
+                            "
                             style={{ animationDelay: `${0.05 + index * 0.05}s` }}
                         >
-                            {/* Bandeau vertical coloré — signature visuelle */}
+                            {/* Bandeau vertical coloré */}
                             <div className="absolute left-0 top-0 h-full w-1.5 sm:w-2 z-20" style={{ backgroundColor: pillar.color }} />
 
                             {/* IMAGE */}
@@ -103,19 +64,22 @@ export default function HomePillars() {
 
                                 {/* Halo dynamique */}
                                 <div
-                                    className={`pointer-events-none absolute inset-0 ${pillar.dotClass}/20 opacity-0 blur-[60px] 
-                                    group-hover:opacity-100 transition-opacity duration-700`}
+                                    className={`
+                                        pointer-events-none absolute inset-0 ${pillar.dotClass}/20 opacity-0 blur-[60px]
+                                        group-hover:opacity-100 transition-opacity duration-700
+                                    `}
                                 />
 
                                 {/* Gradient sombre */}
                                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/30 to-transparent" />
 
-                                {/* BOUTON PILIER */}
+                                {/* BADGE */}
                                 <span
-                                    className={`
+                                    className="
                                         absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full
-                                        bg-black/45 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory backdrop-blur-sm z-30
-                                    `}
+                                        bg-black/45 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] 
+                                        text-ivory backdrop-blur-sm z-30
+                                    "
                                 >
                                     <span className={`h-1.5 w-1.5 rounded-full ${pillar.dotClass}`} />
                                     Pilier
@@ -124,30 +88,31 @@ export default function HomePillars() {
                                 {/* OVERLAY TEXTE */}
                                 <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-5 z-20">
                                     <h3
-                                        className={`
+                                        className="
                                             font-serif-title text-lg sm:text-xl text-ivory
                                             transition-all duration-500 transform
                                             group-hover:translate-y-0 group-hover:opacity-100
-                                        `}
+                                        "
                                     >
                                         {pillar.label}
                                     </h3>
 
                                     <p
-                                        className={`
+                                        className="
                                             text-[0.8rem] text-ivory/90 mt-1 max-w-xs
-                                            opacity-0 translate-y-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0
-                                        `}
+                                            opacity-0 translate-y-2 transition-all duration-500
+                                            group-hover:opacity-100 group-hover:translate-y-0
+                                        "
                                     >
                                         {pillar.description}
                                     </p>
 
                                     <span
-                                        className={`
+                                        className="
                                             mt-2 inline-flex items-center gap-1 text-[0.7rem] uppercase tracking-[0.18em]
                                             text-ivory/85 opacity-0 translate-y-2 transition-all duration-500
                                             group-hover:opacity-100 group-hover:translate-y-0
-                                        `}
+                                        "
                                     >
                                         Découvrir
                                         <span>↗</span>

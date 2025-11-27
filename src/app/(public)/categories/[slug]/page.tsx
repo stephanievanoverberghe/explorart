@@ -5,7 +5,8 @@ import * as React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { allPosts, pillarConfig, subcategoriesByPillar, type Level, type PillarSlug, type SubcategorySlug } from '@/components/categories/category-data';
+import { pillarConfig, subcategoriesByPillar, type Level, type PillarSlug, type SubcategorySlug } from '@/components/categories/category-data';
+import { ALL_ARTICLES } from '@/lib/content/allArticles';
 import { CategoryHero } from '@/components/categories/CategoryHero';
 import { CategorySubunivers } from '@/components/categories/CategorySubunivers';
 import { CategoryFilters } from '@/components/categories/CategoryFilters';
@@ -26,7 +27,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     }
 
     const pillarSubcategories = subcategoriesByPillar[pillarSlug];
-    const posts = allPosts.filter((post) => post.pillarSlug === pillarSlug);
+
+    // 🟢 ICI : vrais articles (TUTORIALS + ARTICLES) déjà normalisés dans ALL_ARTICLES
+    const posts = ALL_ARTICLES.filter((post) => post.pillarSlug === pillarSlug);
 
     const [levelFilter, setLevelFilter] = React.useState<'all' | Level>('all');
     const [subcategoryFilter, setSubcategoryFilter] = React.useState<'all' | SubcategorySlug>('all');
@@ -44,13 +47,12 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     return (
         <section className="relative overflow-hidden bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
             <div className="container-page space-y-10 animate-fade-up">
-                {/* ⭐ Fil d’Ariane */}
                 <CategoryBreadcrumb pillar={pillar} />
                 <CategoryHero pillar={pillar} />
                 <CategorySubunivers pillar={pillar} subcategories={pillarSubcategories} subcategoryFilter={subcategoryFilter} setSubcategoryFilter={setSubcategoryFilter} />
                 <CategoryFilters levelFilter={levelFilter} setLevelFilter={setLevelFilter} articlesCount={filteredPosts.length} />
                 <CategoryPostGrid pillar={pillar} posts={filteredPosts} currentSubcategory={currentSubcategory} resetFilters={resetFilters} />
-                {/* CTA DE SORTIE */}
+
                 <section className="card bg-background/80 space-y-3 max-w-3xl">
                     <h3 className="font-serif-title text-lg">Continuer ton voyage dans {pillar.title.toLowerCase()} ?</h3>
                     <p className="text-sm text-main/75">

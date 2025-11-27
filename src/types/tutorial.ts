@@ -7,10 +7,11 @@ export type TutorialRelatedPost = {
     title: string;
     excerpt: string;
     coverImage: string;
-    level: Level; // 'beginner' | 'intermediate'
-    format: PostFormat; // 'tutorial' | 'artwork-analysis' | ...
-    subcategory: SubcategorySlug; // dp-fondamentaux-du-dessin, etc.
+    level: Level;
+    format: PostFormat;
+    subcategory: SubcategorySlug;
     readingTime: string;
+    publishedAt?: string; // 🆕 optionnel pour l’instant
 };
 
 // 🔹 Blocs "simples"
@@ -167,11 +168,13 @@ export interface Tutorial {
     readingTime: string; // ex: '8 min'
     coverImage: string; // ex: '/images/articles/exemple-dessin-1.png'
     subcategory: SubcategorySlug; // ex: 'dp-fondamentaux-du-dessin'
+    publishedAt?: string; // 🆕 '2025-01-20' — ISO string, optionnel si tu veux être tranquille
 
     hero?: {
         src: string;
         alt: string;
     };
+
     sections: TutorialSection[];
 
     relatedPosts?: TutorialRelatedPost[];

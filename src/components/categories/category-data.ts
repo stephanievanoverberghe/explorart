@@ -47,6 +47,7 @@ export interface CategoryPost {
     coverImage: string;
     pillarSlug: PillarSlug;
     subcategory: SubcategorySlug;
+    publishedAt?: string;
 }
 
 export interface PillarConfig {

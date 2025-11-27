@@ -17,7 +17,7 @@ export function TutorialSections({ sections }: SectionsProps) {
     return (
         <div className="space-y-24">
             {sections.map((section) => (
-                <section key={section.id} id={section.anchorId} className="space-y-8">
+                <section key={section.id} id={section.anchorId} className="space-y-8 scroll-mt-28">
                     {section.blocks.map((block) => (
                         <TutorialBlockRenderer key={block.id} block={block} />
                     ))}

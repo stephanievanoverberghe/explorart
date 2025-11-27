@@ -1,66 +1,33 @@
+// src/app/(public)/categories/page.tsx
 import Link from 'next/link';
 import Image from 'next/image';
+import { pillarConfig, type PillarSlug } from '@/components/categories/category-data';
 
-const categories = [
-    {
-        slug: 'dessin-peinture',
-        label: 'Dessiner & Peindre',
-        desc: 'Techniques douces pour apprivoiser le trait, les formes et la matière.',
-        color: 'var(--color-vert)',
-        dot: 'bg-vert',
-        image: '/images/categories/dessin-peinture.png',
-    },
-    {
-        slug: 'analyse-d-oeuvre',
-        label: 'Comprendre une œuvre',
-        desc: 'Lire une image avec douceur : lignes, masses, lumières, intentions.',
-        color: 'var(--color-bleu)',
-        dot: 'bg-bleu',
-        image: '/images/categories/analyse-oeuvre.png',
-    },
-    {
-        slug: 'histoires-d-artistes',
-        label: 'Histoires d’artistes',
-        desc: 'Récits d’atelier, parcours sensibles, doutes et élans humains.',
-        color: 'var(--color-terre)',
-        dot: 'bg-terre',
-        image: '/images/categories/histoires-artistes.png',
-    },
-    {
-        slug: 'histoire-de-l-art',
-        label: 'Histoire de l’art',
-        desc: 'Explorer les mouvements, styles et évolutions du regard humain.',
-        color: 'var(--color-ocre)',
-        dot: 'bg-ocre',
-        image: '/images/categories/histoire-art.png',
-    },
-    {
-        slug: 'couleurs-harmonie',
-        label: 'Couleurs & harmonie',
-        desc: 'Comprendre comment vibrent les couleurs ensemble, en douceur.',
-        color: 'var(--color-sage)',
-        dot: 'bg-sage',
-        image: '/images/categories/couleurs-harmonie.png',
-    },
-    {
-        slug: 'inspirations',
-        label: 'Inspirations',
-        desc: 'Idées, ambiances et pistes pour nourrir ton regard au quotidien.',
-        color: 'var(--color-rose)',
-        dot: 'bg-rose',
-        image: '/images/categories/inspirations.png',
-    },
-    {
-        slug: 'psychologie-de-l-art',
-        label: 'Psychologie de l’art',
-        desc: 'Ce que l’art réveille en nous : émotions, blocages, élans intérieurs.',
-        color: 'var(--color-prune)',
-        dot: 'bg-prune',
-        image: '/images/categories/psychologie-art.png',
-    },
+// Pour contrôler l’ordre des cartes
+const PILLAR_ORDER: PillarSlug[] = [
+    'dessin-peinture',
+    'analyse-d-oeuvre',
+    'histoires-d-artistes',
+    'histoire-de-l-art',
+    'couleurs-harmonie',
+    'inspirations',
+    'psychologie-de-l-art',
 ];
 
 export default function CategoriesPage() {
+    const categories = PILLAR_ORDER.map((slug) => {
+        const pillar = pillarConfig[slug];
+
+        return {
+            slug,
+            label: pillar.title,
+            desc: pillar.tagline,
+            color: pillar.color,
+            dot: pillar.dotClass, // ex: 'bg-vert'
+            image: pillar.heroImage,
+        };
+    });
+
     return (
         <section className="relative overflow-hidden bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
             <div className="container-page space-y-14 animate-fade-up">
@@ -95,7 +62,7 @@ export default function CategoriesPage() {
                                 {/* Halo dynamique */}
                                 <div
                                     className={`pointer-events-none absolute inset-0 ${cat.dot}/20 opacity-0 blur-[60px] 
-                  group-hover:opacity-100 transition-opacity duration-700`}
+                                        group-hover:opacity-100 transition-opacity duration-700`}
                                 />
 
                                 {/* Gradient sombre */}
@@ -104,7 +71,7 @@ export default function CategoriesPage() {
                                 {/* Badge Pilier */}
                                 <span
                                     className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full
-                    bg-black/40 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory backdrop-blur-sm z-30"
+                                        bg-black/40 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory backdrop-blur-sm z-30"
                                 >
                                     <span className={`h-1.5 w-1.5 rounded-full ${cat.dot}`} />
                                     Pilier
@@ -120,7 +87,7 @@ export default function CategoriesPage() {
 
                                     <span
                                         className="mt-2 inline-flex items-center gap-1 text-[0.7rem] uppercase tracking-[0.18em]
-                    text-ivory/85 opacity-0 translate-y-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0"
+                                            text-ivory/85 opacity-0 translate-y-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0"
                                     >
                                         Découvrir
                                         <span>↗</span>
