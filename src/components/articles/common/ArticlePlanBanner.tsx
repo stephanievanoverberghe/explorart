@@ -8,7 +8,7 @@ type Props = {
     onOpen: () => void;
 };
 
-export function TutorialPlanBanner({ totalSections, onOpen }: Props) {
+export function ArticlePlanBanner({ totalSections, onOpen }: Props) {
     return (
         <section className="rounded-2xl border border-sage bg-background px-4 py-3.5 md:px-5 md:py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1 min-w-0">

@@ -8,7 +8,7 @@ type Props = {
     onToggle: () => void;
 };
 
-export function TutorialOutlineHandle({ isOpen, onToggle }: Props) {
+export function ArticleOutlineHandle({ isOpen, onToggle }: Props) {
     return (
         <button
             type="button"

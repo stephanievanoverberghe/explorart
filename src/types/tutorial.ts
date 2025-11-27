@@ -1,7 +1,21 @@
 // src/types/tutorial.ts
-import type { ArticleLevel, PillarKey } from '@/types/article';
+
+import type {
+    Article,
+    ArticleLevel,
+    PillarKey,
+    ArticleBlock,
+    ArticleSimpleBlock,
+    ArticleTwoColsBlock,
+    ArticleSectionCardBlock,
+    ArticleExercisesGroupBlock,
+    ArticleSection,
+    ArticleRow,
+    ArticleColumn,
+} from '@/types/article';
 import type { PostFormat, SubcategorySlug, Level } from '@/components/categories/category-data';
 
+// Métadonnées pour les cartes "articles liés"
 export type TutorialRelatedPost = {
     slug: string;
     title: string;
@@ -11,125 +25,10 @@ export type TutorialRelatedPost = {
     format: PostFormat;
     subcategory: SubcategorySlug;
     readingTime: string;
-    publishedAt?: string; // 🆕 optionnel pour l’instant
+    publishedAt?: string;
 };
 
-// 🔹 Blocs "simples"
-export type TutorialSimpleBlock =
-    | {
-          kind: 'rich-text';
-          id: string;
-          title?: string;
-          markdown: string;
-      }
-    | {
-          kind: 'encart';
-          id: string;
-          tone?: 'pedagogic' | 'soft' | 'error' | 'question';
-          title?: string;
-          markdown: string;
-          size?: 'normal' | 'compact';
-      }
-    | {
-          kind: 'exercise';
-          id: string;
-          title: string;
-          subtitle?: string;
-          goalMarkdown?: string;
-          steps: string[];
-          variants?: string[];
-          errors?: string[];
-          media?: {
-              type: 'image';
-              src: string;
-              alt: string;
-          };
-      }
-    | {
-          kind: 'image';
-          id: string;
-          src: string;
-          alt: string;
-          caption?: string;
-          fullWidth?: boolean;
-          // 🆕 pour le style
-          emphasis?: 'default' | 'soft' | 'focus' | 'hero';
-      }
-    | {
-          kind: 'video';
-          id: string;
-          url: string; // iframe YouTube, Vimeo, etc.
-          caption?: string;
-          cover?: {
-              src: string;
-              alt: string;
-          };
-      }
-    | {
-          kind: 'resources-grid';
-          id: string;
-          title?: string;
-          items: {
-              label: string;
-              description: string;
-              href: string;
-              badge?: string;
-          }[];
-      }
-    | {
-          kind: 'faq';
-          id: string;
-          title?: string;
-          items: {
-              question: string;
-              answer: string;
-          }[];
-      }
-    | {
-          kind: 'exercises-tabs';
-          id: string;
-          items: {
-              label: string;
-              targetId: string;
-          }[];
-      };
-
-// 🔹 Group d'exercices avec onglets
-export type TutorialExercisesGroupBlock = {
-    kind: 'exercises-group';
-    id: string;
-    items: {
-        id: string; // ex: 'exercice-1', 'exercice-2', 'exercice-3'
-        label: string; // libellé de l’onglet
-        blocks: (TutorialSimpleBlock | TutorialTwoColsBlock)[];
-    }[];
-};
-
-// 🔹 Bloc 2 colonnes = groupe de blocs simples
-export type TutorialTwoColsBlock = {
-    kind: 'two-cols';
-    id: string;
-    hero?: {
-        src: string;
-        alt: string;
-        caption?: string;
-    };
-    layout?: 'balanced' | 'sidebar-right' | 'sidebar-left';
-    variant?: 'default' | 'section-card';
-    left: TutorialSimpleBlock[];
-    right: TutorialSimpleBlock[];
-};
-
-// 🆕 Bloc "section-card" : container qui wrap plusieurs blocs
-export type TutorialSectionCardBlock = {
-    kind: 'section-card';
-    id: string;
-    blocks: (TutorialSimpleBlock | TutorialTwoColsBlock)[];
-};
-
-export type TutorialBlock = TutorialSimpleBlock | TutorialTwoColsBlock | TutorialSectionCardBlock | TutorialExercisesGroupBlock;
-
-// 🔹 Les grandes sections officielles du tutoriel
+// 🔹 Identifiants officiels des sections d’un tutoriel
 export type TutorialSectionId =
     | 'intro'
     | 'before-start'
@@ -143,37 +42,40 @@ export type TutorialSectionId =
     | 'before-after'
     | 'resources'
     | 'faq'
-    | 'conclusion';
+    | 'conclusion'
+    // ✅ ids que tu utilises en FR dans tutorials.ts
+    | 'avant-de-commencer'
+    | 'exercice-principal'
+    | 'mini-exercices'
+    | 'ressources';
 
-export interface TutorialSection {
-    /** Id logique (côté code) */
+// ---------------------------------------------------------------------------
+// Aliases de types : un tutoriel réutilise le builder d’article universel
+// ---------------------------------------------------------------------------
+
+export type TutorialSimpleBlock = ArticleSimpleBlock;
+export type TutorialTwoColsBlock = ArticleTwoColsBlock;
+export type TutorialSectionCardBlock = ArticleSectionCardBlock;
+export type TutorialExercisesGroupBlock = ArticleExercisesGroupBlock;
+export type TutorialBlock = ArticleBlock;
+
+export type TutorialRow = ArticleRow;
+export type TutorialColumn = ArticleColumn;
+
+// Section de tutoriel = section de builder + id fort typé
+export interface TutorialSection extends ArticleSection {
     id: TutorialSectionId;
-    /** Id HTML pour le scroll / outline */
-    anchorId: string;
-    /** Label humain affiché dans le plan */
-    label: string;
-    /** Blocs qui composent cette section */
-    blocks: TutorialBlock[];
 }
 
-export interface Tutorial {
-    slug: string;
-    title: string;
-    excerpt: string;
+/**
+ * Tutoriel complet.
+ * C’est un Article “format tutorial” avec quelques méta et sections typées.
+ */
+export interface Tutorial extends Article {
+    format: 'tutorial';
     level: ArticleLevel;
     pillar: PillarKey;
-
-    // 🆕 meta pour le catalogue
-    format: PostFormat; // ex: 'tutorial'
-    readingTime: string; // ex: '8 min'
-    coverImage: string; // ex: '/images/articles/exemple-dessin-1.png'
-    subcategory: SubcategorySlug; // ex: 'dp-fondamentaux-du-dessin'
-    publishedAt?: string; // 🆕 '2025-01-20' — ISO string, optionnel si tu veux être tranquille
-
-    hero?: {
-        src: string;
-        alt: string;
-    };
+    subcategory: SubcategorySlug;
 
     sections: TutorialSection[];
 

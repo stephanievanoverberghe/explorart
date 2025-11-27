@@ -1,4 +1,4 @@
-// src/components/articles/tutorials/TutorialOutlineDrawer.tsx
+// src/components/articles/tutorials/ArticleOutlineDrawer.tsx
 'use client';
 
 import { X } from 'lucide-react';
@@ -15,7 +15,7 @@ type Props = {
     onClose: () => void;
 };
 
-export function TutorialOutlineDrawer({ isOpen, items, onSelect, onClose }: Props) {
+export function ArticleOutlineDrawer({ isOpen, items, onSelect, onClose }: Props) {
     const handleClick = (id: string) => {
         onSelect(id);
     };

@@ -24,7 +24,7 @@ export function getPillarTheme(pillar: PillarKey) {
                 ctaSecondaryClass: 'bg-sage/5 border-sage/60 text-sage hover:bg-sage/10',
             };
 
-        case 'histoire-art':
+        case 'histoire-de-l-art':
             return {
                 label: 'Histoire de l’art',
                 borderClass: 'border-ocre/60',
@@ -35,7 +35,7 @@ export function getPillarTheme(pillar: PillarKey) {
                 ctaSecondaryClass: 'bg-ocre/5 border-ocre/60 text-ocre hover:bg-ocre/10',
             };
 
-        case 'histoires-artistes':
+        case 'histoires-d-artistes':
             return {
                 label: "Histoires d'artistes",
                 borderClass: 'border-terre/60',
@@ -57,7 +57,7 @@ export function getPillarTheme(pillar: PillarKey) {
                 ctaSecondaryClass: 'bg-rose/5 border-rose/60 text-rose hover:bg-rose/10',
             };
 
-        case 'comprendre-une-oeuvre':
+        case 'analyse-d-oeuvre':
             return {
                 label: 'Comprendre une œuvre',
                 borderClass: 'border-bleu/60',
@@ -68,7 +68,7 @@ export function getPillarTheme(pillar: PillarKey) {
                 ctaSecondaryClass: 'bg-bleu/5 border-bleu/60 text-bleu hover:bg-bleu/10',
             };
 
-        case 'psychologie-art':
+        case 'psychologie-de-l-art':
             return {
                 label: 'Psychologie de l’art',
                 borderClass: 'border-prune/60',

@@ -2,18 +2,21 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { Tutorial } from '@/types/tutorial';
-import { ArticleHero } from '@/components/articles/common/ArticleHero';
-import { pillarConfig } from '@/components/categories/category-data';
+import type { Tutorial, TutorialRelatedPost } from '@/types/tutorial';
 import type { PillarSlug } from '@/components/categories/category-data';
+
+import { pillarConfig } from '@/components/categories/category-data';
+import { ArticleHero } from '@/components/articles/common/ArticleHero';
 import { ArticleRelatedGrid } from '@/components/articles/common/ArticleRelatedGrid';
-import { TutorialPlanBanner } from './TutorialPlanBanner';
-import { TutorialOutlineHandle } from './TutorialOutlineHandle';
-import { TutorialOutlineDrawer } from './TutorialOutlineDrawer';
-import { TutorialSections } from './TutorialBlocks';
+import { ArticleSections } from '@/components/articles/common/ArticleSections';
+import { ArticleComments } from '@/components/articles/common/ArticleComments';
+
+// Si tu as déjà déplacé ces composants en "common" mais gardé le préfixe Tutorial :
+import { ArticlePlanBanner } from '../common/ArticlePlanBanner';
+import { ArticleOutlineHandle } from '../common/ArticleOutlineHandle';
+import { ArticleOutlineDrawer } from '../common/ArticleOutlineDrawer';
 
 import { ALL_ARTICLES } from '@/lib/content/allArticles';
-import type { TutorialRelatedPost } from '@/types/tutorial';
 
 interface Props {
     tutorial: Tutorial;
@@ -22,6 +25,7 @@ interface Props {
 export function TutorialLayout({ tutorial }: Props) {
     const [isOutlineOpen, setIsOutlineOpen] = useState(false);
 
+    // Items pour le plan / outline
     const outlineItems = useMemo(
         () =>
             tutorial.sections.map((section) => ({
@@ -33,15 +37,17 @@ export function TutorialLayout({ tutorial }: Props) {
 
     const totalSections = outlineItems.length;
 
-    // 🟢 config pilier à partir du tuto (pour l’instant tes tutoriels sont en 'dessin-peinture')
+    // 🎨 Config de pilier (couleurs, label, etc.)
     const pillarCfg = pillarConfig[tutorial.pillar as PillarSlug];
 
-    // 🆕 Suggestions d’articles liés (même pilier, format tutoriel)
+    // 🧩 Suggestions d’articles liés (même pilier, même format, slug différent)
     const relatedPosts: TutorialRelatedPost[] = useMemo(() => {
-        // pour l’instant, on reste simple : même pilier + même format, slug différent
         const candidates = ALL_ARTICLES.filter((post) => {
             return (
-                post.slug !== tutorial.slug && post.format === 'tutorial' && post.pillarSlug === 'dessin-peinture' // tu pourras raffiner plus tard
+                post.slug !== tutorial.slug &&
+                post.format === 'tutorial' &&
+                // selon ton ALL_ARTICLES : adapte si c'est `post.pillar` ou `post.pillarSlug`
+                post.pillarSlug === tutorial.pillar
             );
         });
 
@@ -54,10 +60,11 @@ export function TutorialLayout({ tutorial }: Props) {
             format: post.format,
             subcategory: post.subcategory,
             readingTime: post.readingTime,
+            publishedAt: post.publishedAt,
         }));
-    }, [tutorial.slug]);
+    }, [tutorial.slug, tutorial.pillar]);
 
-    // 🔒 scroll body quand le drawer est ouvert
+    // 🔒 scroll body lock quand le drawer est ouvert
     useEffect(() => {
         if (typeof document === 'undefined') return;
 
@@ -82,13 +89,19 @@ export function TutorialLayout({ tutorial }: Props) {
         const absoluteTop = rect.top + window.scrollY;
         const offset = 80;
 
-        window.scrollTo({ top: Math.max(absoluteTop - offset, 0), behavior: 'smooth' });
+        window.scrollTo({
+            top: Math.max(absoluteTop - offset, 0),
+            behavior: 'smooth',
+        });
     }, []);
 
-    const handleClickItem = (id: string) => {
-        scrollToSection(id);
-        setIsOutlineOpen(false);
-    };
+    const handleClickItem = useCallback(
+        (id: string) => {
+            scrollToSection(id);
+            setIsOutlineOpen(false);
+        },
+        [scrollToSection]
+    );
 
     return (
         <>
@@ -119,9 +132,11 @@ export function TutorialLayout({ tutorial }: Props) {
                     }}
                 />
 
-                <TutorialPlanBanner totalSections={totalSections} onOpen={() => setIsOutlineOpen(true)} />
+                {/* Bannière “Plan du tutoriel” en haut du contenu */}
+                <ArticlePlanBanner totalSections={totalSections} onOpen={() => setIsOutlineOpen(true)} />
 
-                <TutorialSections sections={tutorial.sections} />
+                {/* 🧱 Builder universel : on lui passe directement les sections du tuto */}
+                {tutorial.sections && tutorial.sections.length > 0 && <ArticleSections sections={tutorial.sections} />}
 
                 {/* 🆕 bloc “Articles liés” */}
                 {relatedPosts.length > 0 && (
@@ -133,16 +148,19 @@ export function TutorialLayout({ tutorial }: Props) {
                         description="Quelques tutoriels dans le même univers pour prolonger ce que tu viens de travailler."
                     />
                 )}
+
+                {/* 🆕 Section commentaires (toujours affichée, même s’il n’y a pas d’articles liés) */}
+                <ArticleComments articleSlug={tutorial.slug} articleTitle={tutorial.title} />
             </article>
 
-            {/* Overlay plein écran */}
+            {/* Overlay plein écran du drawer */}
             {isOutlineOpen && (
                 <div className="fixed inset-0 z-50 m-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsOutlineOpen(false)} aria-label="Fermer le plan du tutoriel" />
             )}
 
-            <TutorialOutlineHandle isOpen={isOutlineOpen} onToggle={() => setIsOutlineOpen((o) => !o)} />
+            <ArticleOutlineHandle isOpen={isOutlineOpen} onToggle={() => setIsOutlineOpen((o) => !o)} />
 
-            <TutorialOutlineDrawer isOpen={isOutlineOpen} items={outlineItems} onSelect={handleClickItem} onClose={() => setIsOutlineOpen(false)} />
+            <ArticleOutlineDrawer isOpen={isOutlineOpen} items={outlineItems} onSelect={handleClickItem} onClose={() => setIsOutlineOpen(false)} />
         </>
     );
 }
