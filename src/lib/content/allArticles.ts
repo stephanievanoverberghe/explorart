@@ -5,7 +5,7 @@ import type { Article, PillarKey } from '@/types/article';
 
 const pillarKeyToSlug: Record<PillarKey, PillarSlug> = {
     'dessin-peinture': 'dessin-peinture',
-    'analyse-d-oeuvre': 'analyse-d-oeuvre',
+    'comprendre-une-oeuvre': 'comprendre-une-oeuvre',
     'histoires-d-artistes': 'histoires-d-artistes',
     'histoire-de-l-art': 'histoire-de-l-art',
     'couleurs-harmonie': 'couleurs-harmonie',

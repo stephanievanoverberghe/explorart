@@ -2,7 +2,7 @@
 
 export type Level = 'beginner' | 'intermediate';
 
-export type PillarSlug = 'dessin-peinture' | 'analyse-d-oeuvre' | 'histoires-d-artistes' | 'histoire-de-l-art' | 'couleurs-harmonie' | 'inspirations' | 'psychologie-de-l-art';
+export type PillarSlug = 'dessin-peinture' | 'comprendre-une-oeuvre' | 'histoires-d-artistes' | 'histoire-de-l-art' | 'couleurs-harmonie' | 'inspirations' | 'psychologie-de-l-art';
 
 export type PostFormat = 'tutorial' | 'artwork-analysis' | 'artist-story' | 'art-history' | 'color-guide' | 'art-psychology' | 'inspiration';
 
@@ -92,7 +92,7 @@ export const pillarConfig: Record<PillarSlug, PillarConfig> = {
             hover: 'hover:bg-vert/10 hover:border-vert/80 hover:shadow-md hover:-translate-y-0.5',
         },
     },
-    'analyse-d-oeuvre': {
+    'comprendre-une-oeuvre': {
         title: 'Comprendre une œuvre',
         kicker: 'Explorer · Éducation du regard',
         tagline: 'Apprendre à lire une image pas à pas, sans se sentir bête.',
@@ -250,7 +250,7 @@ export const subcategoriesByPillar: Record<PillarSlug, PillarSubcategory[]> = {
             description: 'Croquis, carnets, petites routines visuelles pour nourrir ton geste au quotidien.',
         },
     ],
-    'analyse-d-oeuvre': [
+    'comprendre-une-oeuvre': [
         {
             slug: 'ao-bases-du-regard',
             label: 'Bases du regard',
@@ -425,7 +425,7 @@ export const allPosts: CategoryPost[] = [
         format: 'artwork-analysis',
         readingTime: '7 min',
         coverImage: '/images/articles/exemple-analyse-1.png',
-        pillarSlug: 'analyse-d-oeuvre',
+        pillarSlug: 'comprendre-une-oeuvre',
         subcategory: 'ao-bases-du-regard',
     },
     {
@@ -436,7 +436,7 @@ export const allPosts: CategoryPost[] = [
         format: 'art-psychology',
         readingTime: '9 min',
         coverImage: '/images/articles/exemple-analyse-2.png',
-        pillarSlug: 'analyse-d-oeuvre',
+        pillarSlug: 'comprendre-une-oeuvre',
         subcategory: 'ao-bases-du-regard',
     },
     {
