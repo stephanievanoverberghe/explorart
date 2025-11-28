@@ -4105,7 +4105,7 @@ const remplirUnePage: Tutorial = {
     readingTime: '10 min',
     coverImage: '/images/articles/dessiner-peindre/oser-premier-trait/exercice-3.png',
     subcategory: 'dp-pratique-quotidienne',
-    publishedAt: '2025-07-20',
+    publishedAt: '2025-01-20',
     hero: {
         src: '/images/articles/dessiner-peindre/oser-premier-trait/exercice-3.png',
         alt: 'Page de carnet entièrement remplie de traits, formes et explorations libres.',

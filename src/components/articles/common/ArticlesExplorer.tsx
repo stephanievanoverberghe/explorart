@@ -1,36 +1,46 @@
-// src/components/articles/tutorials/TutorialsExplorer.tsx
+// src/components/articles/explorer/ArticlesExplorer.tsx
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { CategoryPost, Level, SubcategorySlug, PillarConfig } from '@/components/categories/category-data';
+import type { CategoryPost, Level, SubcategorySlug, PillarSlug, PillarConfig } from '@/components/categories/category-data';
 import { pillarConfig, subcategoriesByPillar, subcatLabels, levelLabels, formatLabels } from '@/components/categories/category-data';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getArticleHref } from '@/lib/routing/articlePaths';
 
-type TutorialsExplorerProps = {
-    tutorials: CategoryPost[];
+type ArticlesExplorerProps = {
+    posts: CategoryPost[];
+    pillarSlug: PillarSlug;
 };
 
-export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
+export function ArticlesExplorer({ posts, pillarSlug }: ArticlesExplorerProps) {
     const [query, setQuery] = useState('');
     const [level, setLevel] = useState<'all' | Level>('all');
     const [subcat, setSubcat] = useState<'all' | SubcategorySlug>('all');
 
-    const pillar = pillarConfig['dessin-peinture'];
-    const subcats = subcategoriesByPillar['dessin-peinture'];
+    const pillar = pillarConfig[pillarSlug];
+    const subcats = subcategoriesByPillar[pillarSlug];
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
 
-        return tutorials.filter((tuto) => {
-            if (level !== 'all' && tuto.level !== level) return false;
-            if (subcat !== 'all' && tuto.subcategory !== subcat) return false;
+        return posts.filter((post) => {
+            if (level !== 'all' && post.level !== level) return false;
+            if (subcat !== 'all' && post.subcategory !== subcat) return false;
 
             if (!q) return true;
 
-            return tuto.title.toLowerCase().includes(q) || tuto.excerpt.toLowerCase().includes(q);
+            return post.title.toLowerCase().includes(q) || post.excerpt.toLowerCase().includes(q);
         });
-    }, [tutorials, level, subcat, query]);
+    }, [posts, level, subcat, query]);
+
+    const hasActiveFilters = level !== 'all' || subcat !== 'all' || query.trim() !== '';
+
+    const handleReset = () => {
+        setQuery('');
+        setLevel('all');
+        setSubcat('all');
+    };
 
     return (
         <div className="space-y-6">
@@ -45,11 +55,11 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                 {/* Ligne 1 : header + recherche */}
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-[0.18em] text-main/60">Filtrer les tutoriels</p>
+                        <p className="text-xs font-medium uppercase tracking-[0.18em] text-main/60">Filtrer dans cet univers</p>
                         <p className="text-[0.78rem] text-main/60">
-                            {filtered.length} tutoriel
-                            {filtered.length > 1 ? 's' : ''} trouvé
-                            {query || level !== 'all' || subcat !== 'all' ? ' · filtres actifs' : ''}
+                            {filtered.length} article
+                            {filtered.length > 1 ? 's' : ''} affiché
+                            {hasActiveFilters ? ` sur ${posts.length} · filtres actifs` : ` sur ${posts.length} au total`}
                         </p>
                     </div>
 
@@ -67,7 +77,7 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Rechercher un tutoriel…"
+                                placeholder="Rechercher par mot-clé…"
                                 className="w-full bg-transparent text-xs outline-none placeholder:text-main/40"
                             />
                             {query && (
@@ -79,9 +89,30 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                     </div>
                 </div>
 
+                {/* Résumé des filtres actifs + reset */}
+                {hasActiveFilters && (
+                    <div className="flex flex-wrap items-center gap-2 border-t border-perl/40 pt-2 mt-1">
+                        <span className="text-[0.7rem] uppercase tracking-[0.16em] text-main/50">Filtres actifs</span>
+
+                        <div className="flex flex-wrap gap-1.5 text-[0.7rem]">
+                            {level !== 'all' && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-main/5 px-2 py-0.5 text-main/75">Niveau : {levelLabels[level]}</span>
+                            )}
+                            {subcat !== 'all' && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-main/5 px-2 py-0.5 text-main/75">Sous-univers : {subcatLabels[subcat]}</span>
+                            )}
+                            {query.trim() && <span className="inline-flex items-center gap-1 rounded-full bg-main/5 px-2 py-0.5 text-main/75">Recherche : “{query.trim()}”</span>}
+                        </div>
+
+                        <button type="button" onClick={handleReset} className="ml-auto text-[0.7rem] cursor-pointer underline-offset-2 hover:underline text-main/60">
+                            Réinitialiser les filtres
+                        </button>
+                    </div>
+                )}
+
                 {/* Ligne 2 : Niveaux */}
-                <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[0.7rem] uppercase tracking-[0.16em] text-main/50">Niveau</span>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <span className="text-[0.7rem] uppercase tracking-[0.16em] text-main/70">Niveau</span>
                     <div className="flex flex-wrap gap-1.5">
                         <button
                             type="button"
@@ -90,7 +121,11 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                                 inline-flex items-center rounded-full px-2.5 py-1
                                 text-[0.7rem] uppercase tracking-[0.16em]
                                 border
-                                ${level === 'all' ? 'border-vert bg-vert/10 text-vert' : 'border-perl/60 bg-ivory/80 text-main/60 hover:border-vert/60 hover:text-vert'}
+                                ${
+                                    level === 'all'
+                                        ? 'border-vert bg-vert/10 text-vert'
+                                        : 'cursor-pointer  border-perl/60 bg-ivory/80 text-main/80 hover:border-vert/60 hover:text-vert'
+                                }
                             `}
                         >
                             Tous
@@ -104,7 +139,11 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                                     inline-flex items-center rounded-full px-2.5 py-1
                                     text-[0.7rem] uppercase tracking-[0.16em]
                                     border
-                                    ${level === lvl ? 'border-vert bg-vert/10 text-vert' : 'border-perl/60 bg-ivory/80 text-main/60 hover:border-vert/60 hover:text-vert'}
+                                    ${
+                                        level === lvl
+                                            ? 'border-vert bg-vert/10 text-vert'
+                                            : 'cursor-pointer border-perl/60 bg-ivory/80 text-main/80 hover:border-vert/60 hover:text-vert'
+                                    }
                                 `}
                             >
                                 {levelLabels[lvl]}
@@ -115,7 +154,7 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
 
                 {/* Ligne 3 : Sous-univers */}
                 <div className="space-y-1">
-                    <p className="text-[0.7rem] uppercase tracking-[0.16em] text-main/50">Sous-univers</p>
+                    <p className="text-[0.7rem] uppercase tracking-[0.16em] text-main/70">Sous-univers</p>
                     <div className="flex flex-wrap gap-1.5">
                         <button
                             type="button"
@@ -124,7 +163,11 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                                 inline-flex items-center rounded-full px-2.5 py-1
                                 text-[0.7rem] uppercase tracking-[0.16em]
                                 border
-                                ${subcat === 'all' ? 'border-main/70 bg-main/5 text-main/80' : 'border-perl/60 bg-ivory/80 text-main/60 hover:border-main/70 hover:text-main'}
+                                ${
+                                    subcat === 'all'
+                                        ? 'border-main/70 bg-main/5 text-main'
+                                        : 'cursor-pointer border-perl/60 bg-ivory/80 text-main/80 hover:border-main/80 hover:text-main'
+                                }
                             `}
                         >
                             Tous les sous-univers
@@ -139,7 +182,11 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                                     inline-flex items-center rounded-full px-2 py-1
                                     text-[0.68rem] uppercase tracking-[0.16em]
                                     border
-                                    ${subcat === sc.slug ? 'border-vert bg-vert/10 text-vert' : 'border-perl/60 bg-ivory/80 text-main/60 hover:border-vert/60 hover:text-vert'}
+                                    ${
+                                        subcat === sc.slug
+                                            ? 'border-vert bg-vert/10 text-vert'
+                                            : 'cursor-pointer border-perl/60 bg-ivory/80 text-main/80 hover:border-vert/60 hover:text-vert'
+                                    }
                                 `}
                                 title={sc.description}
                             >
@@ -150,33 +197,36 @@ export function TutorialsExplorer({ tutorials }: TutorialsExplorerProps) {
                 </div>
             </div>
 
-            {/* GRID DES TUTORIELS */}
+            {/* GRID DES ARTICLES */}
             {filtered.length === 0 ? (
-                <p className="text-sm text-main/60">
-                    Aucun tutoriel ne correspond à ces filtres pour le moment. Tu peux essayer un autre sous-univers ou remettre les niveaux sur <strong>Tous</strong>.
-                </p>
+                <div className="space-y-2 text-sm text-main/60">
+                    <p>Aucun article ne correspond à ces filtres pour le moment. Tu peux essayer un autre sous-univers, changer de niveau ou réinitialiser tous les filtres.</p>
+                    <button type="button" onClick={handleReset} className="text-[0.8rem] cursor-pointer underline underline-offset-2 hover:text-main">
+                        Réinitialiser et voir tous les articles de cet univers
+                    </button>
+                </div>
             ) : (
-                <TutorialsGrid pillar={pillar} tutorials={filtered} hrefBase="/articles/tutoriels" />
+                <ArticlesGrid pillar={pillar} posts={filtered} />
             )}
         </div>
     );
 }
 
-/* 🔹 GRID DÉDIÉE AUX TUTORIELS (toutes les cards, pas limité à 3) */
+/* 🔹 GRID DÉDIÉE AUX ARTICLES (toutes les cards, pas limité à 3) */
 
-function TutorialsGrid({ pillar, tutorials, hrefBase }: { pillar: PillarConfig; tutorials: CategoryPost[]; hrefBase: string }) {
+function ArticlesGrid({ pillar, posts }: { pillar: PillarConfig; posts: CategoryPost[] }) {
     return (
         <section className="space-y-4">
             <div className="space-y-1">
-                <h2 className="font-serif-title text-lg md:text-xl">Tous les tutoriels</h2>
+                <h2 className="font-serif-title text-lg md:text-xl">Tous les articles</h2>
                 <p className="text-xs md:text-sm text-main/65 max-w-2xl">Affinés par tes filtres : niveau, sous-univers et mots-clés.</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {tutorials.map((post) => (
+                {posts.map((post) => (
                     <Link
                         key={post.slug}
-                        href={`${hrefBase}/${post.slug}`}
+                        href={getArticleHref(post)}
                         className="group relative overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                     >
                         {/* Bandeau vertical couleur pilier */}
@@ -210,7 +260,7 @@ function TutorialsGrid({ pillar, tutorials, hrefBase }: { pillar: PillarConfig; 
                                 <div className="mt-auto flex items-center justify-between pt-2 text-xs text-main/60">
                                     <span>{post.readingTime} · Lecture douce</span>
                                     <span className="inline-flex items-center gap-1 text-[0.7rem] uppercase tracking-[0.18em] group-hover:text-main">
-                                        Lire le tutoriel <span>↗</span>
+                                        Lire l’article <span>↗</span>
                                     </span>
                                 </div>
                             </div>

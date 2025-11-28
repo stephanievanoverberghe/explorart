@@ -11,7 +11,6 @@ import { CategoryHero } from '@/components/categories/CategoryHero';
 import { CategorySubunivers } from '@/components/categories/CategorySubunivers';
 import { CategoryFilters } from '@/components/categories/CategoryFilters';
 import { CategoryPostGrid } from '@/components/categories/CategoryPostGrid';
-import { CategoryBreadcrumb } from '@/components/categories/CategoryBreadcrumb';
 
 interface CategoryPageProps {
     params: Promise<{ slug: string }>;
@@ -47,7 +46,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     return (
         <section className="relative overflow-hidden bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
             <div className="container-page space-y-10 animate-fade-up">
-                <CategoryBreadcrumb pillar={pillar} />
                 <CategoryHero pillar={pillar} />
                 <CategorySubunivers pillar={pillar} subcategories={pillarSubcategories} subcategoryFilter={subcategoryFilter} setSubcategoryFilter={setSubcategoryFilter} />
                 <CategoryFilters levelFilter={levelFilter} setLevelFilter={setLevelFilter} articlesCount={filteredPosts.length} />

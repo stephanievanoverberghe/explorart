@@ -16,7 +16,11 @@ export function CategorySubunivers({ pillar, subcategories, subcategoryFilter, s
         <section className="space-y-5">
             <div className="flex items-center justify-between gap-2">
                 <h2 className="font-serif-title text-lg md:text-xl">Sous-univers de {pillar.title}</h2>
-                <button type="button" onClick={() => setSubcategoryFilter('all')} className="text-xs underline decoration-1 underline-offset-4 text-main/70 hover:text-main">
+                <button
+                    type="button"
+                    onClick={() => setSubcategoryFilter('all')}
+                    className="text-xs underline cursor-pointer decoration-1 underline-offset-4 text-main/70 hover:text-main"
+                >
                     Tout afficher
                 </button>
             </div>
