@@ -140,7 +140,7 @@ export default function ArticlesPage() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {filteredPosts.map((post) => {
                         const pillar = pillarConfig[post.pillarSlug];
-                        const hrefBase = post.format === 'tutorial' ? '/articles/tutoriels' : `/articles/${post.format}`; // ou via getFormatConfigByKey si tu préfères
+                        const hrefBase = formatToPath[post.format];
 
                         return (
                             <Link
@@ -190,3 +190,14 @@ export default function ArticlesPage() {
         </section>
     );
 }
+
+// Mapping des formats vers les segments de route en français
+const formatToPath: Record<PostFormat, string> = {
+    tutorial: '/articles/tutoriels',
+    'artwork-analysis': '/articles/comprendre-une-oeuvre',
+    'artist-story': '/articles/histoires-d-artistes',
+    'art-history': '/articles/histoire-de-l-art',
+    'color-guide': '/articles/couleurs-harmonie',
+    'art-psychology': '/articles/psychologie-de-l-art',
+    inspiration: '/articles/inspirations',
+};

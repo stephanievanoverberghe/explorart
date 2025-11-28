@@ -12,12 +12,12 @@ const fridaKahloEn5Moments: Article = {
     level: 'beginner',
     pillar: 'histoires-d-artistes',
     format: 'artist-story',
-    coverImage: '/images/articles/histoires-artistes/frida-kahlo/hero.jpg',
+    coverImage: '/images/articles/exemple-artiste-1.png',
     subcategory: 'ha-portraits-d-artistes',
     readingTime: '9 min',
     publishedAt: '2025-03-10',
     hero: {
-        src: '/images/articles/histoires-artistes/frida-kahlo/hero.jpg',
+        src: '/images/articles/exemple-artiste-1.png',
         alt: 'Portrait de Frida Kahlo devant un fond végétal',
     },
     sections: [
@@ -102,7 +102,7 @@ C’est une **source directe** de sa peinture.
                         {
                             kind: 'image',
                             id: 'atelier-lit-image',
-                            src: '/images/articles/histoires-artistes/frida-kahlo/atelier-lit.jpg',
+                            src: '/images/articles/exemple-artiste-1.png',
                             alt: 'Reconstitution du lit-atelier de Frida Kahlo, avec miroir au-dessus',
                             caption: 'Un lit transformé en atelier : peindre sans pouvoir se lever.',
                         },
@@ -305,12 +305,12 @@ const atelierSilencieux: Article = {
     level: 'intermediate',
     pillar: 'histoires-d-artistes',
     format: 'artist-story',
-    coverImage: '/images/articles/histoires-artistes/atelier-silencieux/hero.jpg',
+    coverImage: '/images/articles/exemple-artiste-1.png',
     subcategory: 'ha-ateliers-et-coulisses',
     readingTime: '10 min',
     publishedAt: '2025-03-18',
     hero: {
-        src: '/images/articles/histoires-artistes/atelier-silencieux/hero.jpg',
+        src: '/images/articles/exemple-artiste-1.png',
         alt: 'Atelier d’artiste baigné d’une lumière douce',
     },
     sections: [
@@ -513,12 +513,12 @@ const cheminTardif: Article = {
     level: 'beginner',
     pillar: 'histoires-d-artistes',
     format: 'artist-story',
-    coverImage: '/images/articles/histoires-artistes/chemin-tardif/hero.jpg',
+    coverImage: '/images/articles/exemple-artiste-2.png',
     subcategory: 'ha-parcours-creatifs',
     readingTime: '8 min',
     publishedAt: '2025-03-22',
     hero: {
-        src: '/images/articles/histoires-artistes/chemin-tardif/hero.jpg',
+        src: '/images/articles/exemple-artiste-2.png',
         alt: 'Carnet, pinceaux et tasse de café sur une table',
     },
     sections: [

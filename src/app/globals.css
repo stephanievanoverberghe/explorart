@@ -206,14 +206,17 @@ html {
 
 .badge-sage {
   background-color: var(--color-sage);
+  color: var(--color-ivory)
 }
 
 .badge-rose {
   background-color: var(--color-rose);
+  color: var(--color-ivory)
 }
 
 .badge-prune {
   background-color: var(--color-prune);
+  color: var(--color-ivory)
 }
 
 /* -------------------------------------------

@@ -4,6 +4,10 @@ import { TUTORIALS } from './tutorials';
 import { ARTICLES } from './articles';
 import { ANALYSES } from './analyse-oeuvres';
 import { ARTIST_STORIES } from './histoires-d-artistes';
+import { ART_HISTORY_ARTICLES } from './histoire-art';
+import { COLOR_GUIDES } from './couleurs-harmonie';
+import { INSPIRATION_ARTICLES } from './inspirations';
+import { ART_PSYCHOLOGY_ARTICLES } from './psychologie-art'; // 🆕
 import type { Article, PillarKey } from '@/types/article';
 
 const pillarKeyToSlug: Record<PillarKey, PillarSlug> = {
@@ -52,6 +56,18 @@ export const ALL_ARTICLES: CategoryPost[] = [
     // Analyses d’œuvres
     ...ANALYSES.map(mapArticleToCategoryPost),
 
-    // 🆕 Histoires d’artistes
+    // Histoires d’artistes
     ...ARTIST_STORIES.map(mapArticleToCategoryPost),
+
+    // Histoire de l’art
+    ...ART_HISTORY_ARTICLES.map(mapArticleToCategoryPost),
+
+    // Guides couleur
+    ...COLOR_GUIDES.map(mapArticleToCategoryPost),
+
+    // Inspirations
+    ...INSPIRATION_ARTICLES.map(mapArticleToCategoryPost),
+
+    // 🆕 Psychologie de l’art
+    ...ART_PSYCHOLOGY_ARTICLES.map(mapArticleToCategoryPost),
 ];
