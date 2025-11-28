@@ -93,6 +93,11 @@ export function InspirationsLayout({ article }: Props) {
                     levelLabel={article.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Inspirations"
                     hero={article.hero}
+                    author={{
+                        name: "L'alchimiste",
+                        role: 'Fondatrice d’Explor’Art',
+                        avatarSrc: '/images/auteurs/lalchimiste.jpeg',
+                    }}
                     meta={['⏱️ 4–7 min de lecture', '✨ Idées pour nourrir ton regard']}
                     publishedAt={article.publishedAt}
                     readingTime={article.readingTime}

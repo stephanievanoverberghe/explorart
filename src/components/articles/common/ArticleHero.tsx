@@ -5,6 +5,12 @@ import Link from 'next/link';
 import { getPillarTheme } from './pillarTheme';
 import type { PillarKey } from '@/types/article';
 
+type ArticleAuthor = {
+    name: string;
+    avatarSrc?: string;
+    role?: string;
+};
+
 interface ArticleHeroProps {
     title: string;
     excerpt: string;
@@ -18,6 +24,7 @@ interface ArticleHeroProps {
     breadcrumb?: { label: string; href?: string }[];
     publishedAt?: string;
     readingTime?: string;
+    author?: ArticleAuthor;
 }
 
 export function ArticleHero({
@@ -33,8 +40,25 @@ export function ArticleHero({
     breadcrumb = [],
     publishedAt,
     readingTime,
+    author,
 }: ArticleHeroProps) {
     const theme = getPillarTheme(pillar);
+
+    const authorInitials =
+        author?.name
+            ?.trim()
+            .split(' ')
+            .map((part) => part[0]?.toUpperCase())
+            .join('')
+            .slice(0, 2) || '';
+
+    const formattedDate =
+        publishedAt &&
+        new Date(publishedAt).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
 
     return (
         <header className="mb-10 animate-fade-in">
@@ -76,6 +100,7 @@ export function ArticleHero({
 
                 {/* Hero content */}
                 <div className="grid gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:items-center">
+                    {/* Colonne texte */}
                     <div className="space-y-4">
                         {/* Badges */}
                         <div className="flex flex-wrap items-center gap-3 text-xs">
@@ -84,29 +109,43 @@ export function ArticleHero({
                             <span className={`badge ${theme.badgeClass}`}>{theme.label}</span>
                         </div>
 
-                        {/* Date + temps de lecture */}
-                        {(publishedAt || readingTime) && (
-                            <div className="flex flex-wrap items-center gap-2 text-[0.75rem] text-main/65">
-                                {publishedAt && (
+                        {/* Titre + excerpt */}
+                        <div className="space-y-3">
+                            <h1 className="text-3xl md:text-4xl font-serif-title font-semibold">{title}</h1>
+                            <p className="text-sm md:text-base text-main/70 max-w-xl">{excerpt}</p>
+                        </div>
+
+                        {/* Ligne méta : date + temps de lecture, seule, très discrète */}
+                        {(formattedDate || readingTime) && (
+                            <p className="text-[0.75rem] text-main/60">
+                                {formattedDate && (
                                     <span>
-                                        {new Date(publishedAt).toLocaleDateString('fr-FR', {
-                                            day: '2-digit',
-                                            month: 'short',
-                                            year: 'numeric',
-                                        })}
+                                        Publié le {formattedDate}
+                                        {readingTime && ' · '}
                                     </span>
                                 )}
-
-                                {publishedAt && readingTime && <span className="opacity-50">•</span>}
-
                                 {readingTime && <span>{readingTime} · Lecture douce</span>}
+                            </p>
+                        )}
+
+                        {/* Bloc auteur séparé, comme une mini carte */}
+                        {author && (
+                            <div className="inline-flex items-center gap-3 rounded-2xl border border-perl/50 bg-background px-3 py-2 mt-1">
+                                <div className="h-9 w-9 rounded-full bg-main/5 border border-main/10 flex items-center justify-center overflow-hidden text-[0.8rem] font-semibold text-main/80">
+                                    {author.avatarSrc ? (
+                                        <Image src={author.avatarSrc} alt={author.name} width={36} height={36} className="h-full w-full object-cover" />
+                                    ) : (
+                                        <span>{authorInitials}</span>
+                                    )}
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                    <span className="text-sm font-medium text-main/90">{author.name}</span>
+                                    {author.role && <span className="text-[0.7rem] text-main/55 uppercase tracking-[0.16em]">{author.role}</span>}
+                                </div>
                             </div>
                         )}
 
-                        <h1 className="text-3xl md:text-4xl font-serif-title font-semibold">{title}</h1>
-
-                        <p className="text-sm md:text-base text-main/70 max-w-xl">{excerpt}</p>
-
+                        {/* Méta éventuelle (mots-clés, matériel, etc.) */}
                         {meta && (
                             <div className="flex flex-wrap gap-3 text-xs text-main/70 pt-1">
                                 {meta.map((m, i) => (
@@ -133,6 +172,7 @@ export function ArticleHero({
                         </div>
                     </div>
 
+                    {/* Colonne visuelle */}
                     {hero && (
                         <div className="relative rounded-xl overflow-hidden border border-perl/40 bg-ivory shadow-sm">
                             <div className="aspect-4/3">

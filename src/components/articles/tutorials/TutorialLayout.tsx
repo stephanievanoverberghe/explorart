@@ -112,6 +112,11 @@ export function TutorialLayout({ tutorial }: Props) {
                     pillar={tutorial.pillar}
                     levelLabel={tutorial.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Tutoriel guidé"
+                    author={{
+                        name: "L'alchimiste",
+                        role: 'Fondatrice d’Explor’Art',
+                        avatarSrc: '/images/auteurs/lalchimiste.jpeg',
+                    }}
                     hero={tutorial.hero}
                     meta={['⏱️ 20–30 min de pratique douce', '✏️ 3 exercices progressifs']}
                     publishedAt={tutorial.publishedAt}

@@ -53,11 +53,11 @@ export function ArticleComments({ articleSlug, articleTitle }: ArticleCommentsPr
 
     return (
         <section id={`comments-${articleSlug}`} aria-label={`Commentaires sur l’article ${articleTitle}`} className="mt-12">
-            <div className="relative overflow-hidden rounded-3xl border border-perl/40 bg-ivory/90 px-4 py-6 shadow-sm md:px-6 md:py-7">
+            <div className="relative overflow-hidden rounded-3xl border border-perl/40 bg-background px-4 py-6 shadow-sm md:px-6 md:py-7">
                 {/* Header */}
                 <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div className="space-y-2">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-vert/15 bg-white/60 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-vert/80">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-vert/15 bg-background px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-vert/80">
                             <MessageCircle className="h-3.5 w-3.5" />
                             <span>Échanges autour du tutoriel</span>
                         </div>
@@ -68,7 +68,7 @@ export function ArticleComments({ articleSlug, articleTitle }: ArticleCommentsPr
                     </div>
 
                     <div className="relative flex flex-col items-start gap-2 text-right md:items-end">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-ink/80">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-ivory px-3 py-1 text-xs font-medium text-ink/80">
                             <Sparkles className="h-3.5 w-3.5 text-vert" />
                             {comments.length === 0 ? 'Aucun commentaire pour le moment' : comments.length === 1 ? '1 commentaire' : `${comments.length} commentaires`}
                         </span>
@@ -77,7 +77,7 @@ export function ArticleComments({ articleSlug, articleTitle }: ArticleCommentsPr
                 </div>
 
                 {/* Formulaire */}
-                <form onSubmit={handleSubmit} className="relative mt-6 space-y-4 rounded-2xl border border-perl/40 bg-white/80 p-4 md:p-5">
+                <form onSubmit={handleSubmit} className="relative mt-6 space-y-4 rounded-2xl border border-perl/40 bg-ivory p-4 md:p-5">
                     {/* mini chips “mood” */}
                     <div className="flex flex-wrap gap-2 text-xs text-ink/70">
                         <span className="mr-1 text-[11px] uppercase tracking-wide text-ink/60">Ton ressenti :</span>
@@ -85,7 +85,7 @@ export function ArticleComments({ articleSlug, articleTitle }: ArticleCommentsPr
                             type="button"
                             onClick={() => setMood(mood === 'helped' ? null : 'helped')}
                             className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 transition ${
-                                mood === 'helped' ? 'border-vert/60 bg-vert/10 text-vert' : 'border-perl/60 bg-ivory/70 hover:border-vert/50 hover:bg-vert/5'
+                                mood === 'helped' ? 'border-vert/60 bg-vert/10 text-vert' : 'cursor-pointer border-perl/60 bg-ivory/70 hover:border-vert/50 hover:bg-vert/5'
                             }`}
                         >
                             <span>✨ Ça m’a aidé·e</span>
@@ -94,7 +94,7 @@ export function ArticleComments({ articleSlug, articleTitle }: ArticleCommentsPr
                             type="button"
                             onClick={() => setMood(mood === 'moved' ? null : 'moved')}
                             className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 transition ${
-                                mood === 'moved' ? 'border-rose/60 bg-rose/10 text-rose' : 'border-perl/60 bg-ivory/70 hover:border-rose/50 hover:bg-rose/5'
+                                mood === 'moved' ? 'border-rose/60 bg-rose/10 text-rose' : 'cursor-pointer border-perl/60 bg-ivory/70 hover:border-rose/50 hover:bg-rose/5'
                             }`}
                         >
                             <span>💗 Ça m’a touché·e</span>
@@ -103,7 +103,7 @@ export function ArticleComments({ articleSlug, articleTitle }: ArticleCommentsPr
                             type="button"
                             onClick={() => setMood(mood === 'question' ? null : 'question')}
                             className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 transition ${
-                                mood === 'question' ? 'border-bleu/60 bg-bleu/10 text-bleu' : 'border-perl/60 bg-ivory/70 hover:border-bleu/50 hover:bg-bleu/5'
+                                mood === 'question' ? 'border-bleu/60 bg-bleu/10 text-bleu' : 'cursor-pointer border-perl/60 bg-ivory/70 hover:border-bleu/50 hover:bg-bleu/5'
                             }`}
                         >
                             <span>❓ J’ai une question</span>
@@ -160,7 +160,7 @@ export function ArticleComments({ articleSlug, articleTitle }: ArticleCommentsPr
                         <button
                             type="submit"
                             disabled={isSubmitting || !content.trim() || isOverLimit}
-                            className="inline-flex items-center justify-center gap-2 rounded-full bg-vert px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-vert/90 disabled:cursor-not-allowed disabled:bg-vert/40"
+                            className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-full bg-vert px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-vert/90 disabled:cursor-not-allowed disabled:bg-vert/40"
                         >
                             {isSubmitting ? 'Envoi en cours…' : 'Publier mon message'}
                         </button>

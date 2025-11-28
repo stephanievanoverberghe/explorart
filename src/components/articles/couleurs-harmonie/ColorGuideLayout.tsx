@@ -97,6 +97,11 @@ export function ColorGuideLayout({ article }: Props) {
                     levelLabel={article.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Guide couleur"
                     hero={article.hero}
+                    author={{
+                        name: "L'alchimiste",
+                        role: 'Fondatrice d’Explor’Art',
+                        avatarSrc: '/images/auteurs/lalchimiste.jpeg',
+                    }}
                     meta={['⏱️ 8–10 min de lecture', '🎨 Repères doux pour apprivoiser les couleurs']}
                     publishedAt={article.publishedAt}
                     readingTime={article.readingTime}

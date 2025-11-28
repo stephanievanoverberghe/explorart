@@ -93,6 +93,11 @@ export function ArtHistoryLayout({ article }: Props) {
                     levelLabel={article.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Histoire de l’art"
                     hero={article.hero}
+                    author={{
+                        name: "L'alchimiste",
+                        role: 'Fondatrice d’Explor’Art',
+                        avatarSrc: '/images/auteurs/lalchimiste.jpeg',
+                    }}
                     meta={['⏱️ 8–10 min de lecture', '🧭 Repères clairs, sans jargon']}
                     publishedAt={article.publishedAt}
                     readingTime={article.readingTime}

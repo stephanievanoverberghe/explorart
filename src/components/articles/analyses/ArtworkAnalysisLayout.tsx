@@ -97,6 +97,11 @@ export function ArtworkAnalysisLayout({ article }: Props) {
                     levelLabel={article.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Analyse d’œuvre"
                     hero={article.hero}
+                    author={{
+                        name: "L'alchimiste",
+                        role: 'Fondatrice d’Explor’Art',
+                        avatarSrc: '/images/auteurs/lalchimiste.jpeg',
+                    }}
                     meta={['⏱️ 8–10 min de lecture douce', '🔎 4 étapes simples pour regarder autrement']}
                     publishedAt={article.publishedAt}
                     readingTime={article.readingTime}

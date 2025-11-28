@@ -97,6 +97,11 @@ export function ArtistStoryLayout({ article }: Props) {
                     levelLabel={article.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Portrait / récit"
                     hero={article.hero}
+                    author={{
+                        name: "L'alchimiste",
+                        role: 'Fondatrice d’Explor’Art',
+                        avatarSrc: '/images/auteurs/lalchimiste.jpeg',
+                    }}
                     meta={['⏱️ 8–12 min de lecture douce', '🧡 Récit sensible, sans jargon']}
                     publishedAt={article.publishedAt}
                     readingTime={article.readingTime}

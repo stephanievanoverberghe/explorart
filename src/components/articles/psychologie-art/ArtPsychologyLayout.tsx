@@ -92,6 +92,11 @@ export function ArtPsychologyLayout({ article }: Props) {
                     pillar={article.pillar}
                     levelLabel={article.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
                     formatLabel="Psychologie de l’art"
+                    author={{
+                        name: "L'alchimiste",
+                        role: 'Fondatrice d’Explor’Art',
+                        avatarSrc: '/images/auteurs/lalchimiste.jpeg',
+                    }}
                     hero={article.hero}
                     meta={['🧠 Comprendre ce qui se passe dedans', '💬 Apprendre à te parler avec douceur']}
                     publishedAt={article.publishedAt}
