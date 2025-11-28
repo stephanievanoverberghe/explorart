@@ -14,6 +14,7 @@ import { ArticleComments } from '@/components/articles/common/ArticleComments';
 import { ArticlePlanBanner } from '@/components/articles/common/ArticlePlanBanner';
 import { ArticleOutlineHandle } from '@/components/articles/common/ArticleOutlineHandle';
 import { ArticleOutlineDrawer } from '@/components/articles/common/ArticleOutlineDrawer';
+import { ArticleScrollProgress } from '../common/ArticleScrollProgress';
 
 import { ALL_ARTICLES } from '@/lib/content/allArticles';
 
@@ -85,7 +86,9 @@ export function ArtHistoryLayout({ article }: Props) {
 
     return (
         <>
-            <article className="space-y-8 md:space-y-10">
+            {/* 🟢 Barre de progression globale, collée sous le header */}
+            <ArticleScrollProgress targetId="art-history-article" />
+            <article id="art-history-article" className="space-y-8 md:space-y-10">
                 <ArticleHero
                     title={article.title}
                     excerpt={article.excerpt}

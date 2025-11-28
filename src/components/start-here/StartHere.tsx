@@ -311,7 +311,7 @@ export default function StartHere() {
                     <button
                         type="button"
                         onClick={() => setIsOutlineOpen(false)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-perl/60 bg-ivory hover:bg-background transition-colors"
+                        className="inline-flex h-8 w-8 items-center cursor-pointer justify-center rounded-full border border-perl/60 bg-ivory hover:bg-sage hover:text-ivory transition-colors"
                         aria-label="Fermer le plan du parcours"
                     >
                         <X className="h-4 w-4" />

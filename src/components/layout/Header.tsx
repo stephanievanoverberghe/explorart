@@ -85,8 +85,9 @@ export function Header() {
 
     // Explorer actif UNIQUEMENT sur pages blog / catégories
     const explorerActive = pathname.startsWith('/articles') || pathname.startsWith('/categories');
+    const explorerMobileActive = explorerActive;
 
-    // Scroll : change juste le style du header (ne ferme plus le menu)
+    // Scroll : compacte légèrement le header
     useEffect(() => {
         const onScroll = () => {
             setScrolled(window.scrollY > 8);
@@ -114,11 +115,17 @@ export function Header() {
         return () => window.removeEventListener('click', handleClick);
     }, [openExplorer]);
 
-    // Explorer actif en mobile / tablette (même logique URL)
-    const explorerMobileActive = explorerActive;
+    const desktopNavLinkBase = 'group relative rounded-full px-3.5 py-1.5 text-sm transition-all duration-200 ease-out hover:-translate-y-px';
 
     return (
-        <header className={`navbar sticky top-0 z-40 border-b border-perl/40 backdrop-blur-md transition-all duration-200 ${scrolled ? 'bg-page/95 shadow-sm' : 'bg-page/80'}`}>
+        <header
+            className={`
+                sticky top-0 z-40
+                backdrop-blur-md
+                transition-all duration-200
+                ${scrolled ? 'bg-page/95 border-b border-perl/40 shadow-sm' : 'bg-page/80 border-b border-transparent'}
+            `}
+        >
             <div className="container-page flex items-center justify-between gap-3 h-16 md:h-20">
                 {/* LOGO */}
                 <Link
@@ -129,7 +136,7 @@ export function Header() {
                         setOpenExplorer(false);
                     }}
                 >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sage/90 text-[0.75rem] font-semibold text-ivory shadow-sm" />
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sage/90 text-[0.75rem] font-semibold text-ivory shadow-sm">EA</span>
                     <div className="flex flex-col leading-tight">
                         <span className="font-serif-title text-base md:text-lg tracking-tight">Explor&apos;Art</span>
                         <span className="hidden text-[0.7rem] uppercase tracking-[0.18em] text-main/70 sm:block">Dessiner · Comprendre · Ressentir</span>
@@ -147,36 +154,44 @@ export function Header() {
                                 key={link.href}
                                 href={link.href}
                                 onClick={() => setOpenExplorer(false)}
-                                className={`group relative rounded-full px-3.5 py-1.5 border text-sm transition-all duration-200 ease-out hover:-translate-y-px ${
-                                    active ? 'bg-ivory text-terre border-perl/80 font-medium' : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
+                                className={`${desktopNavLinkBase} border ${
+                                    active
+                                        ? 'bg-ivory text-terre border-perl/80 font-medium shadow-xs'
+                                        : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
                                 }`}
                             >
                                 <span>{link.label}</span>
                                 <span
-                                    className={`pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80 transition-transform duration-200 ${
-                                        active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                                    }`}
+                                    className={`
+                                        pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80
+                                        transition-transform duration-200
+                                        ${active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
+                                    `}
                                 />
                             </Link>
                         );
                     })()}
 
-                    {/* BOUTON EXPLORER – actif uniquement selon l'URL */}
+                    {/* BOUTON EXPLORER */}
                     <button
                         type="button"
                         ref={explorerButtonRef}
                         onClick={() => setOpenExplorer((prev) => !prev)}
                         aria-expanded={openExplorer}
-                        className={`group relative inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3.5 py-1.5 border text-sm transition-all duration-200 ease-out hover:-translate-y-px ${
-                            explorerActive ? 'bg-ivory text-terre border-perl/80 font-medium' : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
+                        className={`${desktopNavLinkBase} border inline-flex items-center gap-1.5 ${
+                            explorerActive
+                                ? 'bg-ivory text-terre border-perl/80 font-medium shadow-xs'
+                                : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
                         }`}
                     >
                         <span>Explorer</span>
                         <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${openExplorer ? 'rotate-180' : ''}`} />
                         <span
-                            className={`pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80 transition-transform duration-200 ${
-                                explorerActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                            }`}
+                            className={`
+                                pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80
+                                transition-transform duration-200
+                                ${explorerActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
+                            `}
                         />
                     </button>
 
@@ -189,15 +204,19 @@ export function Header() {
                                 key={link.href}
                                 href={link.href}
                                 onClick={() => setOpenExplorer(false)}
-                                className={`group relative rounded-full px-3.5 py-1.5 border text-sm transition-all duration-200 ease-out hover:-translate-y-px ${
-                                    active ? 'bg-ivory text-terre border-perl/80 font-medium' : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
+                                className={`${desktopNavLinkBase} border ${
+                                    active
+                                        ? 'bg-ivory text-terre border-perl/80 font-medium shadow-xs'
+                                        : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
                                 }`}
                             >
                                 <span>{link.label}</span>
                                 <span
-                                    className={`pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80 transition-transform duration-200 ${
-                                        active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                                    }`}
+                                    className={`
+                                        pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80
+                                        transition-transform duration-200
+                                        ${active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
+                                    `}
                                 />
                             </Link>
                         );
@@ -278,7 +297,7 @@ export function Header() {
                                                 key={cat.href}
                                                 href={cat.href}
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="group flex items-start gap-2 rounded-lg px-2.5 py-1.5 hover:bg-white/80 transition-colors"
+                                                className="group flex items-start gap-2 rounded-lg px-2.5 py-1.5 hover:bg-background transition-colors"
                                             >
                                                 <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${cat.dotClass}`} />
                                                 <div className="flex flex-col gap-0.5">
@@ -290,13 +309,13 @@ export function Header() {
                                     </nav>
 
                                     {/* Colonne droite : aside éditorial / raccourcis */}
-                                    <aside className="rounded-2xl border border-perl/60 bg-white/80 px-3.5 py-3.5 space-y-3">
+                                    <aside className="rounded-2xl border border-perl/60 bg-background px-3.5 py-3.5 space-y-3">
                                         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-main/55">Par où commencer ?</p>
                                         <div className="space-y-1.5 text-sm">
                                             <Link
                                                 href="/commencer-ici"
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="flex items<center justify-between rounded-lg px-2 py-1.5 hover:bg-ivory/70 transition-colors"
+                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-sage/10  transition-colors"
                                             >
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-main">Commencer ici</span>
@@ -308,7 +327,7 @@ export function Header() {
                                             <Link
                                                 href="/categories/inspirations"
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-ivory/70 transition-colors"
+                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-sage/10 transition-colors"
                                             >
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-main">Picorer des idées</span>
@@ -320,7 +339,7 @@ export function Header() {
                                             <Link
                                                 href="/categories/psychologie-de-l-art"
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-ivory/70 transition-colors"
+                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-sage/10  transition-colors"
                                             >
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-main">Quand ça bloque</span>
