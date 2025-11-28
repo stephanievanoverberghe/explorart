@@ -1,6 +1,9 @@
+// src/lib/content/allArticles.ts
 import type { CategoryPost, PillarSlug } from '@/components/categories/category-data';
 import { TUTORIALS } from './tutorials';
 import { ARTICLES } from './articles';
+import { ANALYSES } from './analyse-oeuvres';
+import { ARTIST_STORIES } from './histoires-d-artistes';
 import type { Article, PillarKey } from '@/types/article';
 
 const pillarKeyToSlug: Record<PillarKey, PillarSlug> = {
@@ -20,7 +23,7 @@ function mapArticleToCategoryPost(article: Article): CategoryPost {
         excerpt: article.excerpt,
         level: article.level,
         format: article.format,
-        readingTime: `${article.readingTime ?? 8} min`,
+        readingTime: article.readingTime,
         coverImage: article.coverImage,
         pillarSlug: pillarKeyToSlug[article.pillar],
         subcategory: article.subcategory,
@@ -43,6 +46,12 @@ export const ALL_ARTICLES: CategoryPost[] = [
         publishedAt: tuto.publishedAt,
     })),
 
-    // Autres formats
+    // Articles “généraux”
     ...ARTICLES.map(mapArticleToCategoryPost),
+
+    // Analyses d’œuvres
+    ...ANALYSES.map(mapArticleToCategoryPost),
+
+    // 🆕 Histoires d’artistes
+    ...ARTIST_STORIES.map(mapArticleToCategoryPost),
 ];

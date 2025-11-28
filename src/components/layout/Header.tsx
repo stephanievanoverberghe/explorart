@@ -23,7 +23,7 @@ const explorerCategories = [
         dotClass: 'bg-vert',
     },
     {
-        href: '/categories/analyse-d-oeuvre',
+        href: '/categories/comprendre-une-oeuvre',
         label: 'Comprendre une œuvre',
         description: 'Apprendre à lire une image sans jargon, avec des questions simples.',
         tagline: 'Regarder autrement',

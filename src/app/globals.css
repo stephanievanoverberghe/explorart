@@ -192,10 +192,12 @@ html {
 
 .badge-bleu {
   background-color: var(--color-bleu);
+  color: var(--color-ivory)
 }
 
 .badge-terre {
   background-color: var(--color-terre);
+  color: var(--color-ivory)
 }
 
 .badge-ocre {

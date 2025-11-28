@@ -11,6 +11,29 @@ interface CategoryPostGridProps {
     resetFilters: () => void;
 }
 
+// 🔗 Génère le bon href selon le format de l’article
+function getPostHref(post: CategoryPost): string {
+    switch (post.format) {
+        case 'tutorial':
+            return `/articles/tutoriels/${post.slug}`;
+        case 'artwork-analysis':
+            return `/articles/comprendre-une-oeuvre/${post.slug}`;
+        case 'artist-story':
+            return `/articles/histoires-d-artistes/${post.slug}`;
+        case 'art-history':
+            return `/articles/histoire-de-l-art/${post.slug}`;
+        case 'color-guide':
+            return `/articles/couleurs-harmonie/${post.slug}`;
+        case 'art-psychology':
+            return `/articles/psychologie-de-l-art/${post.slug}`;
+        case 'inspiration':
+            return `/articles/inspirations/${post.slug}`;
+        default:
+            // fallback safe
+            return `/articles/${post.slug}`;
+    }
+}
+
 export function CategoryPostGrid({ pillar, posts, currentSubcategory, resetFilters }: CategoryPostGridProps) {
     return (
         <section className="space-y-4">
@@ -28,7 +51,7 @@ export function CategoryPostGrid({ pillar, posts, currentSubcategory, resetFilte
                     {posts.map((post) => (
                         <Link
                             key={post.slug}
-                            href={`/articles/tutoriels/${post.slug}`}
+                            href={getPostHref(post)} // 👈 ICI le changement
                             className="group relative overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                         >
                             {/* Bandeau vertical couleur */}
