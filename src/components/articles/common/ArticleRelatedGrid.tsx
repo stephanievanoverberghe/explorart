@@ -6,9 +6,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { PillarConfig } from '@/components/categories/category-data';
 import { formatLabels, levelLabels, subcatLabels } from '@/components/categories/category-data';
-import type { TutorialRelatedPost } from '@/types/tutorial';
+import type { ArticleRelatedPost } from '@/types/article';
 
-type RelatedPost = TutorialRelatedPost;
+type RelatedPost = ArticleRelatedPost;
 
 interface ArticleRelatedGridProps {
     pillar: PillarConfig;

@@ -1,8 +1,38 @@
 // src/lib/content/tutorials.ts
 
-import type { Tutorial, TutorialSection, TutorialBlock, TutorialRelatedPost } from '@/types/tutorial';
+import type { ArticleBlock, ArticleLevel, ArticleRelatedPost, ArticleSection, ArticleWithSections, PillarKey } from '@/types/article';
+import type { SubcategorySlug } from '@/components/categories/category-data';
 
-const oserLePremierTrait: Tutorial = {
+type TutorialSectionId =
+    | 'intro'
+    | 'before-start'
+    | 'material-ritual'
+    | 'video'
+    | 'exercises'
+    | 'exercise-1'
+    | 'exercise-2'
+    | 'exercise-3'
+    | 'progress'
+    | 'before-after'
+    | 'resources'
+    | 'faq'
+    | 'conclusion'
+    | 'avant-de-commencer'
+    | 'exercice-principal'
+    | 'mini-exercices'
+    | 'ressources';
+
+type TutorialBlock = ArticleBlock;
+type TutorialSection = ArticleSection & { id: TutorialSectionId };
+type TutorialArticle = ArticleWithSections & {
+    format: 'tutorial';
+    pillar: PillarKey;
+    subcategory: SubcategorySlug;
+    level: ArticleLevel;
+    relatedPosts?: ArticleRelatedPost[];
+};
+
+const oserLePremierTrait: TutorialArticle = {
     slug: 'oser-le-premier-trait',
     title: 'Oser le premier trait : 3 exercices doux pour délier la main',
     excerpt: 'Trois exercices très simples pour réveiller la main, la délier, et sentir le geste devenir plus libre.',
@@ -818,7 +848,7 @@ Ce n’est pas la quantité qui compte, mais la **continuité douce**. Un geste 
     ],
 };
 
-const dessinerSansGomme: Tutorial = {
+const dessinerSansGomme: TutorialArticle = {
     slug: 'dessiner-sans-gomme',
     title: 'Dessiner sans gomme : apprendre à aimer les erreurs',
     excerpt:
@@ -1638,7 +1668,7 @@ Ce n’est pas la quantité qui compte, mais la **continuité douce**. Un geste 
     ],
 };
 
-const ombresDoucesCrayon: Tutorial = {
+const ombresDoucesCrayon: TutorialArticle = {
     slug: 'ombres-douces-au-crayon',
     title: 'Ombres douces : apprendre à faire respirer ton dessin',
     excerpt: 'Un mini-tutoriel pour comprendre comment poser des ombres légères sans salir ton dessin. Trois gestes simples pour donner du volume sans forcer.',
@@ -2457,7 +2487,7 @@ Ce n’est pas la quantité qui compte, mais la **continuité douce**. Un geste 
     ],
 };
 
-const carnetDuMatin: Tutorial = {
+const carnetDuMatin: TutorialArticle = {
     slug: 'carnet-du-matin',
     title: 'Carnet du matin : 5 minutes pour délier la main',
     excerpt: 'Une petite routine créative pour réveiller le geste au réveil. Pas d’objectif, pas de performance : juste un moment pour laisser ta main respirer.',
@@ -3276,7 +3306,7 @@ Ce n’est pas la quantité qui compte, mais la **continuité douce**. Un geste 
     ],
 };
 
-const traitGestuelRapide: Tutorial = {
+const traitGestuelRapide: TutorialArticle = {
     slug: 'trait-gestuel-rapide',
     title: 'Le trait gestuel : dessiner sans réfléchir',
     excerpt: 'Un exercice libérateur pour éviter de surcontrôler ton dessin. Le geste avant la forme : une petite routine pour casser la raideur du trait.',
@@ -4095,7 +4125,7 @@ Ce n’est pas la quantité qui compte, mais la **continuité douce**. Un geste 
     ],
 };
 
-const remplirUnePage: Tutorial = {
+const remplirUnePage: TutorialArticle = {
     slug: 'remplir-une-page',
     title: 'Remplir une page entière : un exercice pour débloquer le mental',
     excerpt: 'Quand on bloque devant un dessin, remplir une page sans réfléchir peut tout changer. L’objectif n’est pas le “beau”, mais le mouvement.',
@@ -4918,7 +4948,7 @@ Ce n’est pas la quantité qui compte, mais la **continuité douce**. Un geste 
  * CATALOGUE PRINCIPAL
  * --------------------------------- */
 
-const tutorials: Tutorial[] = [oserLePremierTrait, dessinerSansGomme, ombresDoucesCrayon, carnetDuMatin, traitGestuelRapide, remplirUnePage];
+const tutorials: TutorialArticle[] = [oserLePremierTrait, dessinerSansGomme, ombresDoucesCrayon, carnetDuMatin, traitGestuelRapide, remplirUnePage];
 
 export const TUTORIALS = tutorials;
 
@@ -4926,15 +4956,15 @@ export const TUTORIALS = tutorials;
  * HELPERS
  * --------------------------------- */
 
-export function getAllTutorials(): Tutorial[] {
+export function getAllTutorials(): TutorialArticle[] {
     return [...tutorials];
 }
 
-export function getTutorialBySlug(slug: string): Tutorial | undefined {
+export function getTutorialBySlug(slug: string): TutorialArticle | undefined {
     return tutorials.find((t) => t.slug === slug);
 }
 
-export function toTutorialRelatedPost(tutorial: Tutorial): TutorialRelatedPost {
+export function toTutorialRelatedPost(tutorial: TutorialArticle): ArticleRelatedPost {
     return {
         slug: tutorial.slug,
         title: tutorial.title,
@@ -4948,7 +4978,7 @@ export function toTutorialRelatedPost(tutorial: Tutorial): TutorialRelatedPost {
     };
 }
 
-export function getRelatedTutorials(current: Tutorial, limit = 3): TutorialRelatedPost[] {
+export function getRelatedTutorials(current: TutorialArticle, limit = 3): ArticleRelatedPost[] {
     return tutorials
         .filter((t) => t.slug !== current.slug && t.pillar === current.pillar && t.level === current.level)
         .slice(0, limit)

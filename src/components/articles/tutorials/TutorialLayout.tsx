@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { Tutorial, TutorialRelatedPost } from '@/types/tutorial';
+import type { ArticleRelatedPost, ArticleWithSections } from '@/types/article';
 import type { PillarSlug } from '@/components/categories/category-data';
 
 import { pillarConfig } from '@/components/categories/category-data';
@@ -19,8 +19,10 @@ import { useArticleOutline } from '../common/useArticleOutline';
 
 import { ALL_ARTICLES } from '@/lib/content/allArticles';
 
+type TutorialArticle = ArticleWithSections & { format: 'tutorial' };
+
 interface Props {
-    tutorial: Tutorial;
+    tutorial: TutorialArticle;
 }
 
 export function TutorialLayout({ tutorial }: Props) {
@@ -28,12 +30,12 @@ export function TutorialLayout({ tutorial }: Props) {
 
     const pillarCfg = pillarConfig[tutorial.pillar as PillarSlug];
 
-    const relatedPosts: TutorialRelatedPost[] = useMemo(() => {
+    const relatedPosts: ArticleRelatedPost[] = useMemo(() => {
         const candidates = ALL_ARTICLES.filter((post) => {
             return post.slug !== tutorial.slug && post.format === 'tutorial' && post.pillarSlug === tutorial.pillar;
         });
 
-        return candidates.slice(0, 3).map<TutorialRelatedPost>((post) => ({
+        return candidates.slice(0, 3).map<ArticleRelatedPost>((post) => ({
             slug: post.slug,
             title: post.title,
             excerpt: post.excerpt,

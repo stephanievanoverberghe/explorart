@@ -19,7 +19,6 @@
 
 export interface ArticleBlockBase {
     id: string;
-    /** Discriminant */
     kind: string;
 }
 
@@ -27,7 +26,7 @@ export interface ArticleBlockBase {
  * Meta commune que tous les contenus peuvent réutiliser
  * (catalogue, cartes, ArticleHero…)
  *
- * Tu pourras l’étendre dans `Article` et `Tutorial`.
+ * Tu pourras l’étendre dans `Article`.
  */
 export interface ArticleBuilderMeta {
     /** Date ISO string, ex: "2025-01-10" */

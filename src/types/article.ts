@@ -178,6 +178,8 @@ export interface ArticleMeta {
     publishedAt?: string;
 }
 
+export type ArticleRelatedPost = ArticleMeta;
+
 export interface ArticleHeroData {
     src: string;
     alt: string;
@@ -194,3 +196,5 @@ export interface Article extends ArticleMeta {
 
     sections?: ArticleSection[];
 }
+
+export type ArticleWithSections = Article & { sections: ArticleSection[] };
