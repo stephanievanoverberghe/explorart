@@ -7,6 +7,8 @@ import Image from 'next/image';
 import type { PillarConfig } from '@/components/categories/category-data';
 import { formatLabels, levelLabels, subcatLabels } from '@/components/categories/category-data';
 import type { ArticleRelatedPost } from '@/types/article';
+import { ARTICLE_FORMATS_BY_KEY } from '@/lib/content/articleFormats';
+import { getArticlesListPath } from '@/lib/routing/articlePaths';
 
 type RelatedPost = ArticleRelatedPost;
 
@@ -23,7 +25,7 @@ export function ArticleRelatedGrid({
     posts,
     title = 'Continuer avec…',
     description = 'D’autres articles dans le même esprit, pour prolonger ce que tu viens de travailler.',
-    hrefBase = '/articles/tutoriels',
+    hrefBase,
 }: ArticleRelatedGridProps) {
     if (!posts || posts.length === 0) return null;
 
@@ -31,6 +33,9 @@ export function ArticleRelatedGrid({
     const limited = posts.slice(0, 3);
     const primary = limited[0];
     const sides = limited.slice(1);
+
+    const baseHref = hrefBase ?? getArticlesListPath(primary.pillar);
+    const formatLabel = ARTICLE_FORMATS_BY_KEY[primary.format]?.label ?? 'articles';
 
     return (
         <section className="mt-16 space-y-5 border-t border-perl/40 pt-8">
@@ -46,10 +51,10 @@ export function ArticleRelatedGrid({
                 </div>
 
                 <Link
-                    href="/articles/tutoriels"
+                    href={baseHref}
                     className="inline-flex items-center justify-center rounded-full border border-perl/60 bg-background px-3 py-1.5 text-[0.75rem] font-medium text-main/80 shadow-sm hover:border-vert/70 hover:bg-vert/5 hover:text-main transition-colors"
                 >
-                    Voir tous les tutoriels
+                    Voir tous les {formatLabel.toLowerCase()}
                     <span className="ml-1.5 text-xs">↗</span>
                 </Link>
             </div>
@@ -58,23 +63,23 @@ export function ArticleRelatedGrid({
             {limited.length === 1 ? (
                 // 1 seul article → grande card centrée
                 <div className="mt-4 max-w-3xl mx-auto">
-                    <PrimaryCard post={primary} pillar={pillar} hrefBase={hrefBase} />
+                    <PrimaryCard post={primary} pillar={pillar} hrefBase={baseHref} />
                 </div>
             ) : (
                 // 2 ou 3 articles → primaire au milieu, un peu plus grande
                 <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.25fr)_minmax(0,1.05fr)] items-stretch">
                     {/* Gauche */}
-                    {sides[0] ? <SecondaryCard post={sides[0]} pillar={pillar} hrefBase={hrefBase} /> : <div className="hidden lg:block" />}
+                    {sides[0] ? <SecondaryCard post={sides[0]} pillar={pillar} hrefBase={baseHref} /> : <div className="hidden lg:block" />}
 
                     {/* Centre : PROCHAINE ÉTAPE (plus grande, effet) */}
                     <div className="relative">
                         {/* Halo discret derrière la card principale */}
                         <div className={`pointer-events-none absolute inset-0 mx-auto max-w-xl ${pillar.dotClass}/20 blur-[70px] opacity-70`} />
-                        <PrimaryCard post={primary} pillar={pillar} hrefBase={hrefBase} highlight />
+                        <PrimaryCard post={primary} pillar={pillar} hrefBase={baseHref} highlight />
                     </div>
 
                     {/* Droite */}
-                    {sides[1] ? <SecondaryCard post={sides[1]} pillar={pillar} hrefBase={hrefBase} /> : <div className="hidden lg:block" />}
+                    {sides[1] ? <SecondaryCard post={sides[1]} pillar={pillar} hrefBase={baseHref} /> : <div className="hidden lg:block" />}
                 </div>
             )}
         </section>
@@ -93,10 +98,13 @@ interface CardProps {
 /**
  * Card centrale "Prochaine étape"
  */
-function PrimaryCard({ post, pillar, hrefBase = '/articles/tutoriels', highlight }: CardProps) {
+function PrimaryCard({ post, pillar, hrefBase, highlight }: CardProps) {
+    const baseHref = hrefBase ?? getArticlesListPath(post.pillar);
+    const formatLabel = formatLabels[post.format]?.toLowerCase() ?? 'article';
+
     return (
         <Link
-            href={`${hrefBase}/${post.slug}`}
+            href={`${baseHref}/${post.slug}`}
             className={[
                 'group relative flex h-full flex-col overflow-hidden rounded-3xl border bg-white/90 shadow-sm transition-all duration-500',
                 'border-perl/50 hover:shadow-xl hover:-translate-y-1',
@@ -148,7 +156,7 @@ function PrimaryCard({ post, pillar, hrefBase = '/articles/tutoriels', highlight
                     <div className="mt-auto flex items-center justify-between pt-2 text-xs text-main/60">
                         <span>{post.readingTime} · Lecture douce</span>
                         <span className="inline-flex items-center gap-1 text-[0.7rem] uppercase tracking-[0.18em] group-hover:text-main">
-                            Ouvrir le tutoriel <span>↗</span>
+                            Ouvrir {formatLabel} <span>↗</span>
                         </span>
                     </div>
                 </div>
@@ -160,10 +168,13 @@ function PrimaryCard({ post, pillar, hrefBase = '/articles/tutoriels', highlight
 /**
  * Cards latérales (gauche / droite)
  */
-function SecondaryCard({ post, pillar, hrefBase = '/articles/tutoriels' }: CardProps) {
+function SecondaryCard({ post, pillar, hrefBase }: CardProps) {
+    const baseHref = hrefBase ?? getArticlesListPath(post.pillar);
+    const formatLabel = formatLabels[post.format]?.toLowerCase() ?? 'article';
+
     return (
         <Link
-            href={`${hrefBase}/${post.slug}`}
+            href={`${baseHref}/${post.slug}`}
             className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
         >
             {/* Bandeau vertical couleur pilier */}
@@ -196,7 +207,7 @@ function SecondaryCard({ post, pillar, hrefBase = '/articles/tutoriels' }: CardP
                     <div className="mt-auto flex items-center justify-between pt-2 text-[0.7rem] text-main/60">
                         <span>{post.readingTime} · Lecture douce</span>
                         <span className="inline-flex items-center gap-1 uppercase tracking-[0.18em] group-hover:text-main">
-                            Lire <span>↗</span>
+                            Lire {formatLabel} <span>↗</span>
                         </span>
                     </div>
                 </div>
