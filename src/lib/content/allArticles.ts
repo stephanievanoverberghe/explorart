@@ -22,6 +22,7 @@ function mapArticleToCategoryPost(article: Article): CategoryPost {
         format: article.format,
         readingTime: article.readingTime,
         coverImage: article.coverImage,
+        pillar: pillarKeyToSlug[article.pillar],
         pillarSlug: pillarKeyToSlug[article.pillar],
         subcategory: article.subcategory,
         publishedAt: article.publishedAt,
