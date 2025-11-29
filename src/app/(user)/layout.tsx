@@ -7,7 +7,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         <>
             <Header />
             {/* CONTENU DE L’ESPACE MEMBRE */}
-            <main className="bg-ivory min-h-screen pt-20 pb-16">
+            <main className="bg-ivory min-h-screen pt-4 pb-16">
                 <div className="container-page">{children}</div>
             </main>
             <Footer />

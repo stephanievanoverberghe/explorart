@@ -43,10 +43,7 @@ export function OverviewPanel() {
 
 function ContinueReadingCard() {
     return (
-        <article className="relative overflow-hidden rounded-3xl border border-perl/60 bg-linear-to-br from-white via-ivory/80 to-white p-5 md:p-6 shadow-md">
-            {/* halo léger */}
-            <div className="pointer-events-none absolute inset-0 opacity-[0.13] mix-blend-soft-light bg-[radial-gradient(circle_at_12%_20%,#3c6e5a_0,transparent_40%),radial-gradient(circle_at_88%_86%,#b45c77_0,transparent_46%)]" />
-
+        <article className="relative overflow-hidden rounded-3xl border border-sage bg-background p-5 md:p-6 shadow-md">
             <div className="relative flex h-full flex-col gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.18em] text-main/60">
@@ -85,7 +82,7 @@ function ContinueReadingCard() {
 
                     <Link
                         href={mockLastReading.href}
-                        className="inline-flex items-center gap-2 rounded-full bg-main px-4 py-2.5 text-sm font-medium text-ivory shadow-sm transition hover:-translate-y-0.5 hover:bg-main/90"
+                        className="inline-flex items-center gap-2 rounded-full bg-sage px-4 py-2.5 text-sm font-medium text-ivory shadow-sm transition hover:-translate-y-0.5 hover:bg-sage/80"
                     >
                         Reprendre la lecture
                         <span aria-hidden>↗</span>

@@ -1,8 +1,8 @@
 // src/components/user/atelier/atelier-data.ts
 import type { ComponentType, SVGProps } from 'react';
-import { BookOpen, Sparkles, Star, Download, User, Compass, Clock3 } from 'lucide-react';
+import { BookOpen, Star, Sparkles, Download, User, MessageCircle, Compass, Clock3 } from 'lucide-react';
 
-export type AtelierTabId = 'overview' | 'favorites' | 'journeys' | 'downloads' | 'profile';
+export type AtelierTabId = 'overview' | 'favorites' | 'journeys' | 'downloads' | 'profile' | 'comments';
 
 export interface AtelierTab {
     id: AtelierTabId;
@@ -22,6 +22,7 @@ export const ATELIER_TABS: AtelierTab[] = [
     { id: 'favorites', label: 'Favoris', icon: Star },
     { id: 'journeys', label: 'Parcours', icon: BookOpen },
     { id: 'downloads', label: 'Téléchargements', icon: Download },
+    { id: 'comments', label: 'Commentaires', icon: MessageCircle },
     { id: 'profile', label: 'Profil & paramètres', icon: User },
 ];
 
@@ -122,6 +123,56 @@ export const mockFavorites = [
         title: 'Les bases de la couleur sans jargon',
         href: '/articles/couleurs-harmonie/bases-couleur-sans-jargon',
         tag: 'Couleurs & harmonie',
+        pillarColorClass: 'bg-sage',
+    },
+];
+
+/* ———————————————————————
+   Commentaires (mock)
+   ——————————————————————— */
+
+export type CommentStatus = 'published' | 'pending' | 'archived';
+
+export interface MockComment {
+    id: string;
+    articleTitle: string;
+    articleHref: string;
+    excerpt: string;
+    createdAt: string; // texte friendly : "Il y a 3 jours" etc.
+    status: CommentStatus;
+    pillarTag: string;
+    pillarColorClass: string;
+}
+
+export const mockComments: MockComment[] = [
+    {
+        id: '1',
+        articleTitle: 'Peur de la feuille blanche : ce qui se joue en toi',
+        articleHref: '/articles/psychologie-de-l-art/peur-de-la-feuille-blanche',
+        excerpt: 'Ça m’a vraiment rassurée de lire que je ne suis pas “en retard” dans ma pratique…',
+        createdAt: 'Il y a 3 jours',
+        status: 'published',
+        pillarTag: 'Psychologie de l’art',
+        pillarColorClass: 'bg-prune',
+    },
+    {
+        id: '2',
+        articleTitle: 'Moodboard matinal : 5 minutes pour nourrir ton regard',
+        articleHref: '/articles/inspirations/rituel-du-regard-du-matin',
+        excerpt: 'J’ai testé le rituel ce matin avec mon café, ça change complètement mon début de journée.',
+        createdAt: 'Il y a 1 semaine',
+        status: 'published',
+        pillarTag: 'Inspirations',
+        pillarColorClass: 'bg-rose',
+    },
+    {
+        id: '3',
+        articleTitle: 'Les bases de la couleur sans jargon',
+        articleHref: '/articles/couleurs-harmonie/bases-couleur-sans-jargon',
+        excerpt: 'Est-ce que tu pourrais faire un exemple avec l’aquarelle ?',
+        createdAt: 'En attente de validation',
+        status: 'pending',
+        pillarTag: 'Couleurs & harmonie',
         pillarColorClass: 'bg-sage',
     },
 ];

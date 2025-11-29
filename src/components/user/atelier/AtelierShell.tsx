@@ -11,6 +11,7 @@ import { FavoritesPanel } from './FavoritesPanel';
 import { JourneysPanel } from './JourneysPanel';
 import { DownloadsPanel } from './DownloadsPanel';
 import { ProfilePanel } from './ProfilePanel';
+import { CommentsPanel } from './CommentsPanel';
 
 export function AtelierShell() {
     const searchParams = useSearchParams();
@@ -46,7 +47,7 @@ export function AtelierShell() {
             </div>
 
             {/* HERO “atelier” */}
-            <header className="relative overflow-hidden rounded-3xl bg-linear-to-r from-main via-sage to-sage/80 text-ivory px-5 py-7 md:px-8 md:py-8 shadow-lg">
+            <header className="relative overflow-hidden rounded-3xl bg-linear-to-r from-main via-sage to-sage/80 text-ivory px-8 py-8 shadow-lg">
                 {/* motif / halo */}
                 <div className="pointer-events-none absolute inset-0 opacity-35 mix-blend-soft-light bg-[radial-gradient(circle_at_12%_18%,#b45c77_0,transparent_50%),radial-gradient(circle_at_88%_88%,#1e3d72_0,transparent_55%)]" />
                 <div className="pointer-events-none absolute inset-5 rounded-[1.75rem] border border-ivory/15" />
@@ -177,6 +178,7 @@ export function AtelierShell() {
             {activeTab === 'favorites' && <FavoritesPanel />}
             {activeTab === 'journeys' && <JourneysPanel />}
             {activeTab === 'downloads' && <DownloadsPanel />}
+            {activeTab === 'comments' && <CommentsPanel />}
             {activeTab === 'profile' && <ProfilePanel />}
         </section>
     );
