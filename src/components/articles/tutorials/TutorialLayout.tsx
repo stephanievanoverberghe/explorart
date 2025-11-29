@@ -40,6 +40,7 @@ export function TutorialLayout({ tutorial }: Props) {
             title: post.title,
             excerpt: post.excerpt,
             coverImage: post.coverImage,
+            pillar: post.pillarSlug,
             level: post.level,
             format: post.format,
             subcategory: post.subcategory,

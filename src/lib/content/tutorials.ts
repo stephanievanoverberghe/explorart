@@ -4970,6 +4970,7 @@ export function toTutorialRelatedPost(tutorial: TutorialArticle): ArticleRelated
         title: tutorial.title,
         excerpt: tutorial.excerpt,
         coverImage: tutorial.coverImage,
+        pillar: tutorial.pillar,
         level: tutorial.level,
         format: tutorial.format,
         subcategory: tutorial.subcategory,
