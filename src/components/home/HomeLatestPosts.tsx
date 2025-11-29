@@ -3,9 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { ALL_ARTICLES } from '@/lib/content/allArticles';
-import { pillarConfig, type PillarSlug, formatLabels } from '@/components/categories/category-data';
-import { getFormatConfigByKey } from '@/lib/content/articleFormats';
-import type { CategoryPost } from '@/components/categories/category-data';
+import { pillarConfig, type PillarSlug, formatLabels, type CategoryPost, type PostFormat } from '@/components/categories/category-data';
 
 // 🟩 Helper : convertir une date string en timestamp (fallback = 0)
 function parseDate(date: string | undefined): number {
@@ -16,6 +14,17 @@ function parseDate(date: string | undefined): number {
 function getLatestArticles(list: CategoryPost[], count = 3) {
     return [...list].sort((a, b) => parseDate(b.publishedAt) - parseDate(a.publishedAt)).slice(0, count);
 }
+
+// 🧭 Mapping des formats vers les segments de route en français
+const formatToPath: Record<PostFormat, string> = {
+    tutorial: '/articles/tutoriels',
+    'artwork-analysis': '/articles/comprendre-une-oeuvre',
+    'artist-story': '/articles/histoires-d-artistes',
+    'art-history': '/articles/histoire-de-l-art',
+    'color-guide': '/articles/couleurs-harmonie',
+    'art-psychology': '/articles/psychologie-de-l-art',
+    inspiration: '/articles/inspirations',
+};
 
 export default function HomeLatestPosts() {
     const latestPosts = getLatestArticles(ALL_ARTICLES, 3);
@@ -52,14 +61,9 @@ export default function HomeLatestPosts() {
                         const levelLabel = post.level === 'beginner' ? 'Débutant' : 'Intermédiaire';
                         const formatLabel = formatLabels[post.format];
 
-                        // 👉 Href correct selon le format
-                        const href =
-                            post.format === 'tutorial'
-                                ? `/articles/tutoriels/${post.slug}`
-                                : (() => {
-                                      const cfg = getFormatConfigByKey(post.format);
-                                      return `/articles/${cfg.pathSegment}/${post.slug}`;
-                                  })();
+                        // 👉 Href correct selon le format (aligné sur /articles)
+                        const basePath = formatToPath[post.format];
+                        const href = `${basePath}/${post.slug}`;
 
                         return (
                             <Link

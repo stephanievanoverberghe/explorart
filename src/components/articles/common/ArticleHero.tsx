@@ -1,7 +1,9 @@
 // src/components/articles/common/ArticleHero.tsx
+'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { FavoriteToggle } from './FavoriteToggle';
 import { getPillarTheme } from './pillarTheme';
 import type { PillarKey } from '@/types/article';
 
@@ -153,6 +155,10 @@ export function ArticleHero({
                                 ))}
                             </div>
                         )}
+
+                        <div className="pt-1">
+                            <FavoriteToggle label="Ajouter cet article à tes favoris" helperText="Pour le retrouver dans ton Atelier Explor’Art" className="w-full md:w-auto" />
+                        </div>
 
                         {/* CTA */}
                         <div className="flex flex-wrap gap-3 pt-2">

@@ -9,6 +9,7 @@ import { formatLabels, levelLabels, subcatLabels } from '@/components/categories
 import type { ArticleRelatedPost } from '@/types/article';
 import { ARTICLE_FORMATS_BY_KEY } from '@/lib/content/articleFormats';
 import { getArticlesListPath } from '@/lib/routing/articlePaths';
+import { FavoriteToggle } from '@/components/articles/common/FavoriteToggle';
 
 type RelatedPost = ArticleRelatedPost;
 
@@ -127,16 +128,18 @@ function PrimaryCard({ post, pillar, hrefBase, highlight }: CardProps) {
 
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-30">
-                        {/* Niveau */}
                         <span className="badge-level text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1">{levelLabels[post.level]}</span>
 
-                        {/* Format */}
                         <span className={`badge-pillar text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1 ${pillar.badgeClass}`}>{formatLabels[post.format]}</span>
 
-                        {/* Sous-univers */}
                         <span className="badge-subcat text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1 bg-black/45 backdrop-blur-sm text-ivory/90">
                             {subcatLabels[post.subcategory]}
                         </span>
+                    </div>
+
+                    {/* ⭐ Favoris flottant */}
+                    <div className="absolute top-3 right-3 z-30">
+                        <FavoriteToggle variant="floating" defaultActive={false} label="Ajouter cet article aux favoris" className="backdrop-blur-sm" />
                     </div>
 
                     {/* Label "Prochaine étape" */}
@@ -196,6 +199,11 @@ function SecondaryCard({ post, pillar, hrefBase }: CardProps) {
                         <span className="badge-subcat text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1 bg-black/40 backdrop-blur-sm text-ivory/90">
                             {subcatLabels[post.subcategory]}
                         </span>
+                    </div>
+
+                    {/* ⭐ Favoris flottant */}
+                    <div className="absolute top-3 right-3 z-30">
+                        <FavoriteToggle variant="floating" defaultActive={false} label="Ajouter cet article aux favoris" className="backdrop-blur-sm" />
                     </div>
                 </div>
 

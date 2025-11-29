@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { CategoryPost, PillarConfig, PillarSubcategory } from './category-data';
 import { formatLabels, levelLabels, subcatLabels } from './category-data';
+import { FavoriteToggle } from '@/components/articles/common/FavoriteToggle';
 
 interface CategoryPostGridProps {
     pillar: PillarConfig;
@@ -51,7 +52,7 @@ export function CategoryPostGrid({ pillar, posts, currentSubcategory, resetFilte
                     {posts.map((post) => (
                         <Link
                             key={post.slug}
-                            href={getPostHref(post)} // 👈 ICI le changement
+                            href={getPostHref(post)}
                             className="group relative overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                         >
                             {/* Bandeau vertical couleur */}
@@ -61,12 +62,15 @@ export function CategoryPostGrid({ pillar, posts, currentSubcategory, resetFilte
                                 {/* IMAGE */}
                                 <div className="relative w-full aspect-4/3 overflow-hidden">
                                     <Image src={post.coverImage} alt={post.title} fill className="object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
+
                                     {/* Halo */}
                                     <div
                                         className={`pointer-events-none absolute inset-0 ${pillar.dotClass}/15 opacity-0 blur-[60px] group-hover:opacity-100 transition-opacity duration-700`}
                                     />
+
                                     {/* Gradient */}
                                     <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/25 to-transparent" />
+
                                     {/* Badges */}
                                     <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-30">
                                         <span className="badge-level text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1">{levelLabels[post.level]}</span>
@@ -79,6 +83,11 @@ export function CategoryPostGrid({ pillar, posts, currentSubcategory, resetFilte
                                         <span className="badge-subcat text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1 bg-black/40 backdrop-blur-sm text-ivory/90">
                                             {subcatLabels[post.subcategory]}
                                         </span>
+                                    </div>
+
+                                    {/* ⭐ Favoris flottant */}
+                                    <div className="absolute top-3 right-3 z-30">
+                                        <FavoriteToggle variant="floating" label="Ajouter aux favoris" className="backdrop-blur-sm" />
                                     </div>
                                 </div>
 

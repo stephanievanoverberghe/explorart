@@ -10,6 +10,7 @@ import { ALL_ARTICLES } from '@/lib/content/allArticles';
 import { pillarConfig, formatLabels, levelLabels, subcatLabels } from '@/components/categories/category-data';
 import type { PostFormat, Level } from '@/components/categories/category-data';
 import { ArticlesOverviewHero } from '@/components/articles/common/ArticlesOverviewHero';
+import { FavoriteToggle } from '@/components/articles/common/FavoriteToggle';
 
 type FormatFilter = 'all' | PostFormat;
 type LevelFilter = 'all' | Level;
@@ -302,7 +303,7 @@ export default function ArticlesPage() {
                                             <div className="absolute left-0 top-0 h-full w-1 z-20" style={{ backgroundColor: pillar.color }} />
 
                                             <div className="flex flex-col h-full">
-                                                {/* IMAGE plus compacte */}
+                                                {/* IMAGE + badges + favoris */}
                                                 <div className="relative w-full aspect-4/3 overflow-hidden">
                                                     <Image
                                                         src={post.coverImage}
@@ -310,12 +311,13 @@ export default function ArticlesPage() {
                                                         fill
                                                         className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                                                     />
+
                                                     <div
                                                         className={`pointer-events-none absolute inset-0 ${pillar.dotClass}/15 opacity-0 blur-[50px] group-hover:opacity-100 transition-opacity duration-500`}
                                                     />
                                                     <div className="absolute inset-0 bg-linear-to-t from-black/55 via-black/20 to-transparent" />
 
-                                                    {/* Badges plus petits */}
+                                                    {/* Badges format / niveau / sous-cat */}
                                                     <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 z-30">
                                                         <span className="text-[0.6rem] uppercase tracking-[0.16em] rounded-full px-1.5 py-0.5 bg-ivory/90 text-main shadow-sm">
                                                             {levelLabels[post.level]}
@@ -326,6 +328,16 @@ export default function ArticlesPage() {
                                                         <span className="text-[0.6rem] uppercase tracking-[0.16em] rounded-full px-1.5 py-0.5 bg-black/40 backdrop-blur-sm text-ivory/90">
                                                             {subcatLabels[post.subcategory]}
                                                         </span>
+                                                    </div>
+
+                                                    {/* ⭐ Favoris flottant en haut à droite */}
+                                                    <div className="absolute top-2 right-2 z-30">
+                                                        <FavoriteToggle
+                                                            variant="floating"
+                                                            defaultActive={false}
+                                                            label="Ajouter cet article aux favoris"
+                                                            className="backdrop-blur-sm"
+                                                        />
                                                     </div>
                                                 </div>
 

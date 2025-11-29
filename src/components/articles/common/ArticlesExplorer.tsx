@@ -6,6 +6,7 @@ import type { CategoryPost, Level, SubcategorySlug, PillarSlug, PillarConfig } f
 import { pillarConfig, subcategoriesByPillar, subcatLabels, levelLabels, formatLabels } from '@/components/categories/category-data';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FavoriteToggle } from './FavoriteToggle';
 import { getArticleHref } from '@/lib/routing/articlePaths';
 
 type ArticlesExplorerProps = {
@@ -224,15 +225,16 @@ function ArticlesGrid({ pillar, posts }: { pillar: PillarConfig; posts: Category
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {posts.map((post) => (
-                    <Link
+                    <article
                         key={post.slug}
-                        href={getArticleHref(post)}
-                        className="group relative overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                        className="group relative overflow-hidden rounded-3xl border border-perl/40 bg-white/80 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                     >
-                        {/* Bandeau vertical couleur pilier */}
-                        <div className="absolute left-0 top-0 h-full w-1.5 z-20" style={{ backgroundColor: pillar.color }} />
+                        <FavoriteToggle variant="floating" label={`Ajouter ${post.title} aux favoris`} className="absolute right-3 top-3 z-30" />
 
-                        <div className="flex flex-col h-full">
+                        {/* Bandeau vertical couleur pilier */}
+                        <div className="absolute left-0 top-0 z-20 h-full w-1.5" style={{ backgroundColor: pillar.color }} />
+
+                        <Link href={getArticleHref(post)} className="flex h-full flex-col focus:outline-none">
                             {/* IMAGE */}
                             <div className="relative w-full aspect-4/3 overflow-hidden">
                                 <Image src={post.coverImage} alt={post.title} fill className="object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
@@ -243,10 +245,10 @@ function ArticlesGrid({ pillar, posts }: { pillar: PillarConfig; posts: Category
                                 {/* Gradient */}
                                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/25 to-transparent" />
                                 {/* Badges */}
-                                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-30">
-                                    <span className="badge-level text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1">{levelLabels[post.level]}</span>
+                                <div className="absolute top-3 left-3 z-30 flex flex-wrap gap-1.5">
+                                    <span className="badge-level rounded-full px-2 py-1 text-[0.65rem] uppercase tracking-[0.16em]">{levelLabels[post.level]}</span>
 
-                                    <span className={`badge-pillar text-[0.65rem] uppercase tracking-[0.16em] rounded-full px-2 py-1 ${pillar.badgeClass}`}>
+                                    <span className={`badge-pillar rounded-full px-2 py-1 text-[0.65rem] uppercase tracking-[0.16em] ${pillar.badgeClass}`}>
                                         {formatLabels[post.format]}
                                     </span>
                                 </div>
@@ -254,8 +256,8 @@ function ArticlesGrid({ pillar, posts }: { pillar: PillarConfig; posts: Category
 
                             {/* CONTENU */}
                             <div className="flex flex-1 flex-col gap-2 p-4">
-                                <h3 className="font-serif-title text-base md:text-lg text-main group-hover:underline decoration-1 underline-offset-4">{post.title}</h3>
-                                <p className="text-sm text-main/75 leading-relaxed line-clamp-3">{post.excerpt}</p>
+                                <h3 className="font-serif-title text-base text-main md:text-lg group-hover:underline decoration-1 underline-offset-4">{post.title}</h3>
+                                <p className="text-sm leading-relaxed text-main/75 line-clamp-3">{post.excerpt}</p>
 
                                 <div className="mt-auto flex items-center justify-between pt-2 text-xs text-main/60">
                                     <span>{post.readingTime} · Lecture douce</span>
@@ -264,8 +266,8 @@ function ArticlesGrid({ pillar, posts }: { pillar: PillarConfig; posts: Category
                                     </span>
                                 </div>
                             </div>
-                        </div>
-                    </Link>
+                        </Link>
+                    </article>
                 ))}
             </div>
         </section>
