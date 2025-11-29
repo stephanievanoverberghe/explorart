@@ -45,7 +45,7 @@ export interface CategoryPost {
     format: PostFormat;
     readingTime: string;
     coverImage: string;
-    Pillar: PillarSlug;
+    pillar: PillarSlug;
     pillarSlug: PillarSlug;
     subcategory: SubcategorySlug;
     publishedAt?: string;
