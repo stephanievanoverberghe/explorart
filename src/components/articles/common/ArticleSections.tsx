@@ -530,3 +530,6 @@ function ArticleRowRenderer({ row }: { row: ArticleRow }) {
         </div>
     );
 }
+
+// Alias tutoriels : on réutilise le builder universel directement ici
+export const TutorialSections = ArticleSections;

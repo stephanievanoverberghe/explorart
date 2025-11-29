@@ -1,7 +1,7 @@
 // src/components/articles/inspirations/InspirationsLayout.tsx
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { Article } from '@/types/article';
 import type { CategoryPost, PillarSlug } from '@/components/categories/category-data';
 
@@ -15,6 +15,7 @@ import { ArticlePlanBanner } from '@/components/articles/common/ArticlePlanBanne
 import { ArticleOutlineHandle } from '@/components/articles/common/ArticleOutlineHandle';
 import { ArticleOutlineDrawer } from '@/components/articles/common/ArticleOutlineDrawer';
 import { ArticleScrollProgress } from '../common/ArticleScrollProgress';
+import { useArticleOutline } from '../common/useArticleOutline';
 
 import { ALL_ARTICLES } from '@/lib/content/allArticles';
 
@@ -23,18 +24,7 @@ interface Props {
 }
 
 export function InspirationsLayout({ article }: Props) {
-    const [isOutlineOpen, setIsOutlineOpen] = useState(false);
-
-    const outlineItems = useMemo(
-        () =>
-            (article.sections ?? []).map((section) => ({
-                id: section.anchorId,
-                label: section.label,
-            })),
-        [article.sections]
-    );
-
-    const totalSections = outlineItems.length;
+    const { outlineItems, totalSections, isOutlineOpen, openOutline, closeOutline, toggleOutline, handleSelect } = useArticleOutline(article.sections);
 
     const pillarCfg = pillarConfig[article.pillar as PillarSlug];
 
@@ -45,44 +35,6 @@ export function InspirationsLayout({ article }: Props) {
 
         return candidates.slice(0, 3);
     }, [article.slug, article.pillar]);
-
-    useEffect(() => {
-        if (typeof document === 'undefined') return;
-
-        const previousOverflow = document.body.style.overflow;
-
-        if (isOutlineOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = previousOverflow || '';
-        }
-
-        return () => {
-            document.body.style.overflow = previousOverflow || '';
-        };
-    }, [isOutlineOpen]);
-
-    const scrollToSection = useCallback((id: string) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        const rect = el.getBoundingClientRect();
-        const absoluteTop = rect.top + window.scrollY;
-        const offset = 80;
-
-        window.scrollTo({
-            top: Math.max(absoluteTop - offset, 0),
-            behavior: 'smooth',
-        });
-    }, []);
-
-    const handleClickItem = useCallback(
-        (id: string) => {
-            scrollToSection(id);
-            setIsOutlineOpen(false);
-        },
-        [scrollToSection]
-    );
 
     return (
         <>
@@ -120,7 +72,7 @@ export function InspirationsLayout({ article }: Props) {
                     }}
                 />
 
-                {totalSections > 0 && <ArticlePlanBanner totalSections={totalSections} onOpen={() => setIsOutlineOpen(true)} />}
+                {totalSections > 0 && <ArticlePlanBanner totalSections={totalSections} onOpen={openOutline} />}
 
                 {article.sections && article.sections.length > 0 && <ArticleSections sections={article.sections} />}
 
@@ -137,13 +89,11 @@ export function InspirationsLayout({ article }: Props) {
                 <ArticleComments articleSlug={article.slug} articleTitle={article.title} />
             </article>
 
-            {isOutlineOpen && (
-                <div className="fixed inset-0 z-50 m-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsOutlineOpen(false)} aria-label="Fermer le plan de l’article" />
-            )}
+            {isOutlineOpen && <div className="fixed inset-0 z-50 m-0 bg-black/30 backdrop-blur-sm" onClick={closeOutline} aria-label="Fermer le plan de l’article" />}
 
-            <ArticleOutlineHandle isOpen={isOutlineOpen} onToggle={() => setIsOutlineOpen((o) => !o)} />
+            <ArticleOutlineHandle isOpen={isOutlineOpen} onToggle={toggleOutline} />
 
-            <ArticleOutlineDrawer isOpen={isOutlineOpen} items={outlineItems} onSelect={handleClickItem} onClose={() => setIsOutlineOpen(false)} />
+            <ArticleOutlineDrawer isOpen={isOutlineOpen} items={outlineItems} onSelect={handleSelect} onClose={closeOutline} />
         </>
     );
 }
