@@ -158,7 +158,7 @@ function PillarProgressCard() {
                     <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/60">Tes chemins en cours</p>
                     <h3 className="font-serif-title text-lg md:text-xl text-main">Progression par pilier</h3>
                 </div>
-                <Link href="/categories" className="text-[0.8rem] text-sage/80 underline underline-offset-2 hover:text-sage">
+                <Link href="/categories" className="text-[0.8rem] text-main underline underline-offset-2 hover:text-sage">
                     Voir les 7 piliers
                 </Link>
             </div>
@@ -221,7 +221,7 @@ function FavoritesSummaryCard() {
                                 <span className={`h-1.5 w-1.5 rounded-full ${fav.pillarColorClass}`} />
                                 <span>{fav.tag}</span>
                             </span>
-                            <span className="text-sm text-main group-hover:underline decoration-1 underline-offset-4">{fav.title}</span>
+                            <span className="text-sm text-main decoration-1 underline-offset-4">{fav.title}</span>
                         </Link>
                     </li>
                 ))}
