@@ -1,3 +1,4 @@
+// src/components/user/atelier/FavoritesPanel.tsx
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { mockFavorites } from './atelier-data';

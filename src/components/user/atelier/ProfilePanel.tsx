@@ -1,3 +1,4 @@
+// src/components/user/atelier/ProfilePanel.tsx
 import { Settings, User } from 'lucide-react';
 
 export function ProfilePanel() {

@@ -1,3 +1,4 @@
+// src/components/user/atelier/JourneysPanel.tsx
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { mockMiniFormation } from './atelier-data';

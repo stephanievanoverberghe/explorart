@@ -1,3 +1,4 @@
+// src/components/user/atelier/DownloadsPanel.tsx
 import Link from 'next/link';
 import { Download } from 'lucide-react';
 

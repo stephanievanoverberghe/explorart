@@ -1,5 +1,6 @@
+// src/components/user/atelier/atelier-data.ts
 import type { ComponentType, SVGProps } from 'react';
-import { BookOpen, Sparkles, Star, Download, User } from 'lucide-react';
+import { BookOpen, Sparkles, Star, Download, User, Compass, Clock3 } from 'lucide-react';
 
 export type AtelierTabId = 'overview' | 'favorites' | 'journeys' | 'downloads' | 'profile';
 
@@ -9,12 +10,40 @@ export interface AtelierTab {
     icon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
+export interface AtelierHighlight {
+    label: string;
+    value: string;
+    detail: string;
+    icon: ComponentType<SVGProps<SVGSVGElement>>;
+}
+
 export const ATELIER_TABS: AtelierTab[] = [
     { id: 'overview', label: 'Vue d’ensemble', icon: Sparkles },
     { id: 'favorites', label: 'Favoris', icon: Star },
     { id: 'journeys', label: 'Parcours', icon: BookOpen },
     { id: 'downloads', label: 'Téléchargements', icon: Download },
     { id: 'profile', label: 'Profil & paramètres', icon: User },
+];
+
+export const ATELIER_HIGHLIGHTS: AtelierHighlight[] = [
+    {
+        label: 'Progression en cours',
+        value: 'Mini-formation',
+        detail: 'Module 2 en reprise douce',
+        icon: Sparkles,
+    },
+    {
+        label: 'Fil conducteur',
+        value: '7 piliers',
+        detail: 'Une suggestion par semaine',
+        icon: Compass,
+    },
+    {
+        label: 'Temps passé',
+        value: '42 min',
+        detail: 'Cette semaine dans l’atelier',
+        icon: Clock3,
+    },
 ];
 
 export const mockLastReading = {
