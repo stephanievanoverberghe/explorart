@@ -93,7 +93,7 @@ export default function AboutPage() {
                                 <Link href="/commencer-ici" className="btn btn-primary">
                                     Commencer ici
                                 </Link>
-                                <Link href="/categories" className="btn btn-secondary">
+                                <Link href="/categories" className="btn btn-secondary border border-perl text-main">
                                     Explorer les 7 piliers
                                 </Link>
                             </div>
