@@ -1,15 +1,15 @@
 // src/app/(auth)/reinitialisation-mot-de-passe/[token]/page.tsx
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { X, Lock, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ReinitialisationMotDePassePage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const token = searchParams.get('token'); // ⚠️ à vérifier côté backend
+    const params = useParams<{ token?: string }>();
+    const token = params?.token; // ⚠️ à vérifier côté backend
 
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
