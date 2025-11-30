@@ -181,11 +181,11 @@ export default function InscriptionPage() {
                                     type="checkbox"
                                     checked={acceptTerms}
                                     onChange={(e) => setAcceptTerms(e.target.checked)}
-                                    className="mt-0.5 h-4 w-4 rounded border-perl/70 text-sage focus:ring-sage/40"
+                                    className="mt-0.5 h-4 w-4 cursor-pointer rounded border-perl/70 text-sage focus:ring-sage/40"
                                 />
                                 <span>
                                     J’accepte la{' '}
-                                    <Link href="/mentions-legales" className="underline underline-offset-2 hover:text-sage">
+                                    <Link href="/legal/mentions-legales" className="underline cursor-pointer underline-offset-2 hover:text-sage">
                                         politique de confidentialité
                                     </Link>{' '}
                                     et je comprends que je peux me désinscrire à tout moment.
@@ -201,7 +201,7 @@ export default function InscriptionPage() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="flex-1 rounded-full bg-sage text-ivory px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-sage/90 disabled:bg-sage/40 disabled:cursor-not-allowed transition"
+                                className="flex-1 rounded-full bg-sage cursor-pointer text-ivory px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-sage/90 disabled:bg-sage/40 disabled:cursor-not-allowed transition"
                             >
                                 {isSubmitting ? 'Création en cours…' : 'Créer mon compte'}
                             </button>
@@ -219,7 +219,7 @@ export default function InscriptionPage() {
                     <div className="pt-1 border-t border-perl/40 mt-3">
                         <p className="text-[0.75rem] text-main/55 pt-3">
                             Tu peux aussi continuer à explorer librement&nbsp;:{' '}
-                            <Link href="/articles" className="underline underline-offset-2 hover:text-sage">
+                            <Link href="/articles" className="cursor-pointer underline underline-offset-2 hover:text-sage">
                                 voir les articles
                             </Link>
                             .

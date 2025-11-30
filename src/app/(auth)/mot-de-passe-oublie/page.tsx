@@ -128,7 +128,7 @@ export default function MotDePasseOubliePage() {
                                 {resetLink && (
                                     <p className="text-[0.75rem] text-main/70 wrap-break-words">
                                         Pour les tests, voici le lien généré :{' '}
-                                        <Link href={resetLink} className="underline underline-offset-2 text-sage">
+                                        <Link href={resetLink} className="underline cursor-pointer underline-offset-2 text-sage">
                                             {resetLink}
                                         </Link>
                                     </p>
@@ -148,7 +148,7 @@ export default function MotDePasseOubliePage() {
 
                             <Link
                                 href="/connexion"
-                                className="flex-1 inline-flex items-center justify-center rounded-full border border-perl/70 bg-white/85 px-4 py-2.5 text-sm font-medium text-main/85 hover:bg-ivory hover:border-sage/70 transition"
+                                className="flex-1 inline-flex cursor-pointer items-center justify-center rounded-full border border-perl/70 bg-white/85 px-4 py-2.5 text-sm font-medium text-main/85 hover:bg-ivory hover:border-sage/70 transition"
                             >
                                 Retour à la connexion
                             </Link>
@@ -159,7 +159,7 @@ export default function MotDePasseOubliePage() {
                     <div className="pt-1 border-t border-perl/40 mt-3">
                         <p className="text-[0.75rem] text-main/55 pt-3">
                             Besoin d’aide supplémentaire ? Tu pourras toujours me contacter depuis la page{' '}
-                            <Link href="/a-propos" className="underline underline-offset-2 hover:text-sage">
+                            <Link href="/a-propos" className="underline cursor-pointer underline-offset-2 hover:text-sage">
                                 À propos
                             </Link>
                             .

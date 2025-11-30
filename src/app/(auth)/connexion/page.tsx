@@ -136,14 +136,14 @@ export default function ConnexionPage() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting || !email || !password}
-                                className="flex-1 rounded-full bg-sage text-ivory px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-sage/90 disabled:bg-sage/40 disabled:cursor-not-allowed transition"
+                                className="flex-1 rounded-full cursor-pointer bg-sage text-ivory px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-sage/90 disabled:bg-sage/40 disabled:cursor-not-allowed transition"
                             >
                                 {isSubmitting ? 'Connexion…' : 'Se connecter'}
                             </button>
 
                             <Link
                                 href="/inscription"
-                                className="flex-1 inline-flex items-center justify-center rounded-full border border-perl/70 bg-white/85 px-4 py-2.5 text-sm font-medium text-main/85 hover:bg-ivory hover:border-sage/70 transition"
+                                className="flex-1 cursor-pointer inline-flex items-center justify-center rounded-full border border-perl/70 bg-white/85 px-4 py-2.5 text-sm font-medium text-main/85 hover:bg-ivory hover:border-sage/70 transition"
                             >
                                 Créer un compte
                             </Link>
@@ -154,7 +154,7 @@ export default function ConnexionPage() {
                     <div className="pt-1 border-t border-perl/40 mt-3">
                         <p className="text-[0.75rem] text-main/55 pt-3">
                             Tu peux aussi explorer librement&nbsp;:{' '}
-                            <Link href="/articles" className="underline underline-offset-2 hover:text-sage">
+                            <Link href="/articles" className="underline cursor-pointer underline-offset-2 hover:text-sage">
                                 voir les articles
                             </Link>
                             .

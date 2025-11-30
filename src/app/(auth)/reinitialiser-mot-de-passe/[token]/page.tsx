@@ -191,7 +191,7 @@ export default function ReinitialisationMotDePassePage() {
 
                             <Link
                                 href="/connexion"
-                                className="flex-1 inline-flex items-center justify-center rounded-full border border-perl/70 bg-white/85 px-4 py-2.5 text-sm font-medium text-main/85 hover:bg-ivory hover:border-sage/70 transition"
+                                className="flex-1 cursor-pointer inline-flex items-center justify-center rounded-full border border-perl/70 bg-white/85 px-4 py-2.5 text-sm font-medium text-main/85 hover:bg-ivory hover:border-sage/70 transition"
                             >
                                 Aller à la connexion
                             </Link>
@@ -202,7 +202,7 @@ export default function ReinitialisationMotDePassePage() {
                     <div className="pt-1 border-t border-perl/40 mt-3">
                         <p className="text-[0.75rem] text-main/55 pt-3">
                             Si le lien ne fonctionne pas, tu peux recommencer depuis la page{' '}
-                            <Link href="/mot-de-passe-oublie" className="underline underline-offset-2 hover:text-sage">
+                            <Link href="/mot-de-passe-oublie" className="underline cursor-pointer underline-offset-2 hover:text-sage">
                                 mot de passe oublié
                             </Link>
                             .

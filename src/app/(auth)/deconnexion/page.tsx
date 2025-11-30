@@ -112,7 +112,7 @@ export default function DeconnexionPage() {
                             type="button"
                             onClick={status === 'success' ? handleClose : handleLogout}
                             disabled={status === 'loading' || status === 'idle'}
-                            className="flex-1 rounded-full bg-sage text-ivory px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-sage/90 disabled:bg-sage/40 disabled:cursor-not-allowed transition"
+                            className="flex-1 cursor-pointer rounded-full bg-sage text-ivory px-4 py-2.5 text-sm font-medium shadow-sm hover:bg-sage/90 disabled:bg-sage/40 disabled:cursor-not-allowed transition"
                         >
                             {status === 'success' ? "Retour à l'accueil" : status === 'error' ? 'Réessayer' : 'Déconnexion…'}
                         </button>

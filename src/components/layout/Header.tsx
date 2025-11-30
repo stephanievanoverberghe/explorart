@@ -509,10 +509,6 @@ export function Header() {
                                             <span>{avatarInitials}</span>
                                         )}
                                     </span>
-                                    <div className="hidden xl:flex flex-col leading-tight">
-                                        <span className="text-[0.65rem] uppercase tracking-[0.18em] text-ivory/70">Connecté·e</span>
-                                        <span className="text-sm font-medium text-ivory line-clamp-1 max-w-36">{user?.name ?? 'Profil'}</span>
-                                    </div>
                                 </>
                             ) : (
                                 <>
@@ -526,6 +522,12 @@ export function Header() {
                         {openAccountMenu && (
                             <div className="absolute right-0 mt-2 w-72 rounded-3xl border border-perl/60 bg-ivory/98 text-main shadow-xl backdrop-blur-md py-3 text-sm z-50">
                                 <div className="px-3 pb-2">
+                                    {isAuthenticated && (
+                                        <div className="mb-2">
+                                            <p className="text-[0.65rem] uppercase tracking-[0.18em] text-main/60">Connecté·e</p>
+                                            <p className="text-sm font-medium text-main/95 line-clamp-1">{user?.name ?? 'Profil'}</p>
+                                        </div>
+                                    )}
                                     <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/55 mb-1.5">{isAuthenticated ? 'Ton espace' : 'Se connecter'}</p>
                                 </div>
 
