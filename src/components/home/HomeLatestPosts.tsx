@@ -30,7 +30,7 @@ export default function HomeLatestPosts() {
     const latestPosts = getLatestArticles(ALL_ARTICLES, 3);
 
     return (
-        <section className="py-16 md:py-20 bg-ivory relative overflow-hidden">
+        <section className="py-16 md:py-20 relative overflow-hidden border-y border-perl/40 bg-ivory">
             {/* halos très doux */}
             <div className="pointer-events-none absolute inset-0 -z-10">
                 <div className="absolute top-[-20%] left-[-15%] h-80 w-80 rounded-full bg-sage/12 blur-[120px]" />

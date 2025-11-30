@@ -1,11 +1,7 @@
 // src/lib/auth/jwt.ts
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
-
-if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
-}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 interface AuthTokenPayload {
     userId: string;
@@ -14,5 +10,9 @@ interface AuthTokenPayload {
 }
 
 export function signAuthToken(payload: AuthTokenPayload): string {
+    if (!JWT_SECRET) {
+        throw new Error('JWT_SECRET is not defined in environment variables');
+    }
+
     return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 }

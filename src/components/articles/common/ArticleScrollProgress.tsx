@@ -52,7 +52,7 @@ export function ArticleScrollProgress({ targetId }: ArticleScrollProgressProps) 
         >
             {/* barre qui prend 100% de l'écran */}
             <div className="h-1 bg-sage/10 overflow-hidden">
-                <div className="h-full bg-sage rounded-full  transition-[width] duration-150 ease-out" style={{ width: `${progress}%` }} />
+                <div className="h-full bg-rose rounded-full  transition-[width] duration-150 ease-out" style={{ width: `${progress}%` }} />
             </div>
         </div>
     );
