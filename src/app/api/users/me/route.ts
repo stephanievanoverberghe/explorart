@@ -7,8 +7,9 @@ import { getAuthUser } from '@/lib/auth/session';
 export async function GET() {
     const authUser = await getAuthUser();
 
+    // Pas de session → on renvoie juste user: null
     if (!authUser) {
-        return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+        return NextResponse.json({ user: null });
     }
 
     await connectToDatabase();
@@ -16,7 +17,8 @@ export async function GET() {
     const user = await User.findById(authUser.userId).select('-password');
 
     if (!user) {
-        return NextResponse.json({ error: 'Utilisateur introuvable.' }, { status: 404 });
+        // cas rare : token ok mais user supprimé
+        return NextResponse.json({ user: null });
     }
 
     return NextResponse.json({ user });

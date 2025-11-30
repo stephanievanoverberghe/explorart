@@ -1,9 +1,17 @@
 // src/components/user/atelier/AtelierShell.tsx
 'use client';
-
+import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BookOpen, Sparkles } from 'lucide-react';
+
+interface CurrentUser {
+    id: string;
+    name: string;
+    email: string;
+    role: 'user' | 'admin';
+    avatarUrl?: string;
+}
 
 import { ATELIER_HIGHLIGHTS, ATELIER_TABS, type AtelierTabId } from './atelier-data';
 import { OverviewPanel } from './OverviewPanel';
@@ -16,6 +24,25 @@ import { CommentsPanel } from './CommentsPanel';
 export function AtelierShell() {
     const searchParams = useSearchParams();
     const router = useRouter();
+
+    const [user, setUser] = useState<CurrentUser | null>(null);
+    const [loadingUser, setLoadingUser] = useState(true);
+
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                const res = await fetch('/api/users/me');
+                const data = await res.json();
+                setUser(data.user ?? null);
+            } catch {
+                setUser(null);
+            } finally {
+                setLoadingUser(false);
+            }
+        }
+
+        void fetchUser();
+    }, []);
 
     const tabParam = searchParams.get('tab');
     const fallbackTab: AtelierTabId = 'overview';
@@ -63,7 +90,10 @@ export function AtelierShell() {
                             </div>
 
                             <div className="space-y-2.5">
-                                <h1 className="font-serif-title text-2xl md:text-3xl leading-tight text-ivory">Ton atelier Explor&apos;Art</h1>
+                                <h1 className="font-serif-title text-2xl md:text-3xl leading-tight text-ivory">
+                                    {loadingUser ? "Ton atelier Explor'Art" : user ? `Ton atelier, ${user.name}` : "Ton atelier Explor'Art"}
+                                </h1>
+
                                 <p className="text-sm md:text-base text-ivory/90">
                                     Ce tableau rassemble tes parcours, favoris et ressources. Un espace clair pour reprendre sereinement, sans perdre le fil de ta pratique.
                                 </p>
