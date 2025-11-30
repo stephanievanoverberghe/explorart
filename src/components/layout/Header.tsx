@@ -497,37 +497,53 @@ export function Header() {
                                 setOpenLearn(false);
                             }}
                             aria-expanded={openAccountMenu}
-                            className="inline-flex items-center cursor-pointer gap-2 rounded-full border border-ivory/20 bg-black/10 px-3.5 py-1.5 text-xs md:text-sm text-ivory/85 shadow-xxs hover:bg-black/15 hover:text-ivory transition-all"
+                            className={`inline-flex items-center cursor-pointer gap-2 rounded-full border px-3.5 py-1.5 text-xs md:text-sm shadow-xxs transition-all hover:-translate-y-px ${
+                                isAuthenticated
+                                    ? 'border-ivory/25 bg-linear-to-r from-ivory/8 via-black/10 to-ivory/8 text-ivory'
+                                    : 'border-ivory/20 bg-black/10 text-ivory/85 hover:bg-black/15'
+                            } ${openAccountMenu ? 'ring-2 ring-vert/40 ring-offset-2 ring-offset-foreground/95' : ''}`}
                         >
                             {isAuthenticated ? (
                                 <>
                                     <span className="sr-only">Ouvrir ton espace perso</span>
-                                    <span className="relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-ivory/20 bg-ivory/15 text-[0.85rem] font-semibold uppercase text-ivory">
+                                    <span className="relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-ivory/20 bg-ivory/15 text-[0.85rem] font-semibold uppercase text-ivory shadow-inner">
                                         {avatarUrl ? (
                                             <Image src={avatarUrl} alt={`Profil de ${user?.name ?? 'l’utilisateur'}`} fill sizes="36px" className="object-cover" />
                                         ) : (
                                             <span>{avatarInitials}</span>
                                         )}
+                                        <span
+                                            className={`absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border border-foreground/90 ${
+                                                isAuthenticated ? 'bg-vert' : 'bg-rose'
+                                            }`}
+                                        />
+                                    </span>
+                                    <span className="hidden md:flex flex-col items-start leading-tight text-left text-ivory/90">
+                                        <span className="text-[0.8rem] font-semibold text-ivory">{user?.name ?? 'Profil'}</span>
+                                        <span className="text-[0.68rem] uppercase tracking-[0.14em] text-ivory/70">Espace perso</span>
                                     </span>
                                 </>
                             ) : (
                                 <>
-                                    <User className="h-4 w-4" />
-                                    <span>Espace perso</span>
+                                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-ivory/10 text-ivory">
+                                        <User className="h-4 w-4" />
+                                    </span>
+                                    <span className="text-ivory">Espace perso</span>
                                 </>
                             )}
                             <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${openAccountMenu ? 'rotate-180' : ''}`} />
                         </button>
 
                         {openAccountMenu && (
-                            <div className="absolute right-0 mt-2 w-72 rounded-3xl border border-perl/60 bg-ivory/98 text-main shadow-xl backdrop-blur-md py-3 text-sm z-50">
-                                <div className="px-3 pb-2">
-                                    {isAuthenticated && (
-                                        <div className="mb-2">
-                                            <p className="text-[0.65rem] uppercase tracking-[0.18em] text-main/60">Connecté·e</p>
-                                            <p className="text-sm font-medium text-main/95 line-clamp-1">{user?.name ?? 'Profil'}</p>
-                                        </div>
-                                    )}
+                            <div className="absolute right-0 mt-2 w-72 overflow-hidden rounded-3xl border border-perl/60 bg-ivory/98 text-main shadow-xl backdrop-blur-md text-sm z-50">
+                                <div className="bg-linear-to-r from-vert/8 via-sage/10 to-transparent px-4 py-3 border-b border-perl/40">
+                                    <p className="text-[0.65rem] uppercase tracking-[0.18em] text-main/60">{isAuthenticated ? 'Connecté·e' : 'Bienvenue'}</p>
+                                    <p className="text-sm font-semibold text-main/90 line-clamp-1">{user?.name ?? 'Espace Explor’art'}</p>
+                                    <p className="text-[0.72rem] text-main/60">
+                                        {isAuthenticated ? 'Accès rapide à tes outils créatifs.' : 'Retrouve tes cours et formations en te connectant.'}
+                                    </p>
+                                </div>
+                                <div className="px-3 pt-2 pb-1">
                                     <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/55 mb-1.5">{isAuthenticated ? 'Ton espace' : 'Se connecter'}</p>
                                 </div>
 
