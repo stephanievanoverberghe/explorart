@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { X, Mail, Lock } from 'lucide-react';
 
 export default function ConnexionPage() {
@@ -11,18 +11,36 @@ export default function ConnexionPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setError(null);
+
         if (!email || !password) return;
 
         setIsSubmitting(true);
 
-        // TODO: connexion API plus tard
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Connexion impossible pour le moment.');
+            }
+
             router.push('/tableau-de-bord');
-        }, 400);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Une erreur est survenue.';
+            setError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleClose = () => {
@@ -110,6 +128,8 @@ export default function ConnexionPage() {
                         </div>
 
                         <p className="text-[0.75rem] text-main/55">Jamais de spam, jamais de pub. Juste ton atelier.</p>
+
+                        {error && <p className="text-[0.78rem] text-rose">{error}</p>}
 
                         {/* CTA */}
                         <div className="flex flex-col sm:flex-row gap-2 pt-2">

@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { X, Mail, Lock, User } from 'lucide-react';
 
 export default function InscriptionPage() {
@@ -16,7 +16,7 @@ export default function InscriptionPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
 
@@ -30,6 +30,11 @@ export default function InscriptionPage() {
             return;
         }
 
+        if (password.length < 8) {
+            setError('Ton mot de passe doit contenir au moins 8 caractères.');
+            return;
+        }
+
         if (!acceptTerms) {
             setError('Tu dois accepter la politique de confidentialité pour continuer.');
             return;
@@ -37,11 +42,26 @@ export default function InscriptionPage() {
 
         setIsSubmitting(true);
 
-        // TODO: appel API inscription
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Impossible de créer le compte pour le moment.');
+            }
+
             router.push('/tableau-de-bord');
-        }, 500);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Une erreur est survenue.';
+            setError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleClose = () => {

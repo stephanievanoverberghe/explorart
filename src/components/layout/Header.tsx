@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
@@ -119,6 +119,7 @@ const adminLinks = [{ href: '/admin', label: 'Dashboard admin', icon: LayoutDash
 
 export function Header() {
     const pathname = usePathname();
+    const router = useRouter();
 
     const [openMobile, setOpenMobile] = useState(false);
     const [openExplorer, setOpenExplorer] = useState(false);
@@ -140,6 +141,12 @@ export function Header() {
     const learnActive = pathname.startsWith('/cours') || pathname.startsWith('/formations');
 
     const isBrowser = typeof document !== 'undefined';
+
+    const goToLogout = () => {
+        setOpenAccountMenu(false);
+        setOpenMobile(false);
+        router.push('/deconnexion');
+    };
 
     useEffect(() => {
         const onScroll = () => {
@@ -512,7 +519,7 @@ export function Header() {
                                         <button
                                             type="button"
                                             className="mx-2.5 mt-1 flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-2xl px-2.5 py-1.5 text-main/70 hover:bg-rose/5 hover:text-rose-700 transition-colors"
-                                            onClick={() => setOpenAccountMenu(false)}
+                                            onClick={goToLogout}
                                         >
                                             <LogOut className="h-4 w-4" />
                                             <span>Se déconnecter</span>
@@ -685,7 +692,7 @@ export function Header() {
                                             <button
                                                 type="button"
                                                 className="flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2 text-sm text-ivory/75 hover:bg-rose/15 hover:text-ivory transition-colors"
-                                                onClick={() => setOpenMobile(false)}
+                                                onClick={goToLogout}
                                             >
                                                 <LogOut className="h-4 w-4" />
                                                 <span>Se déconnecter</span>

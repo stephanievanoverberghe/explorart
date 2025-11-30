@@ -2,7 +2,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { X, Lock, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
@@ -44,7 +44,7 @@ export default function ReinitialisationMotDePassePage() {
         return true;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
 
@@ -52,11 +52,26 @@ export default function ReinitialisationMotDePassePage() {
 
         setIsSubmitting(true);
 
-        // TODO: appeler ton endpoint de réinitialisation avec { token, password }
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            const response = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Impossible de réinitialiser le mot de passe.');
+            }
+
             setDone(true);
-        }, 700);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Une erreur est survenue.';
+            setError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const passwordHint =

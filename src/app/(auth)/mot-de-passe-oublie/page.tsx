@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { X, Mail } from 'lucide-react';
 
 export default function MotDePasseOubliePage() {
@@ -12,14 +12,16 @@ export default function MotDePasseOubliePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [done, setDone] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [resetLink, setResetLink] = useState<string | null>(null);
 
     const handleClose = () => {
         router.push('/');
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
+        setResetLink(null);
 
         if (!email.trim()) {
             setError('Merci d’indiquer ton adresse e-mail.');
@@ -28,11 +30,29 @@ export default function MotDePasseOubliePage() {
 
         setIsSubmitting(true);
 
-        // TODO: appel API "forgot password"
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            const response = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Impossible d’envoyer le lien pour le moment.');
+            }
+
             setDone(true);
-        }, 600);
+            if (data.resetUrl) {
+                setResetLink(data.resetUrl as string);
+            }
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Une erreur est survenue.';
+            setError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -100,10 +120,20 @@ export default function MotDePasseOubliePage() {
                         {error && <p className="text-[0.78rem] text-rose mt-1">{error}</p>}
 
                         {done && !error && (
-                            <p className="text-[0.78rem] text-sage mt-1">
-                                Si cette adresse existe dans notre atelier, un lien de réinitialisation vient de t’être envoyé. Tu peux fermer cette fenêtre après avoir vérifié ta
-                                boîte mail.
-                            </p>
+                            <div className="space-y-1.5 mt-1">
+                                <p className="text-[0.78rem] text-sage">
+                                    Si cette adresse existe dans notre atelier, un lien de réinitialisation vient de t’être envoyé. Tu peux fermer cette fenêtre après avoir vérifié
+                                    ta boîte mail.
+                                </p>
+                                {resetLink && (
+                                    <p className="text-[0.75rem] text-main/70 wrap-break-words">
+                                        Pour les tests, voici le lien généré :{' '}
+                                        <Link href={resetLink} className="underline underline-offset-2 text-sage">
+                                            {resetLink}
+                                        </Link>
+                                    </p>
+                                )}
+                            </div>
                         )}
 
                         {/* CTA */}
