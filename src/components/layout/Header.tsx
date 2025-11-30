@@ -4,16 +4,26 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 
-// Liens principaux
-const mainLinks = [
-    { href: '/commencer-ici', label: 'Commencer ici' },
-    { href: '/a-propos', label: 'À propos' },
+// 🔐 TODO : remplacer par ton vrai système d’auth
+const isAuthenticated = false;
+const isAdmin = false;
+
+// 🧭 Pages publiques principales (hors Explorer / Apprendre)
+const mainPages = [
+    { href: '/', label: 'Accueil' },
+    { href: '/commencer-ici', label: 'Commencer ici', accent: true },
 ];
 
-// Catégories / 7 piliers
-const explorerCategories = [
+// 📌 Pages info
+const infoPages = [
+    { href: '/a-propos', label: 'À propos' },
+    { href: '/contact', label: 'Contact' },
+];
+
+// 📚 7 piliers = pages d’articles (chemins CONSERVÉS)
+const articlePillars = [
     {
         href: '/categories/dessin-peinture',
         label: 'Dessiner & Peindre',
@@ -72,22 +82,62 @@ const explorerCategories = [
     },
 ];
 
+// 🎓 Apprendre : différence Cours / Formations
+const learnLinks = [
+    {
+        href: '/cours',
+        label: 'Cours',
+        description: 'Cours unitaires, exercices et petits formats à picorer.',
+        badge: 'Progressif',
+    },
+    {
+        href: '/formations',
+        label: 'Formations',
+        description: 'Parcours complets en plusieurs modules, avec un fil conducteur.',
+        badge: 'Programme',
+    },
+];
+
+// 👤 Pages compte / espace perso
+const accountLinksPublic = [
+    { href: '/connexion', label: 'Connexion' },
+    { href: '/inscription', label: 'Créer un compte' },
+];
+
+// 🔒 Espace membre : tout sous /tableau-de-bord
+const accountLinksPrivate = [
+    { href: '/tableau-de-bord', label: 'Mon atelier' },
+    { href: '/tableau-de-bord/profil', label: 'Profil & paramètres' },
+    { href: '/tableau-de-bord/formations', label: 'Mes formations' },
+    { href: '/tableau-de-bord/cours', label: 'Mes cours' },
+    { href: '/tableau-de-bord/favoris', label: 'Mes favoris' },
+    { href: '/tableau-de-bord/commentaires', label: 'Mes commentaires' },
+];
+
+const adminLinks = [{ href: '/admin', label: 'Dashboard admin', icon: LayoutDashboard }];
+
 export function Header() {
     const pathname = usePathname();
+
     const [openMobile, setOpenMobile] = useState(false);
     const [openExplorer, setOpenExplorer] = useState(false);
+    const [openLearn, setOpenLearn] = useState(false);
+    const [openAccountMenu, setOpenAccountMenu] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const explorerRef = useRef<HTMLDivElement | null>(null);
     const explorerButtonRef = useRef<HTMLButtonElement | null>(null);
+    const learnRef = useRef<HTMLDivElement | null>(null);
+    const learnButtonRef = useRef<HTMLButtonElement | null>(null);
+    const accountRef = useRef<HTMLDivElement | null>(null);
+    const accountButtonRef = useRef<HTMLButtonElement | null>(null);
 
-    const isActive = (href: string) => pathname === href;
+    const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
 
-    // Explorer actif UNIQUEMENT sur pages blog / catégories
     const explorerActive = pathname.startsWith('/articles') || pathname.startsWith('/categories');
-    const explorerMobileActive = explorerActive;
 
-    // Scroll : compacte légèrement le header
+    const learnActive = pathname.startsWith('/cours') || pathname.startsWith('/formations');
+
     useEffect(() => {
         const onScroll = () => {
             setScrolled(window.scrollY > 8);
@@ -97,36 +147,49 @@ export function Header() {
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    // Click-outside global pour fermer le menu Explorer (desktop)
+    // Click-outside
     useEffect(() => {
-        if (!openExplorer) return;
+        if (!openExplorer && !openLearn && !openAccountMenu) return;
 
         const handleClick = (event: MouseEvent) => {
             const target = event.target as Node | null;
             if (!target) return;
 
-            if (dropdownRef.current?.contains(target)) return;
-            if (explorerButtonRef.current?.contains(target)) return;
+            if (explorerRef.current?.contains(target) || explorerButtonRef.current?.contains(target)) return;
+
+            if (learnRef.current?.contains(target) || learnButtonRef.current?.contains(target)) return;
+
+            if (accountRef.current?.contains(target) || accountButtonRef.current?.contains(target)) return;
 
             setOpenExplorer(false);
+            setOpenLearn(false);
+            setOpenAccountMenu(false);
         };
 
         window.addEventListener('click', handleClick);
         return () => window.removeEventListener('click', handleClick);
-    }, [openExplorer]);
+    }, [openExplorer, openLearn, openAccountMenu]);
 
     const desktopNavLinkBase = 'group relative rounded-full px-3.5 py-1.5 text-sm transition-all duration-200 ease-out hover:-translate-y-px';
 
     return (
         <header
             className={`
-                sticky top-0 z-40
-                backdrop-blur-md
-                transition-all duration-200
-                ${scrolled ? 'bg-page/95 border-b border-perl/40 shadow-sm' : 'bg-page/80 border-b border-transparent'}
-            `}
+        sticky top-0 z-40
+        backdrop-blur-xl
+        transition-all duration-200
+        border-b
+        bg-foreground/96 text-ivory
+        ${scrolled ? 'border-foreground/50 shadow-sm' : 'border-foreground/30'} 
+      `}
         >
-            <div className="container-page flex items-center justify-between gap-3 h-16 md:h-20">
+            {/* halos comme le footer mais plus légers */}
+            <div className="pointer-events-none absolute inset-0 -z-10 opacity-70">
+                <div className="absolute -top-16 left-[-10%] h-40 w-40 rounded-full bg-bleu/25 blur-[90px]" />
+                <div className="absolute bottom-[-30%] right-[-10%] h-44 w-44 rounded-full bg-rose/18 blur-[90px]" />
+            </div>
+
+            <div className="container-page flex items-center gap-3 h-16 md:h-20">
                 {/* LOGO */}
                 <Link
                     href="/"
@@ -134,136 +197,50 @@ export function Header() {
                     onClick={() => {
                         setOpenMobile(false);
                         setOpenExplorer(false);
+                        setOpenLearn(false);
+                        setOpenAccountMenu(false);
                     }}
                 >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sage/90 text-[0.75rem] font-semibold text-ivory shadow-sm">EA</span>
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-linear-to-br from-terre via-rose to-sage text-[0.75rem] font-semibold text-ivory shadow-md">
+                        EA
+                    </span>
                     <div className="flex flex-col leading-tight">
-                        <span className="font-serif-title text-base md:text-lg tracking-tight">Explor&apos;Art</span>
-                        <span className="hidden text-[0.7rem] uppercase tracking-[0.18em] text-main/70 sm:block">Dessiner · Comprendre · Ressentir</span>
+                        <span className="font-serif-title text-base md:text-lg tracking-tight text-ivory">Explor&apos;Art</span>
+                        <span className="hidden text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70 sm:block">Dessiner · Comprendre · Ressentir</span>
                     </div>
                 </Link>
 
-                {/* NAV DESKTOP – à partir de lg */}
-                <nav className="hidden lg:flex items-center gap-2 xl:gap-4 text-sm">
-                    {/* Commencer ici */}
-                    {(() => {
-                        const link = mainLinks[0];
-                        const active = isActive(link.href);
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setOpenExplorer(false)}
-                                className={`${desktopNavLinkBase} border ${
-                                    active
-                                        ? 'bg-ivory text-terre border-perl/80 font-medium shadow-xs'
-                                        : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
-                                }`}
-                            >
-                                <span>{link.label}</span>
-                                <span
-                                    className={`
-                                        pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80
-                                        transition-transform duration-200
-                                        ${active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
-                                    `}
-                                />
-                            </Link>
-                        );
-                    })()}
-
-                    {/* BOUTON EXPLORER */}
-                    <button
-                        type="button"
-                        ref={explorerButtonRef}
-                        onClick={() => setOpenExplorer((prev) => !prev)}
-                        aria-expanded={openExplorer}
-                        className={`${desktopNavLinkBase} border inline-flex items-center gap-1.5 ${
-                            explorerActive
-                                ? 'bg-ivory text-terre border-perl/80 font-medium shadow-xs'
-                                : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
-                        }`}
-                    >
-                        <span>Explorer</span>
-                        <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${openExplorer ? 'rotate-180' : ''}`} />
-                        <span
-                            className={`
-                                pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80
-                                transition-transform duration-200
-                                ${explorerActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
-                            `}
-                        />
-                    </button>
-
-                    {/* À propos */}
-                    {(() => {
-                        const link = mainLinks[1];
-                        const active = isActive(link.href);
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setOpenExplorer(false)}
-                                className={`${desktopNavLinkBase} border ${
-                                    active
-                                        ? 'bg-ivory text-terre border-perl/80 font-medium shadow-xs'
-                                        : 'bg-transparent text-main/75 border-transparent hover:bg-ivory/80 hover:text-main'
-                                }`}
-                            >
-                                <span>{link.label}</span>
-                                <span
-                                    className={`
-                                        pointer-events-none absolute left-3 right-3 -bottom-1 h-0.5 origin-center rounded-full bg-terre/80
-                                        transition-transform duration-200
-                                        ${active ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
-                                    `}
-                                />
-                            </Link>
-                        );
-                    })()}
-
-                    {/* CTA connexion / atelier */}
-                    <div className="flex items-center gap-2.5 pl-2">
-                        <Link
-                            href="/connexion"
-                            className="rounded-full border border-perl/70 bg-white/60 px-3 py-1.5 text-xs md:text-sm text-main/80 hover:bg-white hover:text-main transition-all duration-200 hover:-translate-y-px"
+                {/* NAV DESKTOP (centre) */}
+                <nav className="hidden lg:flex flex-1 items-center justify-center gap-2 xl:gap-4 text-sm">
+                    {/* Explorer */}
+                    <div className="relative" ref={explorerRef}>
+                        <button
+                            type="button"
+                            ref={explorerButtonRef}
+                            onClick={() => {
+                                setOpenExplorer((prev) => !prev);
+                                setOpenLearn(false);
+                                setOpenAccountMenu(false);
+                            }}
+                            aria-expanded={openExplorer}
+                            className={`${desktopNavLinkBase} border inline-flex items-center gap-1.5 ${
+                                explorerActive
+                                    ? 'bg-ivory text-main border-sage/70 font-medium shadow-sm'
+                                    : 'cursor-pointer bg-ivory/5 text-ivory/85 border-ivory/10 hover:bg-ivory/10'
+                            }`}
                         >
-                            Connexion
-                        </Link>
-                        <Link
-                            href="/tableau-de-bord"
-                            className="rounded-full bg-terre text-ivory px-3.5 py-1.5 text-xs md:text-sm font-medium shadow-sm hover:bg-terre/90 transition-all duration-200 hover:-translate-y-px"
-                        >
-                            Mon atelier
-                        </Link>
-                    </div>
-                </nav>
+                            <span>Explorer</span>
+                            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${openExplorer ? 'rotate-180' : ''}`} />
+                        </button>
 
-                {/* BURGER MOBILE / TABLET – visible jusqu’à lg */}
-                <button
-                    className="lg:hidden inline-flex items-center justify-center rounded-full border border-perl/60 bg-ivory/85 px-3 py-1.5 text-main/80 shadow-sm transition-transform duration-150 active:scale-95"
-                    onClick={() => setOpenMobile((prev) => !prev)}
-                    aria-label={openMobile ? 'Fermer le menu' : 'Ouvrir le menu'}
-                >
-                    <span className="text-xs mr-1.5 uppercase tracking-[0.16em]">{openMobile ? 'Fermer' : 'Menu'}</span>
-                    <span className="text-sm">{openMobile ? '✕' : '☰'}</span>
-                </button>
-            </div>
-
-            {/* SOUS-MENU EXPLORER – desktop uniquement */}
-            {openExplorer && (
-                <div className="hidden lg:block">
-                    <div className="fixed inset-x-0 top-20 flex justify-center pointer-events-none z-30">
-                        <div ref={dropdownRef} className="pointer-events-auto w-full max-w-5xl px-4 animate-subtle-fade-up">
-                            <div className="rounded-3xl bg-ivory/95 border border-perl/70 shadow-xl backdrop-blur-md px-5 py-4 lg:px-7 lg:py-5">
-                                {/* Header du menu */}
+                        {openExplorer && (
+                            <div className="absolute left-1/2 top-full z-40 mt-3 w-[860px] max-w-[90vw] -translate-x-1/2 rounded-3xl border border-perl/40 bg-ivory/98 text-main shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-xl px-6 py-5 lg:px-8 lg:py-6">
                                 <div className="flex items-start justify-between gap-4 mb-4">
                                     <div className="space-y-1.5 max-w-xl">
                                         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-main/50">Explorer le blog</p>
                                         <h2 className="font-serif-title text-lg md:text-xl text-main">7 piliers pour apprivoiser l’art, à ton rythme.</h2>
                                         <p className="text-xs md:text-sm text-main/70">
-                                            Un chemin doux pour alterner pratique, compréhension des images, récits d’artistes, couleurs, psychologie de l’art et inspirations du
-                                            quotidien.
+                                            Pratique, compréhension des images, récits d’artistes, couleurs, psychologie de l’art et inspirations du quotidien.
                                         </p>
                                     </div>
 
@@ -280,7 +257,7 @@ export function Header() {
                                         <Link
                                             href="/articles"
                                             onClick={() => setOpenExplorer(false)}
-                                            className="inline-flex items-center gap-1.5 rounded-full border border-perl/70 bg-white/60 px-3 py-1 hover:bg-white hover:border-sage/70 hover:text-main transition-all"
+                                            className="inline-flex items-center gap-1.5 rounded-full border border-perl/70 bg-white/80 px-3 py-1 text-[0.75rem] hover:bg-white hover:border-sage/70 hover:text-main transition-all"
                                         >
                                             <span>Tous les articles</span>
                                             <span>↗</span>
@@ -288,34 +265,32 @@ export function Header() {
                                     </div>
                                 </div>
 
-                                {/* Contenu : liste des thèmes (2 colonnes) + aside éditorial */}
-                                <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr),minmax(0,1.1fr)] items-start">
-                                    {/* Colonne gauche : sous-menu en 2 colonnes */}
-                                    <nav className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
-                                        {explorerCategories.map((cat) => (
+                                <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.1fr)] items-start">
+                                    <nav className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5">
+                                        {articlePillars.map((cat) => (
                                             <Link
                                                 key={cat.href}
                                                 href={cat.href}
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="group flex items-start gap-2 rounded-lg px-2.5 py-1.5 hover:bg-background transition-colors"
+                                                className="group flex items-start gap-2 rounded-xl px-2.5 py-1.5 hover:bg-background transition-colors"
                                             >
-                                                <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${cat.dotClass}`} />
+                                                <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${cat.dotClass}`} />
                                                 <div className="flex flex-col gap-0.5">
                                                     <span className="text-sm text-main group-hover:text-main font-medium">{cat.label}</span>
-                                                    <span className="text-[0.75rem] text-main/65 line-clamp-1">{cat.description}</span>
+                                                    <span className="text-[0.7rem] text-main/60 line-clamp-1">{cat.description}</span>
+                                                    <span className="text-[0.68rem] uppercase tracking-[0.16em] text-main/45">{cat.tagline}</span>
                                                 </div>
                                             </Link>
                                         ))}
                                     </nav>
 
-                                    {/* Colonne droite : aside éditorial / raccourcis */}
-                                    <aside className="rounded-2xl border border-perl/60 bg-background px-3.5 py-3.5 space-y-3">
+                                    <aside className="rounded-2xl border border-perl/60 bg-background/95 px-3.5 py-3.5 space-y-3 shadow-xs">
                                         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-main/55">Par où commencer ?</p>
                                         <div className="space-y-1.5 text-sm">
                                             <Link
                                                 href="/commencer-ici"
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-sage/10  transition-colors"
+                                                className="flex items-center justify-between rounded-xl px-2 py-1.5 hover:bg-sage/10 transition-colors"
                                             >
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-main">Commencer ici</span>
@@ -325,9 +300,9 @@ export function Header() {
                                             </Link>
 
                                             <Link
-                                                href="/categories/inspirations"
+                                                href="/articles/inspirations"
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-sage/10 transition-colors"
+                                                className="flex items-center justify-between rounded-xl px-2 py-1.5 hover:bg-rose/10 transition-colors"
                                             >
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-main">Picorer des idées</span>
@@ -337,9 +312,9 @@ export function Header() {
                                             </Link>
 
                                             <Link
-                                                href="/categories/psychologie-de-l-art"
+                                                href="/articles/psychologie-de-l-art"
                                                 onClick={() => setOpenExplorer(false)}
-                                                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-sage/10  transition-colors"
+                                                className="flex items-center justify-between rounded-xl px-2 py-1.5 hover:bg-prune/10 transition-colors"
                                             >
                                                 <div className="flex flex-col">
                                                     <span className="font-medium text-main">Quand ça bloque</span>
@@ -351,99 +326,352 @@ export function Header() {
                                     </aside>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
-                </div>
-            )}
 
-            {/* MENU MOBILE / TABLET ( < lg ) */}
-            {openMobile && (
-                <div className="lg:hidden border-t border-perl/40 bg-page/98 backdrop-blur-sm">
-                    <div className="container-page py-4 space-y-4 animate-mobile-sheet">
-                        {/* Bloc principal : navigation structurée */}
-                        <div className="rounded-3xl bg-ivory/90 border border-perl/50 shadow-sm px-4 py-3 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/55">Navigation</p>
-                                <span className="text-[0.7rem] text-main/45">Explor&apos;Art</span>
-                            </div>
+                    {/* Apprendre */}
+                    <div className="relative" ref={learnRef}>
+                        <button
+                            type="button"
+                            ref={learnButtonRef}
+                            onClick={() => {
+                                setOpenLearn((prev) => !prev);
+                                setOpenExplorer(false);
+                                setOpenAccountMenu(false);
+                            }}
+                            aria-expanded={openLearn}
+                            className={`${desktopNavLinkBase} border inline-flex items-center gap-1.5 ${
+                                learnActive
+                                    ? 'bg-ivory text-main border-vert/70 font-medium shadow-sm'
+                                    : 'cursor-pointer bg-ivory/5 text-ivory/85 border-ivory/10 hover:bg-ivory/10'
+                            }`}
+                        >
+                            <span>Apprendre</span>
+                            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${openLearn ? 'rotate-180' : ''}`} />
+                        </button>
 
-                            {/* Liens principaux + Explorer (mobile) */}
-                            <nav className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <Link
-                                    href="/commencer-ici"
-                                    onClick={() => setOpenMobile(false)}
-                                    className={`rounded-2xl px-3 py-2 text-sm text-center transition-all duration-200 border ${
-                                        isActive('/commencer-ici')
-                                            ? 'bg-terre text-ivory border-terre shadow-sm'
-                                            : 'bg-white/80 text-main/85 border-perl/60 hover:bg-white hover:-translate-y-px'
-                                    }`}
-                                >
-                                    Commencer ici
-                                </Link>
-
-                                <Link
-                                    href="/articles"
-                                    onClick={() => setOpenMobile(false)}
-                                    className={`rounded-2xl px-3 py-2 text-sm text-center transition-all duration-200 border inline-flex items-center justify-center gap-1 ${
-                                        explorerMobileActive
-                                            ? 'bg-ivory text-terre border-perl/80 font-medium'
-                                            : 'bg-white/70 text-main/80 border-perl/50 hover:bg-white hover:-translate-y-px'
-                                    }`}
-                                >
-                                    <span>Explorer</span>
-                                </Link>
-
-                                <Link
-                                    href="/a-propos"
-                                    onClick={() => setOpenMobile(false)}
-                                    className={`rounded-2xl px-3 py-2 text-sm text-center transition-all duration-200 border ${
-                                        isActive('/a-propos')
-                                            ? 'bg-ivory text-terre border-perl/80 font-medium'
-                                            : 'bg-white/80 text-main/80 border-perl/60 hover:bg-white hover:-translate-y-px'
-                                    }`}
-                                >
-                                    À propos
-                                </Link>
-                            </nav>
-                        </div>
-
-                        {/* Explorer par thèmes – version “tags” tendance */}
-                        <div className="space-y-2">
-                            <p className="text-xs uppercase tracking-[0.18em] text-main/50">Explorer par thèmes</p>
-                            <div className="rounded-3xl bg-ivory/90 border border-perl/50 px-3.5 py-3 space-y-2">
-                                <p className="text-[0.78rem] text-main/70">Choisis un pilier pour trouver les articles qui t’appellent le plus en ce moment.</p>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {explorerCategories.map((cat) => (
+                        {openLearn && (
+                            <div className="absolute left-1/2 top-full z-40 mt-3 w-[420px] max-w-[90vw] -translate-x-1/2 rounded-3xl border border-perl/40 bg-ivory/98 text-main shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-xl px-5 py-4">
+                                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-main/55 mb-2">Apprendre avec Explor&apos;Art</p>
+                                <div className="space-y-2.5 text-sm">
+                                    {learnLinks.map((item) => (
                                         <Link
-                                            key={cat.href}
-                                            href={cat.href}
-                                            onClick={() => setOpenMobile(false)}
-                                            className="inline-flex items-center gap-1.5 rounded-full border border-perl/60 bg-white/80 px-2.5 py-1 text-[0.78rem] text-main/80 hover:bg-white hover:border-sage/70 hover:-translate-y-px transition-all duration-150"
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={() => setOpenLearn(false)}
+                                            className="flex items-start justify-between gap-2 rounded-2xl px-2.5 py-1.75 hover:bg-background transition-colors"
                                         >
-                                            <span className={`h-1.5 w-1.5 rounded-full ${cat.dotClass}`} />
-                                            <span className="truncate max-w-36">{cat.label}</span>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-main">{item.label}</span>
+                                                <span className="text-[0.78rem] text-main/65">{item.description}</span>
+                                            </div>
+                                            {item.badge && (
+                                                <span className="mt-0.5 text-[0.65rem] px-2 py-0.5 rounded-full bg-vert/10 text-vert uppercase tracking-[0.16em]">
+                                                    {item.badge}
+                                                </span>
+                                            )}
                                         </Link>
                                     ))}
                                 </div>
+
+                                <div className="mt-3 pt-2 border-t border-perl/35 flex items-center justify-between">
+                                    <span className="text-[0.7rem] text-main/55">Tu hésites ? Commence par la mini-formation.</span>
+                                    <Link
+                                        href="/commencer-ici"
+                                        onClick={() => setOpenLearn(false)}
+                                        className="text-[0.7rem] font-medium text-bleu hover:underline underline-offset-2"
+                                    >
+                                        Commencer ici ↗
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Commencer ici (CTA) */}
+                    {mainPages
+                        .filter((link) => link.href === '/commencer-ici')
+                        .map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`${desktopNavLinkBase} border bg-linear-to-r from-sage via-vert to-bleu text-ivory border-transparent shadow-md hover:brightness-105`}
+                            >
+                                Commencer ici
+                            </Link>
+                        ))}
+                </nav>
+
+                {/* Droite : A propos / Contact + Espace perso */}
+                <div className="hidden lg:flex items-center gap-4">
+                    <nav className="flex items-center gap-3 text-xs md:text-sm text-ivory/80">
+                        {infoPages.map((link) => (
+                            <Link key={link.href} href={link.href} className={`relative hover:text-ivory transition-colors ${isActive(link.href) ? 'text-ivory' : ''}`}>
+                                {link.label}
+                            </Link>
+                        ))}
+                    </nav>
+
+                    <div className="relative" ref={accountRef}>
+                        <button
+                            type="button"
+                            ref={accountButtonRef}
+                            onClick={() => {
+                                setOpenAccountMenu((prev) => !prev);
+                                setOpenExplorer(false);
+                                setOpenLearn(false);
+                            }}
+                            aria-expanded={openAccountMenu}
+                            className="inline-flex items-center cursor-pointer gap-1.5 rounded-full border border-ivory/20 bg-black/10 px-3.5 py-1.5 text-xs md:text-sm text-ivory/85 shadow-xxs hover:bg-black/15 hover:text-ivory transition-all"
+                        >
+                            <User className="h-4 w-4" />
+                            <span>Espace perso</span>
+                            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${openAccountMenu ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {openAccountMenu && (
+                            <div className="absolute right-0 mt-2 w-72 rounded-3xl border border-perl/60 bg-ivory/98 text-main shadow-xl backdrop-blur-md py-3 text-sm z-40">
+                                <div className="px-3 pb-2">
+                                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/55 mb-1.5">{isAuthenticated ? 'Ton espace' : 'Se connecter'}</p>
+                                </div>
+
+                                {!isAuthenticated ? (
+                                    <div className="px-2.5 space-y-1.5">
+                                        {accountLinksPublic.map((link) => (
+                                            <Link
+                                                key={link.href}
+                                                href={link.href}
+                                                onClick={() => setOpenAccountMenu(false)}
+                                                className="flex items-center justify-between gap-2 rounded-2xl px-2.5 py-1.5 hover:bg-sage/8 text-main/80"
+                                            >
+                                                <span>{link.label}</span>
+                                                {link.href === '/inscription' && (
+                                                    <span className="text-[0.68rem] px-2 py-0.5 rounded-full bg-vert/10 text-vert uppercase tracking-[0.16em]">gratuit</span>
+                                                )}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="px-2.5 space-y-1.5">
+                                            {accountLinksPrivate.map((link) => (
+                                                <Link
+                                                    key={link.href}
+                                                    href={link.href}
+                                                    onClick={() => setOpenAccountMenu(false)}
+                                                    className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 hover:bg-sage/8 text-main/80"
+                                                >
+                                                    <span>{link.label}</span>
+                                                </Link>
+                                            ))}
+                                        </div>
+
+                                        {isAdmin && (
+                                            <>
+                                                <div className="my-2 mx-3 border-t border-perl/40" />
+                                                <div className="px-3 pb-1">
+                                                    <p className="text-[0.68rem] uppercase tracking-[0.18em] text-main/55 mb-1">Admin</p>
+                                                </div>
+                                                <div className="px-2.5 space-y-1">
+                                                    {adminLinks.map((link) => {
+                                                        const Icon = link.icon;
+                                                        return (
+                                                            <Link
+                                                                key={link.href}
+                                                                href={link.href}
+                                                                onClick={() => setOpenAccountMenu(false)}
+                                                                className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 hover:bg-terre/8 text-main/85"
+                                                            >
+                                                                <Icon className="h-4 w-4" />
+                                                                <span>{link.label}</span>
+                                                            </Link>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
+                                        )}
+
+                                        <div className="my-2 mx-3 border-t border-perl/40" />
+                                        <button
+                                            type="button"
+                                            className="mx-2.5 mt-1 flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-2xl px-2.5 py-1.5 text-main/70 hover:bg-rose/5 hover:text-rose-700 transition-colors"
+                                            onClick={() => setOpenAccountMenu(false)}
+                                        >
+                                            <LogOut className="h-4 w-4" />
+                                            <span>Se déconnecter</span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* BURGER MOBILE / TABLET */}
+                <button
+                    className="lg:hidden ml-auto inline-flex items-center justify-center rounded-full border border-ivory/30 bg-black/10 px-3 py-1.5 text-ivory/85 shadow-sm transition-transform duration-150 active:scale-95"
+                    onClick={() => {
+                        setOpenMobile((prev) => !prev);
+                        setOpenExplorer(false);
+                        setOpenLearn(false);
+                        setOpenAccountMenu(false);
+                    }}
+                    aria-label={openMobile ? 'Fermer le menu' : 'Ouvrir le menu'}
+                >
+                    <span className="text-xs mr-1.5 uppercase tracking-[0.16em]">{openMobile ? 'Fermer' : 'Menu'}</span>
+                    <span className="text-sm">{openMobile ? '✕' : '☰'}</span>
+                </button>
+            </div>
+
+            {/* MENU MOBILE */}
+            {openMobile && (
+                <div className="lg:hidden border-t border-ivory/20 bg-foreground/98 backdrop-blur-md text-ivory">
+                    <div className="container-page py-4 space-y-4">
+                        {/* Explorer */}
+                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Explorer</p>
+                                <Link href="/articles" onClick={() => setOpenMobile(false)} className="text-[0.7rem] underline-offset-2 hover:underline text-ivory/80">
+                                    Tous les articles ↗
+                                </Link>
+                            </div>
+                            <p className="text-[0.78rem] text-ivory/80">Choisis un pilier pour trouver les articles qui t’appellent le plus en ce moment.</p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {articlePillars.map((cat) => (
+                                    <Link
+                                        key={cat.href}
+                                        href={cat.href}
+                                        onClick={() => setOpenMobile(false)}
+                                        className="inline-flex items-center gap-1.5 rounded-full border border-ivory/25 bg-black/20 px-2.5 py-1 text-[0.78rem] text-ivory/85 hover:bg-black/30 hover:-translate-y-px transition-all duration-150"
+                                    >
+                                        <span className={`h-1.5 w-1.5 rounded-full ${cat.dotClass}`} />
+                                        <span className="truncate max-w-40">{cat.label}</span>
+                                    </Link>
+                                ))}
                             </div>
                         </div>
 
-                        {/* CTA bloc bas */}
-                        <div className="pt-1 flex flex-col sm:flex-row gap-2">
-                            <Link
-                                href="/connexion"
-                                onClick={() => setOpenMobile(false)}
-                                className="flex-1 rounded-2xl border border-perl/70 bg-white/90 px-3 py-2 text-sm text-center text-main/80 hover:bg-white hover:text-main hover:-translate-y-px transition-all duration-150"
-                            >
-                                Connexion
-                            </Link>
-                            <Link
-                                href="/tableau-de-bord"
-                                onClick={() => setOpenMobile(false)}
-                                className="flex-1 rounded-2xl bg-terre text-ivory px-3 py-2 text-sm text-center font-medium shadow-sm hover:bg-terre/90 hover:-translate-y-px transition-all duration-150"
-                            >
-                                Mon atelier
-                            </Link>
+                        {/* Apprendre */}
+                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Apprendre</p>
+                            <div className="flex flex-col gap-2 text-sm">
+                                {learnLinks.map((item) => (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={() => setOpenMobile(false)}
+                                        className="flex items-start justify-between gap-2 rounded-2xl px-2.5 py-1.75 bg-black/10 hover:bg-black/20 transition-colors"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-ivory">{item.label}</span>
+                                            <span className="text-[0.78rem] text-ivory/80">{item.description}</span>
+                                        </div>
+                                        {item.badge && (
+                                            <span className="mt-0.5 text-[0.65rem] px-2 py-0.5 rounded-full bg-ivory/10 text-ivory uppercase tracking-[0.16em]">{item.badge}</span>
+                                        )}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Navigation principale (Accueil / Commencer ici / Info) */}
+                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Navigation</p>
+                            <nav className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {mainPages.map((link) => (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        onClick={() => setOpenMobile(false)}
+                                        className={`rounded-2xl px-3 py-2 text-sm text-center transition-all duration-200 border inline-flex items-center justify-center gap-1 ${
+                                            isActive(link.href)
+                                                ? 'bg-ivory text-main border-transparent font-medium shadow-xs'
+                                                : link.accent
+                                                ? 'bg-linear-to-r from-sage via-vert to-bleu text-ivory border-transparent hover:brightness-105 hover:-translate-y-px'
+                                                : 'bg-black/20 text-ivory/85 border-ivory/25 hover:bg-black/30 hover:-translate-y-px'
+                                        }`}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </nav>
+
+                            <div className="flex flex-wrap gap-3 pt-2 text-xs text-ivory/75">
+                                {infoPages.map((link) => (
+                                    <Link key={link.href} href={link.href} onClick={() => setOpenMobile(false)} className="hover:text-ivory underline-offset-2 hover:underline">
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Espace perso */}
+                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Espace perso</p>
+
+                            {!isAuthenticated ? (
+                                <div className="flex flex-col gap-2">
+                                    {accountLinksPublic.map((link) => (
+                                        <Link
+                                            key={link.href}
+                                            href={link.href}
+                                            onClick={() => setOpenMobile(false)}
+                                            className="rounded-2xl border border-ivory/25 bg-black/20 px-3 py-2 text-sm text-center text-ivory/85 hover:bg-black/30 hover:text-ivory hover:-translate-y-px transition-all duration-150"
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex flex-col gap-1.5">
+                                        {accountLinksPrivate.map((link) => (
+                                            <Link
+                                                key={link.href}
+                                                href={link.href}
+                                                onClick={() => setOpenMobile(false)}
+                                                className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 text-sm hover:bg-black/20 text-ivory/85"
+                                            >
+                                                <span>{link.label}</span>
+                                            </Link>
+                                        ))}
+                                    </div>
+
+                                    {isAdmin && (
+                                        <>
+                                            <div className="my-2 border-t border-ivory/25" />
+                                            <p className="text-[0.68rem] uppercase tracking-[0.18em] text-ivory/70">Admin</p>
+                                            <div className="flex flex-col gap-1.5">
+                                                {adminLinks.map((link) => {
+                                                    const Icon = link.icon;
+                                                    return (
+                                                        <Link
+                                                            key={link.href}
+                                                            href={link.href}
+                                                            onClick={() => setOpenMobile(false)}
+                                                            className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 text-sm hover:bg-black/20 text-ivory/90"
+                                                        >
+                                                            <Icon className="h-4 w-4" />
+                                                            <span>{link.label}</span>
+                                                        </Link>
+                                                    );
+                                                })}
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="mt-2">
+                                        <button
+                                            type="button"
+                                            className="flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2 text-sm text-ivory/75 hover:bg-rose/15 hover:text-ivory transition-colors"
+                                            onClick={() => setOpenMobile(false)}
+                                        >
+                                            <LogOut className="h-4 w-4" />
+                                            <span>Se déconnecter</span>
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

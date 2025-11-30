@@ -32,7 +32,6 @@ export function Footer() {
                         regarder les œuvres et d&apos;écouter ce que l&apos;art réveille en eux.
                     </p>
 
-                    {/* 7 PILIERS */}
                     <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70 mt-3">
                         <span className="h-1.5 w-1.5 rounded-full bg-vert" />
                         <span className="h-1.5 w-1.5 rounded-full bg-bleu" />
@@ -45,7 +44,7 @@ export function Footer() {
                     </div>
                 </div>
 
-                {/* GRID LIENS (Découvrir / Ressources / À propos) */}
+                {/* GRID LIENS */}
                 <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                     {/* Découvrir */}
                     <div>
@@ -62,20 +61,30 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/categories" className="hover:text-terre transition-colors">
-                                    Thèmes & catégories
+                                <Link href="/categories/inspirations" className="hover:text-terre transition-colors">
+                                    Inspirations du quotidien
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/categories/dessiner-peindre" className="hover:text-terre transition-colors">
+                                    Dessiner &amp; peindre
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
-                    {/* Ressources */}
+                    {/* Apprendre / Ressources */}
                     <div>
-                        <p className="text-[0.75rem] uppercase tracking-[0.2em] text-ivory/70 mb-3">Ressources</p>
+                        <p className="text-[0.75rem] uppercase tracking-[0.2em] text-ivory/70 mb-3">Apprendre</p>
                         <ul className="space-y-2 text-ivory/85 text-sm">
                             <li>
-                                <Link href="/ressources/palettes" className="hover:text-terre transition-colors">
-                                    Palettes & couleurs
+                                <Link href="/cours" className="hover:text-terre transition-colors">
+                                    Cours & petits formats
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/formations" className="hover:text-terre transition-colors">
+                                    Formations complètes
                                 </Link>
                             </li>
                             <li>
