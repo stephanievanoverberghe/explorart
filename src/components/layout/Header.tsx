@@ -242,7 +242,7 @@ export function Header() {
                             aria-expanded={openExplorer}
                             className={`${desktopNavLinkBase} border inline-flex items-center gap-1.5 ${
                                 explorerActive
-                                    ? 'bg-ivory text-main border-sage/70 font-medium shadow-sm'
+                                    ? 'cursor-pointer bg-ivory text-main border-sage/70 font-medium shadow-sm'
                                     : 'cursor-pointer bg-ivory/5 text-ivory/85 border-ivory/10 hover:bg-ivory/10'
                             }`}
                         >
