@@ -4,9 +4,15 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db/connect';
 import { User } from '@/lib/models/User';
 import { createAuthSuccessResponse } from '../utils';
+import { hasJwtSecret, MISSING_SECRET_MESSAGE } from '@/lib/auth/secret';
 
 export async function POST(req: Request) {
     try {
+        if (!hasJwtSecret()) {
+            console.error(MISSING_SECRET_MESSAGE);
+            return NextResponse.json({ error: "Le serveur n'est pas configuré pour générer des connexions. Merci de réessayer plus tard." }, { status: 500 });
+        }
+
         const { email, password } = await req.json();
 
         if (!email?.trim() || !password?.trim()) {

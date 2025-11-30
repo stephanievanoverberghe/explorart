@@ -1,11 +1,6 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET as string;
-
-if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
-}
+import { getJwtSecret, hasJwtSecret, MISSING_SECRET_MESSAGE } from './secret';
 
 export interface AuthUser {
     userId: string;
@@ -15,13 +10,18 @@ export interface AuthUser {
 
 // ⬇⬇⬇ ICI : async + await cookies()
 export async function getAuthUser(): Promise<AuthUser | null> {
+    if (!hasJwtSecret()) {
+        console.error(MISSING_SECRET_MESSAGE);
+        return null;
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
     if (!token) return null;
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as Partial<AuthUser>;
+        const decoded = jwt.verify(token, getJwtSecret()) as Partial<AuthUser>;
         return {
             userId: decoded.userId as string,
             email: decoded.email as string,
