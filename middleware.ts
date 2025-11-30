@@ -1,55 +1,9 @@
 // middleware.ts
-import { NextResponse, type NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { getJwtSecret, hasJwtSecret, MISSING_SECRET_MESSAGE } from '@/lib/auth/secret';
-
-interface AuthTokenPayload {
-    userId: string;
-    email: string;
-    role?: 'user' | 'admin';
-}
-
-const protectedRoutes = ['/admin', '/tableau-de-bord', '/tableau-de-bord/formations', '/tableau-de-bord/cours', '/deconnexion'];
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-
-    const requiresAuth = protectedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
-
-    if (!requiresAuth) {
-        return NextResponse.next();
-    }
-
-    const token = request.cookies.get('token')?.value;
-
-    if (!token || !hasJwtSecret()) {
-        if (!hasJwtSecret()) {
-            console.error(MISSING_SECRET_MESSAGE);
-        }
-        return NextResponse.redirect(new URL('/connexion', request.url));
-    }
-
-    try {
-        const decoded = jwt.verify(token, getJwtSecret()) as AuthTokenPayload;
-
-        if (pathname.startsWith('/admin') && decoded.role !== 'admin') {
-            return NextResponse.redirect(new URL('/tableau-de-bord', request.url));
-        }
-
-        return NextResponse.next();
-    } catch {
-        const response = NextResponse.redirect(new URL('/connexion', request.url));
-        response.cookies.set('token', '', {
-            httpOnly: true,
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
-            path: '/',
-            maxAge: 0,
-        });
-        return response;
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _unused = request;
+    return NextResponse.next();
 }
-
-export const config = {
-    matcher: ['/admin/:path*', '/tableau-de-bord/:path*', '/tableau-de-bord/formations/:path*', '/tableau-de-bord/cours/:path*', '/deconnexion'],
-};
