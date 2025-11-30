@@ -175,16 +175,17 @@ export function Header() {
     return (
         <header
             className={`
-        sticky top-0 z-40
+        sticky top-0 z-50
         backdrop-blur-xl
         transition-all duration-200
         border-b
         bg-foreground/96 text-ivory
-        ${scrolled ? 'border-foreground/50 shadow-sm' : 'border-foreground/30'} 
+        overflow-visible
+        ${scrolled ? 'border-foreground/50 shadow-sm' : 'border-foreground/30'}
       `}
         >
             {/* halos comme le footer mais plus légers */}
-            <div className="pointer-events-none absolute inset-0 -z-10 opacity-70">
+            <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden opacity-70">
                 <div className="absolute -top-16 left-[-10%] h-40 w-40 rounded-full bg-bleu/25 blur-[90px]" />
                 <div className="absolute bottom-[-30%] right-[-10%] h-44 w-44 rounded-full bg-rose/18 blur-[90px]" />
             </div>
@@ -234,7 +235,7 @@ export function Header() {
                         </button>
 
                         {openExplorer && (
-                            <div className="absolute left-1/2 top-full z-40 mt-3 w-[860px] max-w-[90vw] -translate-x-1/2 rounded-3xl border border-perl/40 bg-ivory/98 text-main shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-xl px-6 py-5 lg:px-8 lg:py-6">
+                            <div className="absolute left-1/2 top-full z-50 mt-3 w-[860px] max-w-[90vw] -translate-x-1/2 rounded-3xl border border-perl/40 bg-ivory/98 text-main shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-xl px-6 py-5 lg:px-8 lg:py-6">
                                 <div className="flex items-start justify-between gap-4 mb-4">
                                     <div className="space-y-1.5 max-w-xl">
                                         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-main/50">Explorer le blog</p>
@@ -351,7 +352,7 @@ export function Header() {
                         </button>
 
                         {openLearn && (
-                            <div className="absolute left-1/2 top-full z-40 mt-3 w-[420px] max-w-[90vw] -translate-x-1/2 rounded-3xl border border-perl/40 bg-ivory/98 text-main shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-xl px-5 py-4">
+                            <div className="absolute left-1/2 top-full z-50 mt-3 w-[420px] max-w-[90vw] -translate-x-1/2 rounded-3xl border border-perl/40 bg-ivory/98 text-main shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-xl px-5 py-4">
                                 <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-main/55 mb-2">Apprendre avec Explor&apos;Art</p>
                                 <div className="space-y-2.5 text-sm">
                                     {learnLinks.map((item) => (
@@ -402,9 +403,9 @@ export function Header() {
                         ))}
                 </nav>
 
-                {/* Droite : A propos / Contact + Espace perso */}
-                <div className="hidden lg:flex items-center gap-4">
-                    <nav className="flex items-center gap-3 text-xs md:text-sm text-ivory/80">
+                {/* Droite : A propos / Contact (XL+) + Espace perso */}
+                <div className="hidden lg:flex items-center gap-3 xl:gap-4">
+                    <nav className="hidden xl:flex items-center gap-3 text-xs md:text-sm text-ivory/80">
                         {infoPages.map((link) => (
                             <Link key={link.href} href={link.href} className={`relative hover:text-ivory transition-colors ${isActive(link.href) ? 'text-ivory' : ''}`}>
                                 {link.label}
@@ -430,7 +431,7 @@ export function Header() {
                         </button>
 
                         {openAccountMenu && (
-                            <div className="absolute right-0 mt-2 w-72 rounded-3xl border border-perl/60 bg-ivory/98 text-main shadow-xl backdrop-blur-md py-3 text-sm z-40">
+                            <div className="absolute right-0 mt-2 w-72 rounded-3xl border border-perl/60 bg-ivory/98 text-main shadow-xl backdrop-blur-md py-3 text-sm z-50">
                                 <div className="px-3 pb-2">
                                     <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/55 mb-1.5">{isAuthenticated ? 'Ton espace' : 'Se connecter'}</p>
                                 </div>
