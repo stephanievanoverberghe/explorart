@@ -7,8 +7,6 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 
-// 🔐 TODO : remplacer par ton vrai système d’auth
-const isAuthenticated = false;
 const isAdmin = false;
 
 // 🧭 Pages publiques principales (hors Explorer / Apprendre)
@@ -108,11 +106,8 @@ const accountLinksPublic = [
 // 🔒 Espace membre : tout sous /tableau-de-bord
 const accountLinksPrivate = [
     { href: '/tableau-de-bord', label: 'Mon atelier' },
-    { href: '/tableau-de-bord/profil', label: 'Profil & paramètres' },
     { href: '/tableau-de-bord/formations', label: 'Mes formations' },
     { href: '/tableau-de-bord/cours', label: 'Mes cours' },
-    { href: '/tableau-de-bord/favoris', label: 'Mes favoris' },
-    { href: '/tableau-de-bord/commentaires', label: 'Mes commentaires' },
 ];
 
 const adminLinks = [{ href: '/admin', label: 'Dashboard admin', icon: LayoutDashboard }];
@@ -126,6 +121,7 @@ export function Header() {
     const [openLearn, setOpenLearn] = useState(false);
     const [openAccountMenu, setOpenAccountMenu] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
 
     const explorerRef = useRef<HTMLDivElement | null>(null);
     const explorerButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -141,6 +137,7 @@ export function Header() {
     const learnActive = pathname.startsWith('/cours') || pathname.startsWith('/formations');
 
     const isBrowser = typeof document !== 'undefined';
+    const isAuthenticated = authStatus === 'authenticated';
 
     const goToLogout = () => {
         setOpenAccountMenu(false);
@@ -192,6 +189,34 @@ export function Header() {
         window.addEventListener('click', handleClick);
         return () => window.removeEventListener('click', handleClick);
     }, [openExplorer, openLearn, openAccountMenu]);
+
+    // Vérifie l'état d'authentification dès le chargement
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchAuthStatus = async () => {
+            try {
+                const response = await fetch('/api/users/me', { credentials: 'include' });
+                if (!isMounted) return;
+
+                if (response.ok) {
+                    setAuthStatus('authenticated');
+                } else {
+                    setAuthStatus('unauthenticated');
+                }
+            } catch {
+                if (isMounted) {
+                    setAuthStatus('unauthenticated');
+                }
+            }
+        };
+
+        void fetchAuthStatus();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const desktopNavLinkBase = 'group relative rounded-full px-3.5 py-1.5 text-sm transition-all duration-200 ease-out hover:-translate-y-px';
 
