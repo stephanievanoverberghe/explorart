@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 
 // 🔐 TODO : remplacer par ton vrai système d’auth
@@ -137,6 +138,8 @@ export function Header() {
     const explorerActive = pathname.startsWith('/articles') || pathname.startsWith('/categories');
 
     const learnActive = pathname.startsWith('/cours') || pathname.startsWith('/formations');
+
+    const isBrowser = typeof document !== 'undefined';
 
     useEffect(() => {
         const onScroll = () => {
@@ -538,158 +541,163 @@ export function Header() {
             </div>
 
             {/* MENU MOBILE */}
-            {openMobile && (
-                <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-ivory/20 bg-foreground/98 backdrop-blur-md text-ivory shadow-[0_-8px_25px_rgba(0,0,0,0.22)]">
-                    <div className="container-page py-4 pb-8 space-y-4">
-                        {/* Explorer */}
-                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Explorer</p>
-                                <Link href="/articles" onClick={() => setOpenMobile(false)} className="text-[0.7rem] underline-offset-2 hover:underline text-ivory/80">
-                                    Tous les articles ↗
-                                </Link>
-                            </div>
-                            <p className="text-[0.78rem] text-ivory/80">Choisis un pilier pour trouver les articles qui t’appellent le plus en ce moment.</p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {articlePillars.map((cat) => (
-                                    <Link
-                                        key={cat.href}
-                                        href={cat.href}
-                                        onClick={() => setOpenMobile(false)}
-                                        className="inline-flex items-center gap-1.5 rounded-full border border-ivory/25 bg-black/20 px-2.5 py-1 text-[0.78rem] text-ivory/85 hover:bg-black/30 hover:-translate-y-px transition-all duration-150"
-                                    >
-                                        <span className={`h-1.5 w-1.5 rounded-full ${cat.dotClass}`} />
-                                        <span className="truncate max-w-40">{cat.label}</span>
+            {isBrowser &&
+                openMobile &&
+                createPortal(
+                    <div className="lg:hidden fixed inset-x-0 top-16 md:top-20 bottom-0 z-40 overflow-y-auto border-t border-ivory/20 bg-foreground/98 backdrop-blur-md text-ivory shadow-[0_-8px_25px_rgba(0,0,0,0.22)]">
+                        <div className="container-page py-4 pb-8 space-y-4">
+                            {/* Explorer */}
+                            <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Explorer</p>
+                                    <Link href="/articles" onClick={() => setOpenMobile(false)} className="text-[0.7rem] underline-offset-2 hover:underline text-ivory/80">
+                                        Tous les articles ↗
                                     </Link>
-                                ))}
+                                </div>
+                                <p className="text-[0.78rem] text-ivory/80">Choisis un pilier pour trouver les articles qui t’appellent le plus en ce moment.</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {articlePillars.map((cat) => (
+                                        <Link
+                                            key={cat.href}
+                                            href={cat.href}
+                                            onClick={() => setOpenMobile(false)}
+                                            className="inline-flex items-center gap-1.5 rounded-full border border-ivory/25 bg-black/20 px-2.5 py-1 text-[0.78rem] text-ivory/85 hover:bg-black/30 hover:-translate-y-px transition-all duration-150"
+                                        >
+                                            <span className={`h-1.5 w-1.5 rounded-full ${cat.dotClass}`} />
+                                            <span className="truncate max-w-40">{cat.label}</span>
+                                        </Link>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Apprendre */}
-                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
-                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Apprendre</p>
-                            <div className="flex flex-col gap-2 text-sm">
-                                {learnLinks.map((item) => (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setOpenMobile(false)}
-                                        className="flex items-start justify-between gap-2 rounded-2xl px-2.5 py-1.75 bg-black/10 hover:bg-black/20 transition-colors"
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="font-medium text-ivory">{item.label}</span>
-                                            <span className="text-[0.78rem] text-ivory/80">{item.description}</span>
-                                        </div>
-                                        {item.badge && (
-                                            <span className="mt-0.5 text-[0.65rem] px-2 py-0.5 rounded-full bg-ivory/10 text-ivory uppercase tracking-[0.16em]">{item.badge}</span>
-                                        )}
-                                    </Link>
-                                ))}
+                            {/* Apprendre */}
+                            <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Apprendre</p>
+                                <div className="flex flex-col gap-2 text-sm">
+                                    {learnLinks.map((item) => (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={() => setOpenMobile(false)}
+                                            className="flex items-start justify-between gap-2 rounded-2xl px-2.5 py-1.75 bg-black/10 hover:bg-black/20 transition-colors"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-ivory">{item.label}</span>
+                                                <span className="text-[0.78rem] text-ivory/80">{item.description}</span>
+                                            </div>
+                                            {item.badge && (
+                                                <span className="mt-0.5 text-[0.65rem] px-2 py-0.5 rounded-full bg-ivory/10 text-ivory uppercase tracking-[0.16em]">
+                                                    {item.badge}
+                                                </span>
+                                            )}
+                                        </Link>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Navigation principale (Accueil / Commencer ici / Info) */}
-                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
-                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Navigation</p>
-                            <nav className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {mainPages.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        onClick={() => setOpenMobile(false)}
-                                        className={`rounded-2xl px-3 py-2 text-sm text-center transition-all duration-200 border inline-flex items-center justify-center gap-1 ${
-                                            isActive(link.href)
-                                                ? 'bg-ivory text-main border-transparent font-medium shadow-xs'
-                                                : link.accent
-                                                ? 'bg-linear-to-r from-sage via-vert to-bleu text-ivory border-transparent hover:brightness-105 hover:-translate-y-px'
-                                                : 'bg-black/20 text-ivory/85 border-ivory/25 hover:bg-black/30 hover:-translate-y-px'
-                                        }`}
-                                    >
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </nav>
-
-                            <div className="flex flex-wrap gap-3 pt-2 text-xs text-ivory/75">
-                                {infoPages.map((link) => (
-                                    <Link key={link.href} href={link.href} onClick={() => setOpenMobile(false)} className="hover:text-ivory underline-offset-2 hover:underline">
-                                        {link.label}
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Espace perso */}
-                        <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
-                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Espace perso</p>
-
-                            {!isAuthenticated ? (
-                                <div className="flex flex-col gap-2">
-                                    {accountLinksPublic.map((link) => (
+                            {/* Navigation principale (Accueil / Commencer ici / Info) */}
+                            <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Navigation</p>
+                                <nav className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {mainPages.map((link) => (
                                         <Link
                                             key={link.href}
                                             href={link.href}
                                             onClick={() => setOpenMobile(false)}
-                                            className="rounded-2xl border border-ivory/25 bg-black/20 px-3 py-2 text-sm text-center text-ivory/85 hover:bg-black/30 hover:text-ivory hover:-translate-y-px transition-all duration-150"
+                                            className={`rounded-2xl px-3 py-2 text-sm text-center transition-all duration-200 border inline-flex items-center justify-center gap-1 ${
+                                                isActive(link.href)
+                                                    ? 'bg-ivory text-main border-transparent font-medium shadow-xs'
+                                                    : link.accent
+                                                    ? 'bg-linear-to-r from-sage via-vert to-bleu text-ivory border-transparent hover:brightness-105 hover:-translate-y-px'
+                                                    : 'bg-black/20 text-ivory/85 border-ivory/25 hover:bg-black/30 hover:-translate-y-px'
+                                            }`}
                                         >
                                             {link.label}
                                         </Link>
                                     ))}
+                                </nav>
+
+                                <div className="flex flex-wrap gap-3 pt-2 text-xs text-ivory/75">
+                                    {infoPages.map((link) => (
+                                        <Link key={link.href} href={link.href} onClick={() => setOpenMobile(false)} className="hover:text-ivory underline-offset-2 hover:underline">
+                                            {link.label}
+                                        </Link>
+                                    ))}
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="flex flex-col gap-1.5">
-                                        {accountLinksPrivate.map((link) => (
+                            </div>
+
+                            {/* Espace perso */}
+                            <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/70">Espace perso</p>
+
+                                {!isAuthenticated ? (
+                                    <div className="flex flex-col gap-2">
+                                        {accountLinksPublic.map((link) => (
                                             <Link
                                                 key={link.href}
                                                 href={link.href}
                                                 onClick={() => setOpenMobile(false)}
-                                                className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 text-sm hover:bg-black/20 text-ivory/85"
+                                                className="rounded-2xl border border-ivory/25 bg-black/20 px-3 py-2 text-sm text-center text-ivory/85 hover:bg-black/30 hover:text-ivory hover:-translate-y-px transition-all duration-150"
                                             >
-                                                <span>{link.label}</span>
+                                                {link.label}
                                             </Link>
                                         ))}
                                     </div>
+                                ) : (
+                                    <>
+                                        <div className="flex flex-col gap-1.5">
+                                            {accountLinksPrivate.map((link) => (
+                                                <Link
+                                                    key={link.href}
+                                                    href={link.href}
+                                                    onClick={() => setOpenMobile(false)}
+                                                    className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 text-sm hover:bg-black/20 text-ivory/85"
+                                                >
+                                                    <span>{link.label}</span>
+                                                </Link>
+                                            ))}
+                                        </div>
 
-                                    {isAdmin && (
-                                        <>
-                                            <div className="my-2 border-t border-ivory/25" />
-                                            <p className="text-[0.68rem] uppercase tracking-[0.18em] text-ivory/70">Admin</p>
-                                            <div className="flex flex-col gap-1.5">
-                                                {adminLinks.map((link) => {
-                                                    const Icon = link.icon;
-                                                    return (
-                                                        <Link
-                                                            key={link.href}
-                                                            href={link.href}
-                                                            onClick={() => setOpenMobile(false)}
-                                                            className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 text-sm hover:bg-black/20 text-ivory/90"
-                                                        >
-                                                            <Icon className="h-4 w-4" />
-                                                            <span>{link.label}</span>
-                                                        </Link>
-                                                    );
-                                                })}
-                                            </div>
-                                        </>
-                                    )}
+                                        {isAdmin && (
+                                            <>
+                                                <div className="my-2 border-t border-ivory/25" />
+                                                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-ivory/70">Admin</p>
+                                                <div className="flex flex-col gap-1.5">
+                                                    {adminLinks.map((link) => {
+                                                        const Icon = link.icon;
+                                                        return (
+                                                            <Link
+                                                                key={link.href}
+                                                                href={link.href}
+                                                                onClick={() => setOpenMobile(false)}
+                                                                className="flex items-center gap-2 rounded-2xl px-2.5 py-1.5 text-sm hover:bg-black/20 text-ivory/90"
+                                                            >
+                                                                <Icon className="h-4 w-4" />
+                                                                <span>{link.label}</span>
+                                                            </Link>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
+                                        )}
 
-                                    <div className="mt-2">
-                                        <button
-                                            type="button"
-                                            className="flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2 text-sm text-ivory/75 hover:bg-rose/15 hover:text-ivory transition-colors"
-                                            onClick={() => setOpenMobile(false)}
-                                        >
-                                            <LogOut className="h-4 w-4" />
-                                            <span>Se déconnecter</span>
-                                        </button>
-                                    </div>
-                                </>
-                            )}
+                                        <div className="mt-2">
+                                            <button
+                                                type="button"
+                                                className="flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2 text-sm text-ivory/75 hover:bg-rose/15 hover:text-ivory transition-colors"
+                                                onClick={() => setOpenMobile(false)}
+                                            >
+                                                <LogOut className="h-4 w-4" />
+                                                <span>Se déconnecter</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </div>,
+                    document.body
+                )}
         </header>
     );
 }
