@@ -191,7 +191,15 @@ export function Footer() {
                             Confidentialité
                         </Link>
                         <span className="opacity-40">•</span>
-                        <Link href="/legal/cookies" className="hover:text-ivory transition-colors">
+                        <Link href="/legal/conditions-d-utilisation" className="hover:text-ivory transition-colors">
+                            CGU
+                        </Link>
+                        <span className="opacity-40">•</span>
+                        <Link href="/legal/conditions-generales-de-vente" className="hover:text-ivory transition-colors">
+                            CGV
+                        </Link>
+                        <span className="opacity-40">•</span>
+                        <Link href="/legal/politique-de-cookies" className="hover:text-ivory transition-colors">
                             Cookies
                         </Link>
                     </div>

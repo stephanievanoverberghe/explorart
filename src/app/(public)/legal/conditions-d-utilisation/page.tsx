@@ -1,3 +1,6 @@
+// src/app/(public)/legal/conditions-d-utilisation/page.tsx
+import Link from 'next/link';
+
 const commitments = [
     {
         title: 'Utilisation raisonnable',
@@ -60,6 +63,49 @@ const usageRules = [
             'Le partage de liens privés, supports ou fichiers premium est interdit sans accord.',
             "En cas de non-respect, l'accès peut être suspendu ou résilié.",
         ],
+    },
+];
+
+const legalNavLinks = [
+    {
+        href: '/legal/mentions-legales',
+        title: 'Mentions légales',
+        description: 'Identité, éditeur, hébergeur, contacts.',
+    },
+    {
+        href: '/legal/politique-de-confidentialite',
+        title: 'Politique de confidentialité',
+        description: 'Traitement des données personnelles.',
+    },
+    {
+        href: '/legal/politique-de-cookies',
+        title: 'Politique de cookies',
+        description: 'Bandeau, consentement, cookies fonctionnels.',
+    },
+    {
+        href: '/legal/conditions-generales-de-vente',
+        title: 'Conditions générales de vente',
+        description: 'Achats, formations, paiements, livraisons.',
+    },
+    {
+        href: '/legal/politique-de-remboursement',
+        title: 'Politique de remboursement',
+        description: 'Annulations, cas particuliers, demandes.',
+    },
+    {
+        href: '/legal/licence-utilisation-ressources',
+        title: 'Licence d’utilisation des ressources',
+        description: 'Limites d’usage des supports et PDF.',
+    },
+    {
+        href: '/legal/politique-newsletter',
+        title: 'Newsletter & e-mails',
+        description: 'Contenu des e-mails, désinscription.',
+    },
+    {
+        href: '/legal/espace-membre-et-communaute',
+        title: 'Espace membre & communauté',
+        description: 'Règles du tableau de bord et des échanges.',
     },
 ];
 
@@ -183,6 +229,31 @@ export default function ConditionsUtilisationPage() {
                     </aside>
                 </div>
             </section>
+
+            {/* NAVIGATION VERS LES AUTRES PAGES LÉGALES */}
+            <section className="border-t border-perl/40 bg-background py-10 md:py-12">
+                <div className="container-page space-y-6">
+                    <div className="space-y-2 max-w-2xl">
+                        <p className="section-label section-label-sage">Autres pages légales Explor’Art</p>
+                        <p className="text-main/70 text-sm">
+                            Pour comprendre le cadre global (données personnelles, cookies, achats, remboursements, espace membre), tu peux parcourir les autres pages légales.
+                        </p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {legalNavLinks.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className="group rounded-2xl border border-perl/40 bg-white/80 px-4 py-3 text-sm shadow-xs hover:border-sage/50 hover:bg-sage/5 transition"
+                            >
+                                <p className="font-serif-title text-base mb-1 group-hover:text-main">{item.title}</p>
+                                <p className="text-main/70 text-xs leading-relaxed">{item.description}</p>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             <section className="bg-main text-ivory py-14 md:py-16">
                 <div className="container-page flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div className="space-y-2">
