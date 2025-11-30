@@ -1,14 +1,13 @@
 // middleware.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { getJwtSecret, hasJwtSecret, MISSING_SECRET_MESSAGE } from '@/lib/auth/secret';
 
 interface AuthTokenPayload {
     userId: string;
     email: string;
     role?: 'user' | 'admin';
 }
-
-const JWT_SECRET = process.env.JWT_SECRET as string;
 
 const protectedRoutes = ['/admin', '/tableau-de-bord', '/tableau-de-bord/formations', '/tableau-de-bord/cours', '/deconnexion'];
 
@@ -23,12 +22,15 @@ export function middleware(request: NextRequest) {
 
     const token = request.cookies.get('token')?.value;
 
-    if (!token || !JWT_SECRET) {
+    if (!token || !hasJwtSecret()) {
+        if (!hasJwtSecret()) {
+            console.error(MISSING_SECRET_MESSAGE);
+        }
         return NextResponse.redirect(new URL('/connexion', request.url));
     }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as AuthTokenPayload;
+        const decoded = jwt.verify(token, getJwtSecret()) as AuthTokenPayload;
 
         if (pathname.startsWith('/admin') && decoded.role !== 'admin') {
             return NextResponse.redirect(new URL('/tableau-de-bord', request.url));
