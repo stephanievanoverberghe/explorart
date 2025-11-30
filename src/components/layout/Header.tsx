@@ -147,6 +147,19 @@ export function Header() {
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
+    // Désactive le scroll de la page quand le menu mobile est ouvert
+    useEffect(() => {
+        if (openMobile) {
+            const previous = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.overflow = previous;
+            };
+        }
+
+        return undefined;
+    }, [openMobile]);
+
     // Click-outside
     useEffect(() => {
         if (!openExplorer && !openLearn && !openAccountMenu) return;
@@ -526,8 +539,8 @@ export function Header() {
 
             {/* MENU MOBILE */}
             {openMobile && (
-                <div className="lg:hidden border-t border-ivory/20 bg-foreground/98 backdrop-blur-md text-ivory">
-                    <div className="container-page py-4 space-y-4">
+                <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-ivory/20 bg-foreground/98 backdrop-blur-md text-ivory shadow-[0_-8px_25px_rgba(0,0,0,0.22)]">
+                    <div className="container-page py-4 pb-8 space-y-4">
                         {/* Explorer */}
                         <div className="rounded-3xl bg-black/15 border border-ivory/25 shadow-sm px-4 py-3 space-y-3">
                             <div className="flex items-center justify-between">
