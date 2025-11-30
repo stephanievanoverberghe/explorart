@@ -1,3 +1,4 @@
+// src/lib/auth/session.ts
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { getJwtSecret, hasJwtSecret, MISSING_SECRET_MESSAGE } from './secret';
