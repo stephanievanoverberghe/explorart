@@ -24,10 +24,19 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    const adminEmailsEnv = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || '';
+    const adminEmails = adminEmailsEnv
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean);
+    const role: 'user' | 'admin' = adminEmails.includes(email.toLowerCase().trim()) ? 'admin' : 'user';
+
     const user = await User.create({
         name: name.trim(),
         email: email.toLowerCase().trim(),
         password: hashedPassword,
+        role,
     });
 
     return createAuthSuccessResponse(user, 'Compte créé avec succès.');

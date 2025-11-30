@@ -4,13 +4,21 @@ import { signAuthToken } from '@/lib/auth/jwt';
 import type { UserDocument } from '@/lib/models/User';
 
 export function createAuthSuccessResponse(user: UserDocument, message: string) {
-    const token = signAuthToken({ userId: user._id.toString(), email: user.email });
+    const role = user.role ?? 'user';
+
+    const token = signAuthToken({
+        userId: user._id.toString(),
+        email: user.email,
+        role,
+    });
 
     const response = NextResponse.json({
         user: {
             id: user._id.toString(),
             name: user.name,
             email: user.email,
+            role,
+            avatarUrl: user.avatarUrl,
         },
         message,
     });

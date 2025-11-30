@@ -25,16 +25,12 @@ export default function DeconnexionPage() {
             }
 
             setStatus('success');
-
-            setTimeout(() => {
-                router.push('/');
-            }, 900);
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Une erreur est survenue.';
             setError(message);
             setStatus('error');
         }
-    }, [router]);
+    }, []);
 
     useEffect(() => {
         void handleLogout();

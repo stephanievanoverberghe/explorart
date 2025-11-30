@@ -10,6 +10,7 @@ if (!JWT_SECRET) {
 interface AuthTokenPayload {
     userId: string;
     email: string;
+    role: 'user' | 'admin';
 }
 
 export function signAuthToken(payload: AuthTokenPayload): string {

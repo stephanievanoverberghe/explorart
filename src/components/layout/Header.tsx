@@ -1,13 +1,18 @@
 // src/components/layout/Header.tsx
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 
-const isAdmin = false;
+interface HeaderUser {
+    name: string;
+    avatarUrl?: string;
+    role: 'user' | 'admin';
+}
 
 // 🧭 Pages publiques principales (hors Explorer / Apprendre)
 const mainPages = [
@@ -122,6 +127,7 @@ export function Header() {
     const [openAccountMenu, setOpenAccountMenu] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+    const [user, setUser] = useState<HeaderUser | null>(null);
 
     const explorerRef = useRef<HTMLDivElement | null>(null);
     const explorerButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -138,12 +144,23 @@ export function Header() {
 
     const isBrowser = typeof document !== 'undefined';
     const isAuthenticated = authStatus === 'authenticated';
+    const isAdmin = user?.role === 'admin';
+
+    const getInitials = (name: string) => {
+        const parts = name.trim().split(' ').filter(Boolean);
+        if (!parts.length) return 'EA';
+        if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+        return `${parts[0]![0] ?? ''}${parts[1]![0] ?? ''}`.toUpperCase();
+    };
 
     const goToLogout = () => {
         setOpenAccountMenu(false);
         setOpenMobile(false);
         router.push('/deconnexion');
     };
+
+    const avatarInitials = user?.name ? getInitials(user.name) : 'EA';
+    const avatarUrl = user?.avatarUrl?.trim();
 
     useEffect(() => {
         const onScroll = () => {
@@ -200,12 +217,21 @@ export function Header() {
                 if (!isMounted) return;
 
                 if (response.ok) {
+                    const data = await response.json();
+                    const fetchedUser = data.user as Partial<HeaderUser> & { name: string };
+                    setUser({
+                        name: fetchedUser.name,
+                        avatarUrl: fetchedUser.avatarUrl,
+                        role: (fetchedUser.role as HeaderUser['role']) ?? 'user',
+                    });
                     setAuthStatus('authenticated');
                 } else {
+                    setUser(null);
                     setAuthStatus('unauthenticated');
                 }
             } catch {
                 if (isMounted) {
+                    setUser(null);
                     setAuthStatus('unauthenticated');
                 }
             }
@@ -471,10 +497,29 @@ export function Header() {
                                 setOpenLearn(false);
                             }}
                             aria-expanded={openAccountMenu}
-                            className="inline-flex items-center cursor-pointer gap-1.5 rounded-full border border-ivory/20 bg-black/10 px-3.5 py-1.5 text-xs md:text-sm text-ivory/85 shadow-xxs hover:bg-black/15 hover:text-ivory transition-all"
+                            className="inline-flex items-center cursor-pointer gap-2 rounded-full border border-ivory/20 bg-black/10 px-3.5 py-1.5 text-xs md:text-sm text-ivory/85 shadow-xxs hover:bg-black/15 hover:text-ivory transition-all"
                         >
-                            <User className="h-4 w-4" />
-                            <span>Espace perso</span>
+                            {isAuthenticated ? (
+                                <>
+                                    <span className="sr-only">Ouvrir ton espace perso</span>
+                                    <span className="relative inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-ivory/20 bg-ivory/15 text-[0.85rem] font-semibold uppercase text-ivory">
+                                        {avatarUrl ? (
+                                            <Image src={avatarUrl} alt={`Profil de ${user?.name ?? 'l’utilisateur'}`} fill sizes="36px" className="object-cover" />
+                                        ) : (
+                                            <span>{avatarInitials}</span>
+                                        )}
+                                    </span>
+                                    <div className="hidden xl:flex flex-col leading-tight">
+                                        <span className="text-[0.65rem] uppercase tracking-[0.18em] text-ivory/70">Connecté·e</span>
+                                        <span className="text-sm font-medium text-ivory line-clamp-1 max-w-36">{user?.name ?? 'Profil'}</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <User className="h-4 w-4" />
+                                    <span>Espace perso</span>
+                                </>
+                            )}
                             <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${openAccountMenu ? 'rotate-180' : ''}`} />
                         </button>
 
@@ -543,7 +588,7 @@ export function Header() {
                                         <div className="my-2 mx-3 border-t border-perl/40" />
                                         <button
                                             type="button"
-                                            className="mx-2.5 mt-1 flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-2xl px-2.5 py-1.5 text-main/70 hover:bg-rose/5 hover:text-rose-700 transition-colors"
+                                            className="mx-2.5 mt-1 flex w-[calc(100%-1.25rem)] cursor-pointer items-center gap-2 rounded-2xl px-2.5 py-1.5 text-main/70 hover:bg-rose/5 hover:text-rose-700 transition-colors"
                                             onClick={goToLogout}
                                         >
                                             <LogOut className="h-4 w-4" />
