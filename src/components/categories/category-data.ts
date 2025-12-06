@@ -6,6 +6,12 @@ export type PillarSlug = 'dessin-peinture' | 'comprendre-une-oeuvre' | 'histoire
 
 export type PostFormat = 'tutorial' | 'artwork-analysis' | 'artist-story' | 'art-history' | 'color-guide' | 'art-psychology' | 'inspiration';
 
+export interface PillarHeroTheme {
+    bgClass: string;
+    haloClass: string;
+    chipLabel: string;
+}
+
 // Sous-univers cohérents, génériques, structurés
 export type SubcategorySlug =
     // Dessin & peinture
@@ -224,6 +230,44 @@ export const pillarConfig: Record<PillarSlug, PillarConfig> = {
             bg: 'bg-prune/5',
             hover: 'hover:bg-prune/10 hover:border-prune/80 hover:shadow-md hover:-translate-y-0.5',
         },
+    },
+};
+
+export const pillarHeroThemes: Record<PillarSlug, PillarHeroTheme> = {
+    'dessin-peinture': {
+        bgClass: 'bg-linear-to-r from-[var(--color-vert)] via-[var(--color-vert)] to-[color-mix(in_oklab,var(--color-vert)_80%,#f9f5ef_20%)]',
+        haloClass: 'bg-[radial-gradient(circle_at_12%_18%,rgba(240,245,240,0.85),transparent_55%),radial-gradient(circle_at_88%_88%,rgba(60,110,90,0.55),transparent_55%)]',
+        chipLabel: 'Dessiner & Peindre',
+    },
+    'comprendre-une-oeuvre': {
+        bgClass: 'bg-linear-to-r from-[var(--color-bleu)] via-[var(--color-bleu)] to-[color-mix(in_oklab,var(--color-bleu)_80%,#f9f5ef_20%)]',
+        haloClass: 'bg-[radial-gradient(circle_at_6%_10%,rgba(255,255,255,0.3),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(30,61,114,0.55),transparent_55%)]',
+        chipLabel: 'Comprendre une œuvre',
+    },
+    'histoires-d-artistes': {
+        bgClass: 'bg-linear-to-r from-[var(--color-terre)] via-[var(--color-terre)] to-[color-mix(in_oklab,var(--color-terre)_80%,#f9f5ef_20%)]',
+        haloClass: 'bg-[radial-gradient(circle_at_18%_15%,rgba(255,255,255,0.28),transparent_55%),radial-gradient(circle_at_88%_88%,rgba(163,65,42,0.55),transparent_55%)]',
+        chipLabel: "Histoires d'artistes",
+    },
+    'histoire-de-l-art': {
+        bgClass: 'bg-linear-to-r from-[var(--color-ocre)] via-[var(--color-ocre)] to-[color-mix(in_oklab,var(--color-ocre)_80%,#f9f5ef_20%)]',
+        haloClass: 'bg-[radial-gradient(circle_at_15%_18%,rgba(255,255,255,0.26),transparent_55%),radial-gradient(circle_at_80%_82%,rgba(192,122,44,0.5),transparent_55%)]',
+        chipLabel: "Histoire de l'art",
+    },
+    'couleurs-harmonie': {
+        bgClass: 'bg-linear-to-r from-[var(--color-sage)] via-[var(--color-sage)] to-[color-mix(in_oklab,var(--color-sage)_80%,#f9f5ef_20%)]',
+        haloClass: 'bg-[radial-gradient(circle_at_10%_15%,rgba(255,255,255,0.3),transparent_55%),radial-gradient(circle_at_82%_78%,rgba(47,105,115,0.5),transparent_55%)]',
+        chipLabel: 'Couleurs & harmonie',
+    },
+    inspirations: {
+        bgClass: 'bg-linear-to-r from-[var(--color-rose)] via-[var(--color-rose)] to-[color-mix(in_oklab,var(--color-rose)_82%,#f9f5ef_18%)]',
+        haloClass: 'bg-[radial-gradient(circle_at_12%_20%,rgba(255,255,255,0.3),transparent_55%),radial-gradient(circle_at_86%_80%,rgba(180,92,119,0.5),transparent_55%)]',
+        chipLabel: 'Inspirations',
+    },
+    'psychologie-de-l-art': {
+        bgClass: 'bg-linear-to-r from-[var(--color-prune)] via-[var(--color-prune)] to-[color-mix(in_oklab,var(--color-prune)_80%,#f9f5ef_20%)]',
+        haloClass: 'bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.28),transparent_55%),radial-gradient(circle_at_82%_78%,rgba(90,60,116,0.55),transparent_55%)]',
+        chipLabel: "Psychologie de l'art",
     },
 };
 
