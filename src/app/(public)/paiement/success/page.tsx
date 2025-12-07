@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { CheckCircle2, ArrowRight, BookOpenCheck } from 'lucide-react';
 
 import { COURSES } from '@/lib/content/courses';
+import { getAuthUser } from '@/lib/auth/session';
+import { saveCoursePurchase } from '@/lib/purchases/saveCoursePurchase';
 
 interface SuccessPageProps {
     searchParams: Promise<{ course?: string }>;
@@ -11,6 +13,16 @@ interface SuccessPageProps {
 export default async function PaymentSuccessPage({ searchParams }: SuccessPageProps) {
     const resolved = await searchParams;
     const courseSlug = resolved.course;
+
+    const authUser = await getAuthUser();
+
+    if (courseSlug) {
+        const saveResult = await saveCoursePurchase({ userId: authUser?.userId, courseSlug });
+
+        if (saveResult.status === 'error') {
+            console.error('[PAYMENT_SUCCESS_SAVE_PURCHASE_ERROR]', saveResult.message);
+        }
+    }
 
     const course = courseSlug ? COURSES.find((c) => c.slug === courseSlug) : undefined;
 
