@@ -60,7 +60,7 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
                                     </Link>
 
                                     <Link
-                                        href="/mon-espace/mes-cours"
+                                        href="/tableau-de-bord/cours"
                                         className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-[0.85rem] font-medium text-main/75 hover:bg-background transition-colors"
                                     >
                                         Voir tous mes cours
@@ -77,7 +77,7 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 <Link
-                                    href="/mon-espace/mes-cours"
+                                    href="/tableau-de-bord/cours"
                                     className="inline-flex items-center justify-center gap-2 rounded-full bg-main px-4 py-2.5 text-sm font-medium text-ivory hover:bg-main/90"
                                 >
                                     Accéder à mes cours
