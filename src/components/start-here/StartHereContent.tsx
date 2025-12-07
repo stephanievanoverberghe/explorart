@@ -1,3 +1,4 @@
+// src.components/start-here/StartHereContent.tsx
 'use client';
 
 import { SectionId } from './sections';

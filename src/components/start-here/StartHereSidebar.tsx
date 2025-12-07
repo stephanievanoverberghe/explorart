@@ -1,3 +1,4 @@
+// src.components/start-here/StartHereSidebar.tsx
 'use client';
 
 import { Check, Lock, PlayCircle } from 'lucide-react';
