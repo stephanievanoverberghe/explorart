@@ -3,10 +3,12 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CheckCircle2, Clock, Layers, ShieldCheck } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { ArrowRight, BadgeCheck, CheckCircle2, Clock, CreditCard, Layers, Lock, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
 
 import { COURSES, type Course } from '@/lib/content/courses';
 import { levelLabels, pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
+import { CheckoutButton } from '@/components/courses/ChechoutButton';
 
 interface CoursePageProps {
     // Next 16 : params est un Promise côté serveur
@@ -48,12 +50,46 @@ export default async function CoursePage({ params }: CoursePageProps) {
     return (
         <section className="relative bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
             <div className="container-page space-y-10">
-                {/* HERO = VRAIE SECTION DE VENTE */}
+                {/* HERO */}
                 <CourseHero course={course} isFree={isFree} priceLabel={priceLabel} levelLabel={levelLabel} />
 
                 <main className="grid gap-8 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1.15fr)] items-start">
                     {/* Colonne gauche : contenu éditorial / vente */}
                     <div className="space-y-8">
+                        {/* 0. Pack complet */}
+                        <section className="card space-y-4 border-main/20 bg-white/90 shadow-sm">
+                            <div className="flex items-center gap-2 text-main">
+                                <Sparkles className="h-5 w-5 text-main" />
+                                <div>
+                                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Accès immédiat</p>
+                                    <h2 className="font-serif-title text-lg md:text-xl">Tout ce qui est inclus quand tu achètes</h2>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-3 md:grid-cols-2">
+                                <IncludedItem
+                                    icon={<BadgeCheck className="h-4 w-4 text-main" />}
+                                    title="Accès illimité"
+                                    description="Toutes les vidéos, les exercices et les ressources téléchargeables disponibles tout de suite après paiement."
+                                />
+                                <IncludedItem
+                                    icon={<Lock className="h-4 w-4 text-main" />}
+                                    title="Paiement 100% sécurisé"
+                                    description="Transactions traitées par Stripe, avec facture automatique et confirmation instantanée."
+                                />
+                                <IncludedItem
+                                    icon={<MessageCircle className="h-4 w-4 text-main" />}
+                                    title="Support rapide"
+                                    description="Un contact direct si tu bloques : on te répond avec bienveillance et clarté."
+                                />
+                                <IncludedItem
+                                    icon={<ArrowRight className="h-4 w-4 text-main" />}
+                                    title="Plan d’action guidé"
+                                    description="Un fil rouge étape par étape pour suivre le cours sans te disperser."
+                                />
+                            </div>
+                        </section>
+
                         {/* 1. Ce que tu vas apprendre */}
                         <section className="card space-y-4">
                             <div className="space-y-1">
@@ -185,6 +221,33 @@ export default async function CoursePage({ params }: CoursePageProps) {
                             </div>
                         </section>
 
+                        {/* 4bis. Tunnel de vente */}
+                        <section className="card space-y-5 border-main/20 bg-white/95">
+                            <div className="space-y-1">
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Un tunnel clair</p>
+                                <h3 className="font-serif-title text-lg md:text-xl">Ton achat en 3 étapes sécurisées</h3>
+                                <p className="text-sm text-main/75 max-w-2xl">
+                                    Pas de détour ni d’upsell agressif : tu cliques, tu paies via Stripe, tu reçois l’accès et la facture dans la foulée.
+                                </p>
+                            </div>
+
+                            <div className="grid gap-3 md:grid-cols-3">
+                                <FunnelStep icon={<Sparkles className="h-5 w-5 text-main" />} title="Étape 1" description="Choisis ton cours et clique sur « Acheter »." />
+                                <FunnelStep icon={<CreditCard className="h-5 w-5 text-main" />} title="Étape 2" description="Paiement Stripe sécurisé (CB ou Apple Pay)." />
+                                <FunnelStep icon={<BadgeCheck className="h-5 w-5 text-main" />} title="Étape 3" description="Mail de confirmation + accès immédiat au cours." />
+                            </div>
+
+                            {!isFree && (
+                                <div className="flex flex-col gap-2 rounded-2xl bg-main/5 border border-main/15 p-4 md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                        <p className="text-sm font-semibold text-main">Prête à démarrer ?</p>
+                                        <p className="text-[0.9rem] text-main/70">Un seul clic → un paiement Stripe → ton accès arrive instantanément.</p>
+                                    </div>
+                                    <CheckoutButton course={course} label="Lancer l’achat sécurisé" />
+                                </div>
+                            )}
+                        </section>
+
                         {/* 5. Petite FAQ simple (version page de vente) */}
                         <section className="card space-y-4 bg-ivory/97 border-perl/70">
                             <div className="space-y-1">
@@ -263,13 +326,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                     <span>↗</span>
                                 </Link>
                             ) : (
-                                <button
-                                    type="button"
-                                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-main px-4 py-2.5 text-sm font-medium text-ivory shadow-sm hover:bg-main/90 transition-colors cursor-pointer"
-                                >
-                                    Acheter ce cours maintenant
-                                    <span>↗</span>
-                                </button>
+                                <CheckoutButton course={course} fullWidth label="Payer en toute sécurité" sublabel="Paiement Stripe 100% sécurisé" size="lg" />
                             )}
 
                             <div className="rounded-2xl border border-sage/40 bg-sage/5 px-3.5 py-3 flex items-start gap-2.5">
@@ -296,6 +353,24 @@ type LearnPointProps = {
     items: string[];
 };
 
+type IncludedItemProps = {
+    icon: ReactNode;
+    title: string;
+    description: string;
+};
+
+function IncludedItem({ icon, title, description }: IncludedItemProps) {
+    return (
+        <div className="rounded-2xl border border-perl/60 bg-ivory/98 px-3.5 py-3.5">
+            <div className="flex items-center gap-2 text-main">
+                {icon}
+                <h3 className="font-serif-title text-[0.95rem]">{title}</h3>
+            </div>
+            <p className="mt-1 text-sm text-main/75">{description}</p>
+        </div>
+    );
+}
+
 function LearnPoint({ title, items }: LearnPointProps) {
     return (
         <div className="rounded-2xl border border-perl/60 bg-ivory/98 px-3.5 py-3.5 space-y-2">
@@ -318,12 +393,30 @@ type ProgrammeRowProps = {
     description: string;
 };
 
+type FunnelStepProps = {
+    icon: ReactNode;
+    title: string;
+    description: string;
+};
+
 function ProgrammeRow({ step, badge, description }: ProgrammeRowProps) {
     return (
         <div className="rounded-2xl border border-perl/60 bg-ivory/98 px-3.5 py-3 flex flex-col gap-1.5 md:flex-row md:items-start md:gap-3">
             <div className="min-w-32 space-y-1">
                 <p className="text-[0.75rem] font-medium text-main/80">{step}</p>
                 <p className="inline-flex items-center rounded-full bg-sage/6 px-2 py-0.5 text-[0.7rem] uppercase tracking-[0.16em] text-main/65">{badge}</p>
+            </div>
+            <p className="text-sm text-main/75">{description}</p>
+        </div>
+    );
+}
+
+function FunnelStep({ icon, title, description }: FunnelStepProps) {
+    return (
+        <div className="rounded-2xl border border-perl/60 bg-ivory/98 px-3.5 py-3 space-y-1.5">
+            <div className="flex items-center gap-2 text-main">
+                {icon}
+                <p className="text-[0.85rem] font-semibold">{title}</p>
             </div>
             <p className="text-sm text-main/75">{description}</p>
         </div>
@@ -465,13 +558,7 @@ function CourseHero({ course, isFree, priceLabel, levelLabel }: CourseHeroProps)
                                             <span>↗</span>
                                         </Link>
                                     ) : (
-                                        <button
-                                            type="button"
-                                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-main px-4 py-2 text-sm font-medium text-ivory shadow-sm hover:bg-main/90 transition-colors cursor-pointer"
-                                        >
-                                            Acheter ce cours maintenant
-                                            <span>↗</span>
-                                        </button>
+                                        <CheckoutButton course={course} fullWidth label="Acheter le cours maintenant" sublabel="Paiement Stripe sécurisé, accès immédiat" />
                                     )}
                                 </div>
                             </div>
