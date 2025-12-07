@@ -10,7 +10,6 @@ import type { PillarSlug } from '@/components/categories/category-data';
 import { CoursesHero } from '@/components/courses/CoursesHero';
 import { CoursesFilterBar } from '@/components/courses/CoursesFilterBar';
 import { CoursesListSection } from '@/components/courses/CoursesListSection';
-import { CoursesIntroBanner } from '@/components/courses/CoursesIntroBanner';
 import { CoursesValueProps } from '@/components/courses/CoursesValueProps';
 
 export default function CoursesPage() {
@@ -30,15 +29,16 @@ export default function CoursesPage() {
     );
 
     return (
-        <section className="relative overflow-hidden bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
-            <div className="container-page space-y-10 animate-fade-up">
-                <CoursesHero />
+        <section className="relative overflow-hidden bg-ivory">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_25%_18%,rgba(123,164,143,0.12),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(59,91,141,0.09),transparent_38%)]" />
 
-                <CoursesIntroBanner />
+            <div className="container-page space-y-12 pb-24 pt-6 md:pb-28 md:pt-24 animate-fade-up relative">
+                <CoursesHero />
 
                 <CoursesValueProps />
 
                 <CoursesFilterBar level={level} setLevel={setLevel} duration={duration} setDuration={setDuration} pillar={pillar} setPillar={setPillar} />
+
                 <CoursesListSection courses={filtered} />
             </div>
         </section>

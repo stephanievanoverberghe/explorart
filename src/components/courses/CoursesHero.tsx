@@ -2,91 +2,98 @@
 'use client';
 
 import Link from 'next/link';
+import { CheckCircle2, Clock3, ShieldCheck, Sparkles } from 'lucide-react';
+
+const highlights = [
+    {
+        label: 'Structure guidée',
+        text: 'Intro · 3 modules · conclusion',
+        icon: CheckCircle2,
+    },
+    {
+        label: 'Rythme réaliste',
+        text: '45 à 90 minutes au total',
+        icon: Clock3,
+    },
+    {
+        label: 'Accès serein',
+        text: 'Rejouable, sans date limite',
+        icon: ShieldCheck,
+    },
+];
 
 export function CoursesHero() {
     return (
-        <header className="relative overflow-hidden rounded-3xl px-6 py-7 md:px-9 md:py-9 shadow-lg border border-perl/60 bg-linear-to-r from-sage via-vert/90 to-sage text-ivory">
-            {/* halos */}
-            <div className="pointer-events-none absolute inset-0 opacity-30 mix-blend-soft-light bg-[radial-gradient(circle_at_10%_18%,rgba(255,255,255,0.35),transparent_55%),radial-gradient(circle_at_85%_82%,rgba(30,61,114,0.55),transparent_60%)]" />
-            {/* inner border */}
-            <div className="pointer-events-none absolute inset-4 rounded-[1.75rem] border border-ivory/20" />
+        <header className="relative overflow-hidden rounded-4xl border border-perl/70 bg-linear-to-r from-[color-mix(in_oklab,var(--color-sage)_78%,#0b1d16_22%)] via-[color-mix(in_oklab,var(--color-vert)_80%,#0d2c21_20%)] to-[color-mix(in_oklab,var(--color-bleu)_78%,#0f2134_22%)] px-6 py-8 text-ivory shadow-lg shadow-main/10 md:px-10 md:py-12">
+            <div className="pointer-events-none absolute inset-0 opacity-50 mix-blend-soft-light bg-[radial-gradient(circle_at_14%_20%,rgba(255,255,255,0.32),transparent_48%),radial-gradient(circle_at_86%_78%,rgba(27,52,101,0.35),transparent_48%)]" />
+            <div className="pointer-events-none absolute inset-3 rounded-[2.3rem] border border-ivory/15" />
 
-            <div className="relative grid gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1.1fr)] items-center">
-                <div className="space-y-4 max-w-xl">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-ivory/10 px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/90">
+            <div className="relative grid items-start gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+                <div className="space-y-5">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-ivory/12 px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/90">
                         <span className="h-1.5 w-1.5 rounded-full bg-ivory" />
-                        <span>Cours & mini-formations</span>
+                        <span>Parcours Explor&apos;Art</span>
                     </div>
 
-                    <div className="space-y-2.5">
-                        <h1 className="font-serif-title text-2xl sm:text-3xl md:text-4xl leading-tight">
-                            Apprendre l’art en douceur,
+                    <div className="space-y-3">
+                        <h1 className="font-serif-title text-3xl leading-tight sm:text-4xl md:text-5xl">
+                            Des cours qui respectent ton rythme
                             <br />
-                            <span className="text-ivory/90">un cours à la fois.</span>
+                            <span className="text-ivory/85">et donnent de la cohérence à ta pratique.</span>
                         </h1>
-                        <p className="text-sm md:text-base text-ivory/90">
-                            Ici, tu trouves des cours construits comme de vraies mini-formations : introduction, 3 modules guidés, conclusion. Tu avances à ton rythme, sans
-                            pression de « bien faire ».
+                        <p className="max-w-2xl text-sm text-ivory/90 sm:text-base">
+                            Chaque cours est construit comme une mini-formation complète, sans catalogue fouillis : une porte d&apos;entrée claire, trois modules progressifs, une
+                            conclusion qui t&apos;aide à prolonger l&apos;élan chez toi.
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 text-[0.75rem]">
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-ivory/10 px-3 py-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-vert" />
-                            Cours dessin & geste
+                    <div className="flex flex-wrap gap-2 text-[0.82rem] text-ivory/90">
+                        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">
+                            <Sparkles className="h-4 w-4" />
+                            Dessin & gestes rassurants
                         </span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-ivory/10 px-3 py-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-bleu" />
-                            Regarder & comprendre une œuvre
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-ivory/10 px-3 py-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-rose" />
-                            Couleurs & émotions
-                        </span>
+                        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">Regarder une œuvre sans se sentir perdu·e</span>
+                        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1">Couleurs, émotions, psychologie de l’art</span>
                     </div>
 
                     <div className="flex flex-wrap gap-3 pt-1">
                         <Link
                             href="/commencer-ici"
-                            className="inline-flex items-center justify-center gap-2 rounded-full bg-ivory text-main px-5 py-2.5 text-sm font-medium shadow-md shadow-main/20 hover:-translate-y-0.5 hover:bg-ivory/95 transition-all"
+                            className="inline-flex items-center justify-center gap-2 rounded-full bg-ivory px-5 py-2.5 text-sm font-medium text-main shadow-lg shadow-main/25 transition-all hover:-translate-y-0.5 hover:bg-ivory/95"
                         >
                             Commencer gratuitement
                             <span>↗</span>
                         </Link>
                         <a
                             href="#liste-cours"
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-ivory/80 bg-transparent px-4 py-2.5 text-sm font-medium text-ivory hover:bg-ivory hover:text-main hover:-translate-y-0.5 transition-all"
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-ivory/75 bg-transparent px-4 py-2.5 text-sm font-medium text-ivory transition-all hover:-translate-y-0.5 hover:bg-ivory hover:text-main"
                         >
-                            Voir tous les cours
+                            Parcourir les cours
                             <span>↓</span>
                         </a>
                     </div>
                 </div>
 
-                {/* bloc info à droite */}
-                <aside className="relative rounded-3xl border border-ivory/25 bg-black/15 p-4 md:p-5 space-y-4 shadow-md backdrop-blur-sm">
-                    <div className="flex items-center justify-between gap-3">
+                <aside className="relative grid gap-4 rounded-3xl border border-ivory/25 bg-black/15 p-5 shadow-inner shadow-black/10 backdrop-blur-sm lg:p-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="space-y-1">
-                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ivory/75">Pensé pour les autodidactes</p>
-                            <p className="text-sm text-ivory/92">
-                                Chaque cours suit la même structure : une introduction, 3 modules guidés, une conclusion pour savoir comment continuer.
+                            <p className="text-[0.75rem] font-medium uppercase tracking-[0.16em] text-ivory/70">Une méthode simple</p>
+                            <p className="max-w-sm text-sm text-ivory/88">
+                                Les cours sont pensés pour que tu puisses vraiment les terminer : étapes courtes, consignes claires, exemples rassurants.
                             </p>
                         </div>
                     </div>
 
-                    <div className="grid gap-2 text-[0.8rem] text-ivory/90">
-                        <div className="flex items-center justify-between rounded-2xl bg-black/20 px-3 py-2 border border-ivory/20">
-                            <span>Modules courts (10–20 min)</span>
-                            <span className="text-ivory/80">⏱</span>
-                        </div>
-                        <div className="flex items-center justify-between rounded-2xl bg-black/20 px-3 py-2 border border-ivory/20">
-                            <span>Niveaux débutant & intermédiaire</span>
-                            <span className="text-ivory/80">★</span>
-                        </div>
-                        <div className="flex items-center justify-between rounded-2xl bg-black/20 px-3 py-2 border border-ivory/20">
-                            <span>Accès à vie aux mises à jour</span>
-                            <span className="text-ivory/80">∞</span>
-                        </div>
+                    <div className="flex flex-col gap-2 text-[0.85rem] text-ivory/90 ">
+                        {highlights.map(({ label, text, icon: Icon }) => (
+                            <div key={label} className="flex items-start gap-2.5 rounded-2xl border border-ivory/18 bg-white/5 px-3 py-2.5">
+                                <Icon className="mt-0.5 h-4 w-4 text-ivory/85" />
+                                <div>
+                                    <p className="text-[0.8rem] uppercase tracking-[0.14em] text-ivory/70">{label}</p>
+                                    <p className="text-sm text-ivory/92">{text}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </aside>
             </div>

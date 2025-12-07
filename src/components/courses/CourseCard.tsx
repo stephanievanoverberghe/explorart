@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Course } from '@/lib/content/courses';
+import { pillarConfig } from '@/components/categories/category-data';
 
 interface Props {
     course: Course;
@@ -19,60 +20,74 @@ export function CourseCard({ course }: Props) {
     const isFree = course.priceEUR === 0 || course.isMini;
     const priceLabel = isFree ? 'Offert' : `${course.priceEUR.toString().replace('.', ',')} €`;
     const durationLabel = formatDuration(course.durationMinutes);
+    const theme = pillarConfig[course.pillarSlug];
 
     return (
-        <article
-            className="
-                group flex flex-col overflow-hidden
-                rounded-2xl border border-perl/60 bg-ivory/95
-                shadow-xs hover:shadow-md hover:-translate-y-0.5
-                transition-all
-            "
-        >
-            {/* IMAGE COVER SIMPLE */}
-            <div className="relative aspect-4/3 w-full overflow-hidden bg-perl/15">
-                <Image src={course.coverImage} alt={course.title} fill className="object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
-                {/* léger voile pour la lisibilité globale */}
-                <div className="absolute inset-0 bg-linear-to-t from-black/20 via-black/5 to-transparent" />
+        <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-perl/70 bg-white/80 shadow-sm shadow-main/5 transition-all hover:-translate-y-1 hover:shadow-lg">
+            <div className="relative aspect-4/3 w-full overflow-hidden">
+                <Image
+                    src={course.coverImage}
+                    alt={course.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 45vw, 100vw"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/35 via-black/10 to-transparent" />
+
+                <div className="absolute left-3 right-3 top-3 flex items-center justify-between gap-2 text-[0.8rem] text-ivory">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 backdrop-blur">
+                        <span className="h-2 w-2 rounded-full bg-ivory" />
+                        {course.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 backdrop-blur">⏱ {durationLabel}</span>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-black/35 px-3 py-1.5 text-[0.8rem] text-ivory backdrop-blur">
+                        {course.isMini && <span className="h-2 w-2 rounded-full bg-sage" />}
+                        {course.pillarLabel}
+                    </span>
+                    <span className="rounded-full border border-white/30 bg-black/25 px-3 py-1 text-[0.82rem] text-ivory backdrop-blur">{course.modulesCount} modules</span>
+                </div>
             </div>
 
-            {/* CONTENU TEXTE */}
             <div className="flex flex-1 flex-col gap-3 px-4 py-4">
-                {/* Titre + baseline */}
                 <div className="space-y-1">
-                    <h3 className="font-serif-title text-base md:text-lg leading-snug text-main">{course.title}</h3>
-                    <p className="text-[0.85rem] text-main/75 line-clamp-2">{course.tagline}</p>
+                    <h3 className="font-serif-title text-base leading-snug text-main md:text-lg">{course.title}</h3>
+                    <p className="line-clamp-2 text-[0.9rem] text-main/75">{course.tagline}</p>
                 </div>
 
-                {/* META LIGNE SIMPLE */}
-                <div className="flex flex-wrap gap-2 text-[0.75rem] text-main/70">
-                    <span className="inline-flex items-center rounded-full bg-main/5 px-2 py-0.5">{course.level === 'beginner' ? 'Débutant' : 'Intermédiaire'}</span>
-
-                    <span className="inline-flex items-center rounded-full bg-ivory border border-perl/50 px-2 py-0.5">{course.pillarLabel}</span>
-
-                    {course.isMini && <span className="inline-flex items-center rounded-full bg-sage/8 border border-sage/40 px-2 py-0.5 text-sage">Mini-parcours offert</span>}
+                <div className="flex flex-wrap items-center gap-2 text-[0.78rem] text-main/75">
+                    <span
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 ${theme?.colorClasses.border ?? 'border-main/40'} ${
+                            theme?.colorClasses.bg ?? 'bg-main/5'
+                        }`}
+                    >
+                        <span className={`h-2 w-2 rounded-full ${theme?.dotClass ?? 'bg-main'}`} />
+                        {theme?.title ?? course.pillarLabel}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-perl/70 bg-white px-2.5 py-1">Structure guidée</span>
+                    {course.isMini && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-sage/60 bg-sage/10 px-2.5 py-1 text-sage">Mini-parcours offert</span>
+                    )}
                 </div>
 
-                {/* STRUCTURE & DURÉE */}
-                <div className="space-y-0.5 text-[0.8rem] text-main/65">
-                    <p>Structure : introduction · {course.modulesCount} modules · conclusion</p>
-                    <p>⏱ {durationLabel} · cours guidé</p>
+                <div className="space-y-0.5 text-[0.82rem] text-main/65">
+                    <p>Introduction · {course.modulesCount} modules · conclusion</p>
+                    <p>{durationLabel} de contenu guidé · accès à vie</p>
                 </div>
 
-                {/* BAS DE CARD : PRIX + CTA */}
-                <div className="mt-1 flex items-center justify-between gap-3 pt-2">
+                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
                     <div className="space-y-0.5">
-                        <p className="text-[0.75rem] text-main/55">Accès {isFree ? 'immédiat' : 'complet au cours'}</p>
-                        <p className={`text-[0.95rem] font-semibold ${isFree ? 'text-sage' : 'text-main'}`}>{priceLabel}</p>
+                        <p className="text-[0.78rem] text-main/55">{isFree ? 'Accès immédiat' : 'Accès complet au cours'}</p>
+                        <p className={`text-[1rem] font-semibold ${isFree ? 'text-sage' : 'text-main'}`}>{priceLabel}</p>
                     </div>
 
                     <Link
                         href={course.isMini ? '/commencer-ici' : `/cours/${course.slug}`}
-                        className={`
-                            inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.75
-                            text-[0.8rem] font-medium transition-colors
-                            ${isFree ? 'bg-sage text-ivory hover:bg-sage/90' : 'bg-main text-ivory hover:bg-main/90'}
-                        `}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.75 text-[0.85rem] font-medium transition-all ${
+                            isFree ? 'bg-sage text-ivory shadow-sage/30 hover:bg-sage/90' : 'bg-main text-ivory shadow-main/25 hover:bg-main/90'
+                        }`}
                     >
                         {isFree ? 'Accéder au parcours' : 'Voir le cours'}
                         <span>↗</span>
