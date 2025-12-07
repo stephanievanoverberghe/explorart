@@ -48,21 +48,36 @@ export default async function CoursePage({ params }: CoursePageProps) {
     const levelLabel = levelLabels[course.level];
 
     return (
-        <section className="relative bg-ivory pt-4 pb-24 md:pt-24 md:pb-28">
-            <div className="container-page space-y-10">
-                {/* HERO */}
+        <section className="relative bg-linear-to-b from-ivory via-white to-ivory pt-4 pb-24 md:pt-24 md:pb-28">
+            <div className="container-page space-y-10 md:space-y-12">
+                {/* HERO / PITCH PRINCIPAL */}
                 <CourseHero course={course} isFree={isFree} priceLabel={priceLabel} levelLabel={levelLabel} />
 
-                <main className="grid gap-8 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1.15fr)] items-start">
-                    {/* Colonne gauche : contenu éditorial / vente */}
+                {/* APERÇU RAPIDE DU COURS */}
+                <section className="grid gap-4 md:grid-cols-3">
+                    <QuickStat
+                        label="Format professionnel"
+                        value={`${course.modulesCount} modules guidés`}
+                        detail="Introduction, 3 modules structurés, conclusion avec pistes concrètes."
+                    />
+                    <QuickStat label="Rythme adapté" value={getDurationPhrase(course.durationMinutes)} detail="Un format compact, pensé pour s’intégrer dans un vrai quotidien." />
+                    <QuickStat
+                        label={isFree ? 'Mini-parcours offert' : 'Accès illimité'}
+                        value={isFree ? 'Parcours 100% gratuit' : 'Accès à vie'}
+                        detail={isFree ? 'Tu peux commencer tout de suite, sans carte bancaire.' : 'Accès illimité aux vidéos et exercices, à refaire autant que tu veux.'}
+                    />
+                </section>
+
+                <main className="grid gap-8 lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1.05fr)] items-start">
+                    {/* COLONNE GAUCHE : CONTENU DE VENTE */}
                     <div className="space-y-8">
-                        {/* 0. Pack complet */}
-                        <section className="card space-y-4 border-main/20 bg-white/90 shadow-sm">
+                        {/* 0. PACK INCLUS */}
+                        <section className="card space-y-5 border-main/20 bg-white/95 shadow-md">
                             <div className="flex items-center gap-2 text-main">
                                 <Sparkles className="h-5 w-5 text-main" />
                                 <div>
-                                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Accès immédiat</p>
-                                    <h2 className="font-serif-title text-lg md:text-xl">Tout ce qui est inclus quand tu achètes</h2>
+                                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Quand tu achètes ce cours</p>
+                                    <h2 className="font-serif-title text-lg md:text-xl">Tout ce qui est inclus dans ton accès</h2>
                                 </div>
                             </div>
 
@@ -70,66 +85,67 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                 <IncludedItem
                                     icon={<BadgeCheck className="h-4 w-4 text-main" />}
                                     title="Accès illimité"
-                                    description="Toutes les vidéos, les exercices et les ressources téléchargeables disponibles tout de suite après paiement."
+                                    description="Toutes les vidéos, les exercices et les supports sont accessibles dès le paiement, sans limite dans le temps."
                                 />
                                 <IncludedItem
                                     icon={<Lock className="h-4 w-4 text-main" />}
-                                    title="Paiement 100% sécurisé"
-                                    description="Transactions traitées par Stripe, avec facture automatique et confirmation instantanée."
+                                    title="Paiement sécurisé"
+                                    description="Transactions traitées par Stripe, avec facture automatique et mail de confirmation immédiat."
                                 />
                                 <IncludedItem
                                     icon={<MessageCircle className="h-4 w-4 text-main" />}
-                                    title="Support rapide"
-                                    description="Un contact direct si tu bloques : on te répond avec bienveillance et clarté."
+                                    title="Support bienveillant"
+                                    description="Tu peux poser tes questions si tu bloques : on te répond avec clarté et sans jugement."
                                 />
                                 <IncludedItem
                                     icon={<ArrowRight className="h-4 w-4 text-main" />}
-                                    title="Plan d’action guidé"
-                                    description="Un fil rouge étape par étape pour suivre le cours sans te disperser."
+                                    title="Fil rouge précis"
+                                    description="Un déroulé clair pour savoir par où commencer, quoi faire ensuite, et comment terminer sereinement."
                                 />
                             </div>
                         </section>
 
-                        {/* 1. Ce que tu vas apprendre */}
-                        <section className="card space-y-4">
+                        {/* 1. BÉNÉFICES / CE QUE TU VAS APPRENDRE */}
+                        <section className="card space-y-5">
                             <div className="space-y-1">
-                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Ce que tu vas apprendre dans ce cours</p>
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Ce que tu vas vivre dans ce cours</p>
                                 <h2 className="font-serif-title text-lg md:text-xl">Transformer {course.pillarLabel.toLowerCase()} en un vrai temps pour toi</h2>
                             </div>
 
                             <p className="text-sm md:text-base text-main/75 max-w-2xl">
-                                Ce cours n’est pas une playlist de vidéos à consommer puis oublier. C’est un petit parcours structuré qui t’aide à{' '}
-                                <strong>poser des bases solides</strong> dans l’univers&nbsp;: <strong>{course.pillarLabel}</strong>, sans te perdre ni te juger.
+                                Ce cours n’est pas une simple playlist de vidéos. C’est un parcours guidé qui t’aide à <strong>poser des bases solides</strong> dans
+                                l’univers&nbsp;:
+                                <strong> {course.pillarLabel}</strong>, sans te perdre ni te juger.
                             </p>
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <LearnPoint
                                     title="Une structure claire et rassurante"
                                     items={[
-                                        'Introduction guidée pour te mettre dans le bon état d’esprit.',
-                                        '3 modules qui avancent progressivement, sans surcharge.',
+                                        'Une introduction pour te mettre dans le bon état d’esprit.',
+                                        '3 modules qui avancent progressivement, sans surcharge mentale.',
                                         'Une conclusion pour intégrer ce que tu as vécu et savoir comment continuer.',
                                     ]}
                                 />
                                 <LearnPoint
                                     title="Des résultats concrets pour ta pratique"
                                     items={[
-                                        'Des exercices que tu peux refaire plusieurs fois, sans te lasser.',
-                                        'Des repères simples pour ne plus te sentir « perdue » devant la feuille.',
-                                        'Une relation un peu plus douce avec ton geste, ton regard ou tes couleurs.',
+                                        'Des exercices que tu peux refaire plusieurs fois, sans obligation de « chef-d’œuvre ».',
+                                        'Des repères simples pour ne plus te sentir perdue devant la feuille ou l’image.',
+                                        'Une relation plus douce avec ton geste, ton regard ou tes couleurs.',
                                     ]}
                                 />
                             </div>
                         </section>
 
-                        {/* 2. À qui ça s’adresse / pour qui c’est fait */}
+                        {/* 2. POUR QUI / POUR QUI CE N’EST PAS */}
                         <section className="grid gap-5 md:grid-cols-2">
                             <div className="card bg-ivory/95 border-perl/60 space-y-3">
                                 <h3 className="font-serif-title text-lg">Ce cours est pour toi si…</h3>
                                 <ul className="text-sm text-main/75 space-y-1.5">
-                                    <li>• Tu as envie d’un cours {course.level === 'beginner' ? 'débutant' : 'intermédiaire'} mais assumé, pas « pour enfants ».</li>
-                                    <li>• Tu veux un rythme réaliste : environ {getDurationPhrase(course.durationMinutes).toLowerCase()}.</li>
-                                    <li>• Tu cherches un cadre clair, sans jargon et sans performance.</li>
+                                    <li>• Tu veux un cours {course.level === 'beginner' ? 'débutant' : 'intermédiaire'} mais assumé, pas « bébé ».</li>
+                                    <li>• Tu as besoin d’un cadre clair, sans jargon d’école d’art.</li>
+                                    <li>• Tu cherches un format réaliste : {getDurationPhrase(course.durationMinutes).toLowerCase()}.</li>
                                     <li>• Tu veux que ton temps, ton énergie et ton argent soient respectés.</li>
                                 </ul>
                             </div>
@@ -138,21 +154,20 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                 <h3 className="font-serif-title text-lg">Ce cours n’est pas pour toi si…</h3>
                                 <ul className="text-sm text-main/75 space-y-1.5">
                                     <li>• Tu cherches une énorme formation de 40h avec tous les sujets en même temps.</li>
-                                    <li>• Tu veux des recettes magiques « en 3 jours tu deviendras pro ».</li>
-                                    <li>• Tu n’es pas prête à consacrer au moins 1h de vraie disponibilité intérieure.</li>
-                                    <li>• Tu veux surtout des techniques spectaculaires, sans réflexion ni douceur.</li>
+                                    <li>• Tu veux des promesses magiques « en 3 jours tu deviendras pro ».</li>
+                                    <li>• Tu n’es pas prête à dégager au moins 1h de vraie disponibilité intérieure.</li>
+                                    <li>• Tu veux surtout des effets spectaculaires, sans réflexion ni douceur.</li>
                                 </ul>
                             </div>
                         </section>
 
-                        {/* 3. Programme détaillé */}
+                        {/* 3. PROGRAMME DÉTAILLÉ */}
                         <section id="programme" className="card space-y-5">
                             <div>
                                 <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Programme du cours</p>
                                 <h3 className="font-serif-title text-lg md:text-xl">Un parcours en 5 temps : intro · 3 modules · conclusion</h3>
                                 <p className="text-sm text-main/75 mt-1 max-w-2xl">
-                                    Tu peux suivre le cours d’un bloc ou module par module. Chaque étape est pensée pour tenir dans ton vrai quotidien, sans te demander de tout
-                                    réorganiser.
+                                    Tu peux suivre le cours d’un bloc ou module par module. Chaque étape est pensée pour se glisser dans ton rythme actuel, sans tout bouleverser.
                                 </p>
                             </div>
 
@@ -165,17 +180,17 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                 <ProgrammeRow
                                     step="Module 1"
                                     badge="Premier socle"
-                                    description="Un premier exercice guidé pour entrer dans le cœur du sujet, en douceur, avec un objectif clair et atteignable dès maintenant."
+                                    description="Un exercice guidé pour entrer dans le cœur du sujet, en douceur, avec un objectif clair et atteignable dès maintenant."
                                 />
                                 <ProgrammeRow
                                     step="Module 2"
                                     badge="Approfondir sans se perdre"
-                                    description="On complexifie légèrement : nouveaux exemples, nouvelles pistes, mais toujours avec un fil rouge rassurant."
+                                    description="On complexifie un peu : nouvelles pistes, exemples concrets, mais toujours avec un fil rouge rassurant."
                                 />
                                 <ProgrammeRow
                                     step="Module 3"
                                     badge="Intégrer dans ta pratique"
-                                    description="On relie ce que tu as vu, ressenti et expérimenté, pour que ce cours laisse une trace durable dans ta pratique artistique."
+                                    description="On relie ce que tu as vu, ressenti et expérimenté, pour que ce cours laisse une trace durable dans ta pratique."
                                 />
                                 <ProgrammeRow
                                     step="Conclusion"
@@ -185,17 +200,17 @@ export default async function CoursePage({ params }: CoursePageProps) {
                             </div>
                         </section>
 
-                        {/* 4. Après le cours / articulation avec le reste d’Explor’Art */}
+                        {/* 4. APRÈS LE COURS / LIEN AVEC LE RESTE DU SITE */}
                         <section className="grid gap-5 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
                             <div className="card space-y-3">
-                                <h3 className="font-serif-title text-lg">Et après ce cours, qu’est-ce qui change ?</h3>
+                                <h3 className="font-serif-title text-lg">Après ce cours, qu’est-ce qui change vraiment ?</h3>
                                 <p className="text-sm text-main/75">
-                                    L’objectif n’est pas que tu « finisses » ce cours, mais qu’il ouvre quelque chose pour la suite : un geste plus libre, un regard plus confiant,
-                                    une couleur qui devient ton alliée…
+                                    Le but n’est pas que tu « coches » ce cours comme terminé, mais qu’il ouvre quelque chose pour la suite : un geste plus libre, un regard plus
+                                    confiant, une couleur qui devient ton alliée…
                                 </p>
                                 <ul className="text-sm text-main/75 space-y-1.5 mt-1">
                                     <li>• Tu peux refaire les modules plusieurs fois, avec d’autres sujets ou d’autres images.</li>
-                                    <li>• Tu peux t’appuyer sur les articles gratuits du même pilier pour continuer à explorer.</li>
+                                    <li>• Tu peux t’appuyer sur les articles gratuits du même pilier pour nourrir ce que tu as lancé.</li>
                                     <li>• Tu gardes une trace écrite, visuelle et émotionnelle de ce que tu as traversé.</li>
                                 </ul>
                             </div>
@@ -221,19 +236,19 @@ export default async function CoursePage({ params }: CoursePageProps) {
                             </div>
                         </section>
 
-                        {/* 4bis. Tunnel de vente */}
+                        {/* 5. TUNNEL D’ACHAT SIMPLE */}
                         <section className="card space-y-5 border-main/20 bg-white/95">
                             <div className="space-y-1">
-                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Un tunnel clair</p>
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Un tunnel simple & transparent</p>
                                 <h3 className="font-serif-title text-lg md:text-xl">Ton achat en 3 étapes sécurisées</h3>
                                 <p className="text-sm text-main/75 max-w-2xl">
-                                    Pas de détour ni d’upsell agressif : tu cliques, tu paies via Stripe, tu reçois l’accès et la facture dans la foulée.
+                                    Pas d’upsell agressif, pas de surprise : tu cliques, tu paies via Stripe, tu reçois l’accès et la facture dans la foulée.
                                 </p>
                             </div>
 
                             <div className="grid gap-3 md:grid-cols-3">
-                                <FunnelStep icon={<Sparkles className="h-5 w-5 text-main" />} title="Étape 1" description="Choisis ton cours et clique sur « Acheter »." />
-                                <FunnelStep icon={<CreditCard className="h-5 w-5 text-main" />} title="Étape 2" description="Paiement Stripe sécurisé (CB ou Apple Pay)." />
+                                <FunnelStep icon={<Sparkles className="h-5 w-5 text-main" />} title="Étape 1" description="Tu choisis ton cours et cliques sur « Acheter »." />
+                                <FunnelStep icon={<CreditCard className="h-5 w-5 text-main" />} title="Étape 2" description="Paiement Stripe sécurisé (CB, Apple Pay…)." />
                                 <FunnelStep icon={<BadgeCheck className="h-5 w-5 text-main" />} title="Étape 3" description="Mail de confirmation + accès immédiat au cours." />
                             </div>
 
@@ -241,14 +256,14 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                 <div className="flex flex-col gap-2 rounded-2xl bg-main/5 border border-main/15 p-4 md:flex-row md:items-center md:justify-between">
                                     <div>
                                         <p className="text-sm font-semibold text-main">Prête à démarrer ?</p>
-                                        <p className="text-[0.9rem] text-main/70">Un seul clic → un paiement Stripe → ton accès arrive instantanément.</p>
+                                        <p className="text-[0.9rem] text-main/70">Un clic → un paiement Stripe → ton accès arrive instantanément dans ta boîte mail.</p>
                                     </div>
                                     <CheckoutButton course={course} label="Lancer l’achat sécurisé" />
                                 </div>
                             )}
                         </section>
 
-                        {/* 5. Petite FAQ simple (version page de vente) */}
+                        {/* 6. FAQ */}
                         <section className="card space-y-4 bg-ivory/97 border-perl/70">
                             <div className="space-y-1">
                                 <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Questions fréquentes</p>
@@ -259,14 +274,12 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                 <div>
                                     <p className="font-medium">Est-ce que je dois suivre le cours d’un bloc&nbsp;?</p>
                                     <p className="text-main/75">
-                                        Non. Tu peux le faire sur plusieurs jours ou semaines. L’important, c’est d’avoir des moments où tu es vraiment disponible, même courts.
+                                        Non. Tu peux le suivre sur plusieurs jours ou semaines. L’important, c’est d’avoir des moments où tu es vraiment disponible, même courts.
                                     </p>
                                 </div>
                                 <div>
                                     <p className="font-medium">Est-ce que j’ai besoin de beaucoup de matériel&nbsp;?</p>
-                                    <p className="text-main/75">
-                                        Non plus. Tout le contenu est pensé pour rester accessible avec peu de moyens (carnet, quelques couleurs, un crayon…).
-                                    </p>
+                                    <p className="text-main/75">Non. Tout est pensé pour rester accessible avec peu de moyens (carnet, quelques couleurs, un crayon…).</p>
                                 </div>
                                 <div>
                                     <p className="font-medium">Et si je me sens « trop débutante » ou « pas assez douée »&nbsp;?</p>
@@ -279,9 +292,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
                         </section>
                     </div>
 
-                    {/* Colonne droite : bloc récap prix / durée / CTA sticky */}
+                    {/* COLONNE DROITE : RÉCAP / PRIX / CTA STICKY */}
                     <aside className="lg:sticky lg:top-24 self-start space-y-4 lg:space-y-5">
-                        <section className="card space-y-4 border-sage/50 bg-ivory/98 shadow-md shadow-sage/10">
+                        <section className="card space-y-4 border-sage/50 bg-white shadow-lg shadow-sage/10">
                             <div className="space-y-1">
                                 <p className="text-[0.7rem] uppercase tracking-[0.18em] text-sage">Récap du cours</p>
                                 <h2 className="font-serif-title text-lg md:text-xl">{course.title}</h2>
@@ -316,7 +329,6 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                 </li>
                             </ul>
 
-                            {/* CTA principal (brancher plus tard sur le tunnel de paiement) */}
                             {isFree ? (
                                 <Link
                                     href="/commencer-ici"
@@ -326,7 +338,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                     <span>↗</span>
                                 </Link>
                             ) : (
-                                <CheckoutButton course={course} fullWidth label="Payer en toute sécurité" sublabel="Paiement Stripe 100% sécurisé" size="lg" />
+                                <CheckoutButton course={course} fullWidth size="lg" label="Payer en toute sécurité" sublabel="Paiement Stripe sécurisé, accès immédiat" />
                             )}
 
                             <div className="rounded-2xl border border-sage/40 bg-sage/5 px-3.5 py-3 flex items-start gap-2.5">
@@ -367,6 +379,22 @@ function IncludedItem({ icon, title, description }: IncludedItemProps) {
                 <h3 className="font-serif-title text-[0.95rem]">{title}</h3>
             </div>
             <p className="mt-1 text-sm text-main/75">{description}</p>
+        </div>
+    );
+}
+
+type QuickStatProps = {
+    label: string;
+    value: string;
+    detail: string;
+};
+
+function QuickStat({ label, value, detail }: QuickStatProps) {
+    return (
+        <div className="rounded-2xl border border-perl/60 bg-white px-4 py-4 shadow-sm">
+            <p className="text-[0.7rem] uppercase tracking-[0.16em] text-main/60">{label}</p>
+            <p className="text-lg font-serif-title text-main mt-1">{value}</p>
+            <p className="text-sm text-main/70 mt-1.5">{detail}</p>
         </div>
     );
 }
@@ -480,20 +508,19 @@ function CourseHero({ course, isFree, priceLabel, levelLabel }: CourseHeroProps)
                     </div>
                 </div>
 
-                {/* Grid principale : pitch + visuel + CTA */}
+                {/* Grid principale : pitch + visuel + mini bloc vente */}
                 <div className="grid gap-7 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1.4fr)] items-stretch">
                     {/* Colonne gauche : pitch principal */}
                     <div className="space-y-5 max-w-xl">
                         <div className="space-y-3">
                             <h1 className="font-serif-title text-2xl sm:text-3xl md:text-4xl leading-tight text-ivory">{course.title}</h1>
-
                             <p className="text-sm md:text-base text-ivory/90 max-w-2xl">{course.tagline}</p>
                         </div>
 
                         <ul className="text-sm text-ivory/92 space-y-1.5">
                             <li className="flex gap-2">
                                 <CheckCircle2 className="h-4 w-4 mt-0.5 text-ivory" />
-                                <span>Un parcours complet, mais compact, pour vraiment avancer dans l’univers {course.pillarLabel.toLowerCase()}.</span>
+                                <span>Un parcours complet mais compact, pour vraiment avancer dans l’univers {course.pillarLabel.toLowerCase()}.</span>
                             </li>
                             <li className="flex gap-2">
                                 <CheckCircle2 className="h-4 w-4 mt-0.5 text-ivory" />
@@ -517,7 +544,7 @@ function CourseHero({ course, isFree, priceLabel, levelLabel }: CourseHeroProps)
                         </div>
                     </div>
 
-                    {/* Colonne droite : carte visuel + mini bloc vente */}
+                    {/* Colonne droite : visuel + mini bloc vente */}
                     <aside className="relative">
                         <div className="relative h-full rounded-3xl border border-ivory/25 bg-black/20 shadow-md backdrop-blur-sm overflow-hidden">
                             <div className="grid h-full grid-rows-[minmax(0,1.2fr)_auto]">
@@ -558,7 +585,7 @@ function CourseHero({ course, isFree, priceLabel, levelLabel }: CourseHeroProps)
                                             <span>↗</span>
                                         </Link>
                                     ) : (
-                                        <CheckoutButton course={course} fullWidth label="Acheter le cours maintenant" sublabel="Paiement Stripe sécurisé, accès immédiat" />
+                                        <CheckoutButton course={course} fullWidth label="Acheter le cours maintenant" />
                                     )}
                                 </div>
                             </div>

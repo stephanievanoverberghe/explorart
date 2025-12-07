@@ -28,8 +28,8 @@ export async function POST(request: Request) {
     try {
         const body = new URLSearchParams({
             mode: 'payment',
-            success_url: `${origin}/cours/${course.slug}?paiement=success`,
-            cancel_url: `${origin}/cours/${course.slug}?paiement=cancel`,
+            success_url: `${origin}/paiement/success?course=${course.slug}`,
+            cancel_url: `${origin}/paiement/cancel?course=${course.slug}`,
             'payment_method_types[0]': 'card',
             'line_items[0][price_data][currency]': 'eur',
             'line_items[0][price_data][unit_amount]': Math.round(course.priceEUR * 100).toString(),

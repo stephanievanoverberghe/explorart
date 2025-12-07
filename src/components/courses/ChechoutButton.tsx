@@ -14,7 +14,7 @@ interface CheckoutButtonProps {
     size?: 'md' | 'lg';
 }
 
-export function CheckoutButton({ course, label = 'Acheter ce cours', sublabel, fullWidth = false, variant = 'primary', size = 'md' }: CheckoutButtonProps) {
+export function CheckoutButton({ course, label = 'Acheter ce cours', fullWidth = false, variant = 'primary', size = 'md' }: CheckoutButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +64,6 @@ export function CheckoutButton({ course, label = 'Acheter ce cours', sublabel, f
                 {isLoading ? 'Redirection en cours…' : label}
                 <span aria-hidden>↗</span>
             </button>
-            {sublabel && <p className="text-[0.82rem] text-main/65">{sublabel}</p>}
             {error && <p className="text-[0.8rem] text-red-600">{error}</p>}
         </div>
     );
