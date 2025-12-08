@@ -44,6 +44,7 @@ export default function TableauDeBordFormationsPage() {
     }, []);
 
     const catalog = useMemo(() => FORMATIONS, []);
+    const purchasedFormationSlugs = useMemo(() => new Set(formations.map((formation) => formation.slug)), [formations]);
 
     return (
         <main className="space-y-10 md:space-y-12 py-8 md:py-12">
@@ -192,41 +193,51 @@ export default function TableauDeBordFormationsPage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    {catalog.map((formation) => (
-                        <article
-                            key={formation.slug}
-                            className="group flex flex-col rounded-3xl border border-perl/70 bg-white/95 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="space-y-1">
-                                    <p className="text-[0.75rem] uppercase tracking-[0.16em] text-main/70">{formation.pillarLabel}</p>
-                                    <h3 className="font-serif-title text-lg text-main group-hover:text-main/90">{formation.title}</h3>
-                                    <p className="text-sm text-main/75 line-clamp-2">{formation.tagline}</p>
+                    {catalog.map((formation) => {
+                        const isPurchased = purchasedFormationSlugs.has(formation.slug);
+
+                        return (
+                            <article
+                                key={formation.slug}
+                                className="group flex flex-col rounded-3xl border border-perl/70 bg-white/95 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="space-y-1">
+                                        <p className="text-[0.75rem] uppercase tracking-[0.16em] text-main/70">{formation.pillarLabel}</p>
+                                        <h3 className="font-serif-title text-lg text-main group-hover:text-main/90">{formation.title}</h3>
+                                        <p className="text-sm text-main/75 line-clamp-2">{formation.tagline}</p>
+                                    </div>
+                                    <span className="rounded-full bg-ivory border border-perl/60 px-3 py-1 text-xs text-main/80">≈ {formation.approximateHours} h</span>
                                 </div>
-                                <span className="rounded-full bg-ivory border border-perl/60 px-3 py-1 text-xs text-main/80">≈ {formation.approximateHours} h</span>
-                            </div>
 
-                            <div className="mt-4 flex flex-wrap gap-2 text-xs text-main/70">
-                                <span className="inline-flex items-center gap-2 rounded-full bg-ivory border border-perl/60 px-3 py-1">
-                                    <Layers className="h-3.5 w-3.5" /> {formation.modulesCount} modules
-                                </span>
-                                <span className="inline-flex items-center gap-2 rounded-full bg-ivory border border-perl/60 px-3 py-1">
-                                    <Clock className="h-3.5 w-3.5" /> Niveau {formation.level}
-                                </span>
-                            </div>
+                                <div className="mt-4 flex flex-wrap gap-2 text-xs text-main/70">
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-ivory border border-perl/60 px-3 py-1">
+                                        <Layers className="h-3.5 w-3.5" /> {formation.modulesCount} modules
+                                    </span>
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-ivory border border-perl/60 px-3 py-1">
+                                        <Clock className="h-3.5 w-3.5" /> Niveau {formation.level}
+                                    </span>
+                                </div>
 
-                            <div className="mt-4 flex items-center justify-between text-sm text-main">
-                                <span className="font-medium">{formation.priceEUR.toString().replace('.', ',')} €</span>
-                                <Link
-                                    href={`/formations/${formation.slug}`}
-                                    className="inline-flex items-center gap-2 rounded-full border border-perl/60 px-3 py-1.5 text-xs font-medium text-main transition hover:-translate-y-0.5 hover:border-main/60"
-                                >
-                                    Voir les détails
-                                    <ArrowRight className="h-3.5 w-3.5" />
-                                </Link>
-                            </div>
-                        </article>
-                    ))}
+                                <div className="mt-4 flex items-center justify-between text-sm text-main">
+                                    <span className="font-medium">{isPurchased ? 'Déjà achetée' : `${formation.priceEUR.toString().replace('.', ',')} €`}</span>
+                                    {isPurchased ? (
+                                        <div className="inline-flex items-center gap-2 rounded-full border border-sage/60 bg-sage/10 px-3 py-1.5 text-xs font-medium text-sage shadow-sm">
+                                            <CheckCircle2 className="h-3.5 w-3.5" /> Accès débloqué
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            href={`/formations/${formation.slug}`}
+                                            className="inline-flex items-center gap-2 rounded-full border border-perl/60 px-3 py-1.5 text-xs font-medium text-main transition hover:-translate-y-0.5 hover:border-main/60"
+                                        >
+                                            Voir les détails
+                                            <ArrowRight className="h-3.5 w-3.5" />
+                                        </Link>
+                                    )}
+                                </div>
+                            </article>
+                        );
+                    })}
                 </div>
             </section>
         </main>

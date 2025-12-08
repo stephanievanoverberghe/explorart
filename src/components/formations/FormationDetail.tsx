@@ -154,14 +154,7 @@ function FormationHero({ formation, levelLabel, priceLabel }: HeroProps) {
                                     <p className="text-[0.82rem] text-ivory/90">
                                         Accès immédiat : tu suis les modules à ton rythme, avec tous les bonus et replays inclus dès l’achat.
                                     </p>
-                                    <CheckoutButton
-                                        product={formation}
-                                        productType="formation"
-                                        fullWidth
-                                        size="lg"
-                                        label="Acheter la formation maintenant"
-                                        sublabel="Paiement Stripe sécurisé, accès instantané"
-                                    />
+                                    <CheckoutButton product={formation} productType="formation" fullWidth size="lg" label="Acheter la formation maintenant" />
                                 </div>
                             </div>
                         </div>
@@ -438,7 +431,7 @@ function FormationAside({ formation, priceLabel, levelLabel }: AsideProps) {
                     Paiement Stripe sécurisé, accès immédiat à tous les modules et bonus. Tu peux revenir sur la formation aussi souvent que tu le souhaites.
                 </div>
 
-                <CheckoutButton product={formation} productType="formation" fullWidth size="lg" label="Acheter la formation" sublabel="Accès instantané après paiement" />
+                <CheckoutButton product={formation} productType="formation" fullWidth size="lg" label="Acheter la formation" />
             </section>
         </aside>
     );
