@@ -66,7 +66,7 @@ export const FORMATIONS: Formation[] = [
         pillarSlug: 'dessin-peinture',
         pillarLabel: 'Dessiner & Peindre',
         coverImage: '/images/formations/apprendre-a-dessiner-hero.png',
-        status: 'coming-soon',
+        status: 'open',
 
         modulesCount: 8,
         hasIntro: true,

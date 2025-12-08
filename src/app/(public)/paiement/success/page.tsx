@@ -3,16 +3,18 @@ import Link from 'next/link';
 import { CheckCircle2, ArrowRight, BookOpenCheck } from 'lucide-react';
 
 import { COURSES } from '@/lib/content/courses';
+import { FORMATIONS } from '@/lib/content/formations';
 import { getAuthUser } from '@/lib/auth/session';
 import { saveCoursePurchase } from '@/lib/purchases/saveCoursePurchase';
 
 interface SuccessPageProps {
-    searchParams: Promise<{ course?: string }>;
+    searchParams: Promise<{ course?: string; formation?: string }>;
 }
 
 export default async function PaymentSuccessPage({ searchParams }: SuccessPageProps) {
     const resolved = await searchParams;
     const courseSlug = resolved.course;
+    const formationSlug = resolved.formation;
 
     const authUser = await getAuthUser();
 
@@ -25,6 +27,7 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
     }
 
     const course = courseSlug ? COURSES.find((c) => c.slug === courseSlug) : undefined;
+    const formation = formationSlug ? FORMATIONS.find((f) => f.slug === formationSlug) : undefined;
 
     return (
         <section className="relative overflow-hidden bg-ivory pt-8 pb-24 md:pt-20 md:pb-28">
@@ -81,6 +84,39 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
                                 </div>
                             </div>
                         </>
+                    ) : formation ? (
+                        <div className="space-y-3">
+                            <div className="space-y-1">
+                                <p className="text-[0.8rem] text-main/70">Pré-commande de formation</p>
+                                <h2 className="font-serif-title text-lg text-main">{formation.title}</h2>
+                                <p className="text-sm text-main/70">{formation.tagline}</p>
+                            </div>
+
+                            <div className="flex flex-col gap-2 rounded-2xl border border-sage/30 bg-sage/5 p-4 text-[0.9rem] text-main/75">
+                                <p className="font-medium text-main">Merci pour ta confiance !</p>
+                                <p>
+                                    Nous enregistrons ta place dès que l’ouverture des formations premium est prête. Tu recevras un e-mail avec le calendrier précis et le lien de
+                                    connexion.
+                                </p>
+                                <p className="text-[0.82rem] text-main/70">Besoin d’aide ? Écris-nous via la page contact, nous répondons rapidement.</p>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                                <Link
+                                    href={`/formations/${formation.slug}`}
+                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-main px-4 py-2.5 text-sm font-medium text-ivory hover:bg-main/90"
+                                >
+                                    Revenir à la formation
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                                <Link
+                                    href="/contact"
+                                    className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-[0.85rem] font-medium text-main/75 hover:bg-background"
+                                >
+                                    Parler avec l’équipe
+                                </Link>
+                            </div>
+                        </div>
                     ) : (
                         <div className="space-y-3">
                             <p className="text-sm text-main/75">

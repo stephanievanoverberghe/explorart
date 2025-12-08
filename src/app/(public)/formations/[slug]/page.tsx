@@ -2,7 +2,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { ReactNode } from 'react';
 
 import { FORMATIONS, type Formation, type FormationModule } from '@/lib/content/formations';
 import { pillarConfig, levelLabels } from '@/components/categories/category-data';
