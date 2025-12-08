@@ -415,7 +415,7 @@ export function Header() {
                                 setOpenAccountMenu(false);
                             }}
                             aria-expanded={openLearn}
-                            className={`${desktopNavLinkBase} border inline-flex items-center gap-1.5 ${
+                            className={`${desktopNavLinkBase} border cursor-pointer inline-flex items-center gap-1.5 ${
                                 learnActive
                                     ? 'bg-ivory text-main border-vert/70 font-medium shadow-sm'
                                     : 'cursor-pointer bg-ivory/5 text-ivory/85 border-ivory/10 hover:bg-ivory/10'

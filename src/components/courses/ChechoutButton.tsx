@@ -4,6 +4,7 @@
 import { useState } from 'react';
 
 import type { Course } from '@/lib/content/courses';
+import { usePathname } from 'next/navigation';
 
 interface CheckoutButtonProps {
     course: Course;
@@ -17,6 +18,7 @@ interface CheckoutButtonProps {
 export function CheckoutButton({ course, label = 'Acheter ce cours', fullWidth = false, variant = 'primary', size = 'md' }: CheckoutButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const pathname = usePathname();
 
     const handleCheckout = async () => {
         setIsLoading(true);
@@ -30,6 +32,15 @@ export function CheckoutButton({ course, label = 'Acheter ce cours', fullWidth =
             });
 
             const data = await response.json();
+
+            if (response.status === 401) {
+                const loginUrl = new URL('/connexion', window.location.origin);
+                loginUrl.searchParams.set('redirect', pathname ?? '/');
+
+                setIsLoading(false);
+                window.location.href = loginUrl.toString();
+                return;
+            }
 
             if (!response.ok || !data?.url) {
                 const message = data?.error ?? 'Impossible de démarrer le paiement Stripe pour le moment.';

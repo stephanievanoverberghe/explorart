@@ -2,12 +2,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { X, Mail, Lock } from 'lucide-react';
 
 export default function ConnexionPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +35,8 @@ export default function ConnexionPage() {
                 throw new Error(data.error || 'Connexion impossible pour le moment.');
             }
 
-            router.push('/tableau-de-bord');
+            const redirectTo = searchParams.get('redirect');
+            router.push(redirectTo ?? '/tableau-de-bord');
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Une erreur est survenue.';
             setError(message);
@@ -44,7 +46,8 @@ export default function ConnexionPage() {
     };
 
     const handleClose = () => {
-        router.push('/');
+        const redirectTo = searchParams.get('redirect');
+        router.push(redirectTo ?? '/');
     };
 
     return (
