@@ -4,6 +4,7 @@ import { CheckCircle2, Clock, Layers } from 'lucide-react';
 
 import type { Formation, FormationModule } from '@/lib/content/formations';
 import { pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
+import { CheckoutButton } from '@/components/payments/CheckoutButton';
 
 type FormationDetailProps = {
     formation: Formation;
@@ -151,16 +152,16 @@ function FormationHero({ formation, levelLabel, priceLabel }: HeroProps) {
                                         <p className="text-[0.8rem] text-ivory/80">Pour une formation complète, rejouable, structurée en modules.</p>
                                     </div>
                                     <p className="text-[0.82rem] text-ivory/90">
-                                        Les inscriptions ouvriront bientôt. Tu pourras suivre le parcours à ton rythme, en vivant chaque module comme un vrai rendez-vous avec ta
-                                        créativité.
+                                        Accès immédiat : tu suis les modules à ton rythme, avec tous les bonus et replays inclus dès l’achat.
                                     </p>
-                                    <Link
-                                        href="/contact"
-                                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ivory px-4 py-2 text-sm font-medium text-main shadow-sm hover:bg-ivory/95 transition-colors"
-                                    >
-                                        Être prévenu·e de l’ouverture
-                                        <span>↗</span>
-                                    </Link>
+                                    <CheckoutButton
+                                        product={formation}
+                                        productType="formation"
+                                        fullWidth
+                                        size="lg"
+                                        label="Acheter la formation maintenant"
+                                        sublabel="Paiement Stripe sécurisé, accès instantané"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -434,16 +435,10 @@ function FormationAside({ formation, priceLabel, levelLabel }: AsideProps) {
                 </ul>
 
                 <div className="rounded-2xl border border-sage/40 bg-sage/5 px-3.5 py-3 text-[0.78rem] text-main/75">
-                    Les inscriptions ne sont pas encore ouvertes. Tu peux te préinscrire ou demander des infos via le formulaire de contact.
+                    Paiement Stripe sécurisé, accès immédiat à tous les modules et bonus. Tu peux revenir sur la formation aussi souvent que tu le souhaites.
                 </div>
 
-                <Link
-                    href="/contact"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-main px-4 py-2.5 text-sm font-medium text-ivory shadow-sm hover:bg-main/90 transition-colors"
-                >
-                    Me préinscrire / poser une question
-                    <span>↗</span>
-                </Link>
+                <CheckoutButton product={formation} productType="formation" fullWidth size="lg" label="Acheter la formation" sublabel="Accès instantané après paiement" />
             </section>
         </aside>
     );

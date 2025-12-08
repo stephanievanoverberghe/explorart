@@ -8,7 +8,7 @@ import { ArrowRight, BadgeCheck, CheckCircle2, Clock, CreditCard, Layers, Lock, 
 
 import { COURSES, type Course } from '@/lib/content/courses';
 import { levelLabels, pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
-import { CheckoutButton } from '@/components/courses/ChechoutButton';
+import { CheckoutButton } from '@/components/payments/CheckoutButton';
 
 interface CoursePageProps {
     // Next 16 : params est un Promise côté serveur
@@ -258,7 +258,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                         <p className="text-sm font-semibold text-main">Prête à démarrer ?</p>
                                         <p className="text-[0.9rem] text-main/70">Un clic → un paiement Stripe → ton accès arrive instantanément dans ta boîte mail.</p>
                                     </div>
-                                    <CheckoutButton course={course} label="Lancer l’achat sécurisé" />
+                                    <CheckoutButton product={course} productType="course" label="Lancer l’achat sécurisé" />
                                 </div>
                             )}
                         </section>
@@ -338,7 +338,14 @@ export default async function CoursePage({ params }: CoursePageProps) {
                                     <span>↗</span>
                                 </Link>
                             ) : (
-                                <CheckoutButton course={course} fullWidth size="lg" label="Payer en toute sécurité" sublabel="Paiement Stripe sécurisé, accès immédiat" />
+                                <CheckoutButton
+                                    product={course}
+                                    productType="course"
+                                    fullWidth
+                                    size="lg"
+                                    label="Payer en toute sécurité"
+                                    sublabel="Paiement Stripe sécurisé, accès immédiat"
+                                />
                             )}
 
                             <div className="rounded-2xl border border-sage/40 bg-sage/5 px-3.5 py-3 flex items-start gap-2.5">
@@ -585,7 +592,7 @@ function CourseHero({ course, isFree, priceLabel, levelLabel }: CourseHeroProps)
                                             <span>↗</span>
                                         </Link>
                                     ) : (
-                                        <CheckoutButton course={course} fullWidth label="Acheter le cours maintenant" />
+                                        <CheckoutButton product={course} productType="course" fullWidth label="Acheter le cours maintenant" />
                                     )}
                                 </div>
                             </div>
