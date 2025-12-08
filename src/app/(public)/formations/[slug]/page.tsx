@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import slugify from 'slugify';
 import { FORMATIONS } from '@/lib/content/formations';
 import { levelLabels } from '@/components/categories/category-data';
 import { FormationDetail } from '@/components/formations/FormationDetail';
@@ -9,13 +10,15 @@ interface FormationPageProps {
 
 function normalizeSlug(raw: string | string[]) {
     const slug = Array.isArray(raw) ? raw[0] : raw;
-    return decodeURIComponent(slug).trim().toLowerCase();
+    const decoded = decodeURIComponent(slug).trim();
+    return slugify(decoded, { lower: true, strict: true });
 }
 
-export default function FormationPage({ params }: FormationPageProps) {
-    const normalizedSlug = normalizeSlug(params.slug);
+export default async function FormationPage({ params }: FormationPageProps) {
+    const resolvedParams = await params;
+    const normalizedSlug = normalizeSlug(resolvedParams.slug);
 
-    const formation = FORMATIONS.find((f) => f.slug.toLowerCase() === normalizedSlug);
+    const formation = FORMATIONS.find((f) => normalizeSlug(f.slug) === normalizedSlug);
     if (!formation) {
         notFound();
     }

@@ -32,7 +32,7 @@ export function CoursesHero() {
                 <div className="space-y-5">
                     <div className="inline-flex items-center gap-2 rounded-full bg-ivory/12 px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/90">
                         <span className="h-1.5 w-1.5 rounded-full bg-ivory" />
-                        <span>Parcours Explor&apos;Art</span>
+                        <span>Cours Explor&apos;Art</span>
                     </div>
 
                     <div className="space-y-3">

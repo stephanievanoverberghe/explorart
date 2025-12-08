@@ -1,9 +1,8 @@
-// src/components/formations/FormationDetail.tsx
 import Link from 'next/link';
 import Image from 'next/image';
 
 import type { Formation, FormationModule } from '@/lib/content/formations';
-import { pillarConfig } from '@/components/categories/category-data';
+import { pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
 
 type FormationDetailProps = {
     formation: Formation;
@@ -43,61 +42,70 @@ type HeroProps = {
 
 function FormationHero({ formation, levelLabel, priceLabel }: HeroProps) {
     const pillar = pillarConfig[formation.pillarSlug];
+    const heroTheme = pillarHeroThemes[formation.pillarSlug];
 
     return (
-        <header
-            className={[
-                'relative overflow-hidden rounded-3xl px-5 py-7 md:px-8 md:py-8 shadow-lg border border-perl/60 text-ivory',
-                pillar?.colorClasses?.bg?.replace('bg-', 'bg-linear-to-r from-') ||
-                    'bg-linear-to-r from-prune via-prune to-[color-mix(in_oklab,var(--color-prune)_80%,#f9f5ef_20%)]',
-            ].join(' ')}
-        >
-            <div className="pointer-events-none absolute inset-0 opacity-45 mix-blend-soft-light bg-[radial-gradient(circle_at_12%_18%,rgba(240,245,240,0.85),transparent_55%),radial-gradient(circle_at_88%_88%,rgba(60,110,90,0.55),transparent_55%)]" />
+        <header className={['relative overflow-hidden rounded-3xl px-5 py-7 md:px-8 md:py-8 shadow-lg border border-perl/60 text-ivory', heroTheme.bgClass].join(' ')}>
+            {/* Halos doux */}
+            <div className={['pointer-events-none absolute inset-0 opacity-40 mix-blend-soft-light', heroTheme.haloClass].join(' ')} />
+
+            {/* inner border */}
             <div className="pointer-events-none absolute inset-5 rounded-[1.75rem] border border-ivory/15" />
 
             <div className="relative mx-auto flex max-w-6xl flex-col gap-7 lg:flex-row lg:items-stretch lg:gap-8">
+                {/* COLONNE GAUCHE : TEXTE & PITCH */}
                 <div className="flex-1 space-y-5">
-                    <nav className="text-[0.75rem] md:text-sm text-ivory/85" aria-label="Fil d’Ariane">
-                        <ol className="flex flex-wrap items-center gap-1.5">
-                            <li>
-                                <Link href="/" className="hover:text-white">
-                                    Accueil
-                                </Link>
-                            </li>
-                            <li>·</li>
-                            <li>
-                                <Link href="/formations" className="hover:text-white">
-                                    Formations
-                                </Link>
-                            </li>
-                            <li>·</li>
-                            <li className="inline-flex items-center gap-1 text-ivory">
-                                <span className={`h-1.5 w-1.5 rounded-full ${pillar.dotClass}`} />
-                                <span className="truncate max-w-48 sm:max-w-xs">{formation.title}</span>
-                            </li>
-                        </ol>
-                    </nav>
+                    {/* Fil d’Ariane + meta courte */}
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        {/* Fil d’Ariane */}
+                        <nav className="text-[0.75rem] md:text-sm text-ivory/85" aria-label="Fil d’Ariane">
+                            <ol className="flex flex-wrap items-center gap-1.5">
+                                <li>
+                                    <Link href="/" className="hover:text-white">
+                                        Accueil
+                                    </Link>
+                                </li>
+                                <li>·</li>
+                                <li>
+                                    <Link href="/formations" className="hover:text-white">
+                                        Formations
+                                    </Link>
+                                </li>
+                                <li>·</li>
+                                <li className="inline-flex items-center gap-1 text-ivory">
+                                    <span className={`h-1.5 w-1.5 rounded-full ${pillar.dotClass}`} />
+                                    <span className="truncate max-w-48 sm:max-w-xs">{formation.title}</span>
+                                </li>
+                            </ol>
+                        </nav>
 
-                    <div className="inline-flex items-center gap-2 rounded-full bg-black/20 px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/90">
-                        <span className="h-1.5 w-1.5 rounded-full bg-ivory" />
-                        <span>Formation premium Explor&apos;Art</span>
-                        <span className="mx-1 h-px w-6 bg-ivory/60" />
-                        <span>{pillar.title}</span>
-                        <span className="mx-1 h-px w-6 bg-ivory/60" />
-                        <span>{levelLabel}</span>
+                        {/* Meta courte */}
+                        <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/85">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3 py-1 backdrop-blur-sm">
+                                <span className="h-1.5 w-1.5 rounded-full bg-ivory" />
+                                Formation Explor&apos;Art
+                            </span>
+                            <span className="mx-1 h-px w-6 bg-ivory/60" />
+                            <span>{pillar.title}</span>
+                            <span className="mx-1 h-px w-6 bg-ivory/60" />
+                            <span>{levelLabel}</span>
+                        </div>
                     </div>
 
-                    <div className="space-y-3">
+                    {/* Titre + tagline */}
+                    <div className="space-y-3 max-w-xl">
                         <h1 className="font-serif-title text-2xl sm:text-3xl md:text-4xl leading-tight text-ivory">{formation.title}</h1>
-                        <p className="max-w-2xl text-sm md:text-base text-ivory/90">{formation.tagline}</p>
+                        <p className="text-sm md:text-base text-ivory/90 max-w-2xl">{formation.tagline}</p>
                     </div>
 
+                    {/* Bullets principaux */}
                     <ul className="text-sm text-ivory/92 space-y-1.5">
                         <li>• Un grand parcours structuré en {formation.modulesCount} modules, avec sous-modules, intro, conclusion et bonus.</li>
                         <li>• Un format pensé pour une transformation profonde de ta pratique, pas juste un “cours en plus”.</li>
                         <li>• Une pédagogie douce et claire, alignée avec tout l’univers Explor’Art.</li>
                     </ul>
 
+                    {/* Meta durée / structure */}
                     <div className="flex flex-wrap gap-2 pt-2 text-[0.8rem] text-ivory/90">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">⏱ ≈ {formation.approximateHours} h de contenu guidé</span>
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">{formation.modulesCount} modules · intro · conclusion</span>
@@ -105,10 +113,12 @@ function FormationHero({ formation, levelLabel, priceLabel }: HeroProps) {
                     </div>
                 </div>
 
+                {/* COLONNE DROITE : VISUEL + MINI BLOC VENTE */}
                 <aside className="relative w-full max-w-md lg:w-[360px]">
                     <div className="relative h-full overflow-hidden rounded-3xl border border-ivory/25 bg-black/20 shadow-md backdrop-blur-sm">
                         <div className="grid h-full grid-rows-[minmax(0,1.2fr)_auto]">
-                            <div className="relative border-b border-ivory/20">
+                            {/* Visuel formation */}
+                            <div className="relative border-b border-ivory/20 overflow-hidden">
                                 <div className="relative aspect-4/3 w-full">
                                     <Image src={formation.coverImage} alt={formation.title} fill className="object-cover scale-[1.03]" />
                                     <div className="pointer-events-none absolute inset-0 bg-black/35 mix-blend-multiply" />
@@ -120,6 +130,7 @@ function FormationHero({ formation, levelLabel, priceLabel }: HeroProps) {
                                 </div>
                             </div>
 
+                            {/* Bloc prix / CTA */}
                             <div className="space-y-3 p-4 sm:p-5">
                                 <div className="flex items-baseline gap-2">
                                     <p className="text-xl font-semibold text-ivory">{priceLabel}</p>
@@ -270,7 +281,7 @@ function ProgrammeModuleCard({ module, label, accent }: ProgrammeModuleCardProps
                                             ? 'Cours vidéo — '
                                             : lesson.kind === 'exercise'
                                             ? 'Exercice — '
-                                            : lesson.kind === 'ritual'
+                                            : lesson.kind === 'ritual' // ⚠︎ type string = 'ritual', label affiché = "Rituel"
                                             ? 'Rituel — '
                                             : lesson.kind === 'bonus'
                                             ? 'Bonus — '
