@@ -58,7 +58,7 @@ export interface Formation {
 // 🧠 2 formations premium de base
 export const FORMATIONS: Formation[] = [
     {
-        slug: 'apprendre-a-dessiner-methode-somato-graphique',
+        slug: 'apprendre-a-dessiner',
         title: 'Apprendre à dessiner – La Méthode Somato-Graphique Explor’Art',
         tagline: 'En 8 modules, tu passes de « je ne sais pas dessiner » à « je vois, je comprends, je crée ».',
 

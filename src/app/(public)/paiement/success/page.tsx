@@ -6,6 +6,7 @@ import { COURSES } from '@/lib/content/courses';
 import { FORMATIONS } from '@/lib/content/formations';
 import { getAuthUser } from '@/lib/auth/session';
 import { saveCoursePurchase } from '@/lib/purchases/saveCoursePurchase';
+import { saveFormationPurchase } from '@/lib/purchases/saveFormationPurchase';
 
 interface SuccessPageProps {
     searchParams: Promise<{ course?: string; formation?: string }>;
@@ -26,6 +27,14 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
         }
     }
 
+    if (formationSlug) {
+        const saveResult = await saveFormationPurchase({ userId: authUser?.userId, formationSlug });
+
+        if (saveResult.status === 'error') {
+            console.error('[PAYMENT_SUCCESS_SAVE_FORMATION_ERROR]', saveResult.message);
+        }
+    }
+
     const course = courseSlug ? COURSES.find((c) => c.slug === courseSlug) : undefined;
     const formation = formationSlug ? FORMATIONS.find((f) => f.slug === formationSlug) : undefined;
 
@@ -42,8 +51,11 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
                 <header className="space-y-3">
                     <h1 className="font-serif-title text-2xl md:text-3xl text-main">Merci, ton paiement est bien passé ✨</h1>
                     <p className="text-sm md:text-base text-main/75 max-w-xl">
-                        Tu viens de débloquer un nouveau cours Explor’Art. Tu vas recevoir un mail de confirmation avec ton reçu et le lien d’accès. Tu peux aussi y accéder tout de
-                        suite ci-dessous.
+                        {course
+                            ? 'Tu viens de débloquer un nouveau cours Explor’Art. Tu vas recevoir un mail de confirmation avec ton reçu et le lien d’accès. Tu peux aussi y accéder tout de suite ci-dessous.'
+                            : formation
+                            ? 'Tu viens de réserver une place pour une formation Explor’Art. Tu recevras un mail de confirmation avec les prochaines étapes et le lien d’accès dès l’ouverture.'
+                            : 'Ton paiement est confirmé. Si tu ne vois pas le produit associé, utilise le lien reçu par e-mail ou passe par ton espace perso.'}
                     </p>
                 </header>
 

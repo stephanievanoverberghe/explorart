@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { COURSES } from '@/lib/content/courses';
 import { connectToDatabase } from '@/lib/db/connect';
 import { getAuthUser } from '@/lib/auth/session';
-import { Purchase } from '@/lib/models/Purchase';
+import { CoursePurchase } from '@/lib/models/CoursePurchase';
 import { saveCoursePurchase } from '@/lib/purchases/saveCoursePurchase';
 
 export async function GET() {
@@ -16,7 +16,7 @@ export async function GET() {
 
     await connectToDatabase();
 
-    const purchases = await Purchase.find({ userId: authUser.userId }).sort({ createdAt: -1 }).lean();
+    const purchases = await CoursePurchase.find({ userId: authUser.userId }).sort({ createdAt: -1 }).lean();
 
     const courses = purchases
         .map((purchase) => {

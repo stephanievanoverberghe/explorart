@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { COURSES } from '@/lib/content/courses';
 import { getAuthUser } from '@/lib/auth/session';
 import { connectToDatabase } from '@/lib/db/connect';
-import { Purchase } from '@/lib/models/Purchase';
+import { CoursePurchase } from '@/lib/models/CoursePurchase';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const existingPurchase = await Purchase.findOne({ userId: authUser.userId, courseSlug: course.slug });
+    const existingPurchase = await CoursePurchase.findOne({ userId: authUser.userId, courseSlug: course.slug });
 
     if (existingPurchase) {
         return NextResponse.json({ error: 'Tu as déjà débloqué ce cours.' }, { status: 400 });

@@ -4,13 +4,13 @@ import { Types } from 'mongoose';
 
 import { COURSES } from '@/lib/content/courses';
 import { connectToDatabase } from '@/lib/db/connect';
-import { Purchase, type PurchaseDocument } from '@/lib/models/Purchase';
+import { CoursePurchase, type CoursePurchaseDocument } from '@/lib/models/CoursePurchase';
 
 export type SaveCoursePurchaseResult =
     | { status: 'invalid-course' }
     | { status: 'unauthenticated' }
-    | { status: 'exists'; purchase: PurchaseDocument }
-    | { status: 'saved'; purchase: PurchaseDocument }
+    | { status: 'exists'; purchase: CoursePurchaseDocument }
+    | { status: 'saved'; purchase: CoursePurchaseDocument }
     | { status: 'error'; message: string };
 
 interface SaveCoursePurchaseOptions {
@@ -36,13 +36,13 @@ export async function saveCoursePurchase(options: SaveCoursePurchaseOptions): Pr
     try {
         await connectToDatabase();
 
-        const existingPurchase = await Purchase.findOne({ userId: options.userId, courseSlug: options.courseSlug });
+        const existingPurchase = await CoursePurchase.findOne({ userId: options.userId, courseSlug: options.courseSlug });
 
         if (existingPurchase) {
             return { status: 'exists', purchase: existingPurchase };
         }
 
-        const purchase = await Purchase.create({
+        const purchase = await CoursePurchase.create({
             userId: new Types.ObjectId(options.userId),
             courseSlug: course.slug,
             courseTitle: course.title,

@@ -1,10 +1,10 @@
-// src/lib/models/Purchase.ts
+// src/lib/models/FormationPurchase.ts
 import { Schema, model, models, type Document, type Model, Types } from 'mongoose';
 
-export interface PurchaseDocument extends Document {
+export interface FormationPurchaseDocument extends Document {
     userId: Types.ObjectId;
-    courseSlug: string;
-    courseTitle: string;
+    formationSlug: string;
+    formationTitle: string;
     amountTotal: number;
     currency: string;
     stripeSessionId: string;
@@ -13,11 +13,11 @@ export interface PurchaseDocument extends Document {
     updatedAt: Date;
 }
 
-const purchaseSchema = new Schema<PurchaseDocument>(
+const formationPurchaseSchema = new Schema<FormationPurchaseDocument>(
     {
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-        courseSlug: { type: String, required: true },
-        courseTitle: { type: String, required: true },
+        formationSlug: { type: String, required: true },
+        formationTitle: { type: String, required: true },
         amountTotal: { type: Number, required: true },
         currency: { type: String, required: true, default: 'eur' },
         stripeSessionId: { type: String, required: true, unique: true },
@@ -26,6 +26,6 @@ const purchaseSchema = new Schema<PurchaseDocument>(
     { timestamps: true }
 );
 
-purchaseSchema.index({ userId: 1, courseSlug: 1 }, { unique: true });
+formationPurchaseSchema.index({ userId: 1, formationSlug: 1 }, { unique: true });
 
-export const Purchase: Model<PurchaseDocument> = models.Purchase || model<PurchaseDocument>('Purchase', purchaseSchema);
+export const FormationPurchase: Model<FormationPurchaseDocument> = models.FormationPurchase || model<FormationPurchaseDocument>('FormationPurchase', formationPurchaseSchema);
