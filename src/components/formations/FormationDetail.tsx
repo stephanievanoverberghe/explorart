@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { CheckCircle2, Clock, Layers } from 'lucide-react';
 
 import type { Formation, FormationModule } from '@/lib/content/formations';
 import { pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
@@ -52,105 +53,119 @@ function FormationHero({ formation, levelLabel, priceLabel }: HeroProps) {
             {/* inner border */}
             <div className="pointer-events-none absolute inset-5 rounded-[1.75rem] border border-ivory/15" />
 
-            <div className="relative mx-auto flex max-w-6xl flex-col gap-7 lg:flex-row lg:items-stretch lg:gap-8">
-                {/* COLONNE GAUCHE : TEXTE & PITCH */}
-                <div className="flex-1 space-y-5">
-                    {/* Fil d’Ariane + meta courte */}
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                        {/* Fil d’Ariane */}
-                        <nav className="text-[0.75rem] md:text-sm text-ivory/85" aria-label="Fil d’Ariane">
-                            <ol className="flex flex-wrap items-center gap-1.5">
-                                <li>
-                                    <Link href="/" className="hover:text-white">
-                                        Accueil
-                                    </Link>
-                                </li>
-                                <li>·</li>
-                                <li>
-                                    <Link href="/formations" className="hover:text-white">
-                                        Formations
-                                    </Link>
-                                </li>
-                                <li>·</li>
-                                <li className="inline-flex items-center gap-1 text-ivory">
-                                    <span className={`h-1.5 w-1.5 rounded-full ${pillar.dotClass}`} />
-                                    <span className="truncate max-w-48 sm:max-w-xs">{formation.title}</span>
-                                </li>
-                            </ol>
-                        </nav>
+            <div className="relative max-w-6xl mx-auto space-y-6">
+                {/* Ligne top : fil d’Ariane + meta courte */}
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    {/* Fil d’Ariane */}
+                    <nav className="text-[0.75rem] md:text-sm text-ivory/85" aria-label="Fil d’Ariane">
+                        <ol className="flex flex-wrap items-center gap-1.5">
+                            <li>
+                                <Link href="/" className="hover:text-white">
+                                    Accueil
+                                </Link>
+                            </li>
+                            <li>·</li>
+                            <li>
+                                <Link href="/formations" className="hover:text-white">
+                                    Formations
+                                </Link>
+                            </li>
+                            <li>·</li>
+                            <li className="inline-flex items-center gap-1 text-ivory">
+                                <span className={`h-1.5 w-1.5 rounded-full ${pillar.dotClass}`} />
+                                <span className="truncate max-w-48 sm:max-w-xs">{formation.title}</span>
+                            </li>
+                        </ol>
+                    </nav>
 
-                        {/* Meta courte */}
-                        <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/85">
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3 py-1 backdrop-blur-sm">
-                                <span className="h-1.5 w-1.5 rounded-full bg-ivory" />
-                                Formation Explor&apos;Art
-                            </span>
-                            <span className="mx-1 h-px w-6 bg-ivory/60" />
-                            <span>{pillar.title}</span>
-                            <span className="mx-1 h-px w-6 bg-ivory/60" />
-                            <span>{levelLabel}</span>
-                        </div>
-                    </div>
-
-                    {/* Titre + tagline */}
-                    <div className="space-y-3 max-w-xl">
-                        <h1 className="font-serif-title text-2xl sm:text-3xl md:text-4xl leading-tight text-ivory">{formation.title}</h1>
-                        <p className="text-sm md:text-base text-ivory/90 max-w-2xl">{formation.tagline}</p>
-                    </div>
-
-                    {/* Bullets principaux */}
-                    <ul className="text-sm text-ivory/92 space-y-1.5">
-                        <li>• Un grand parcours structuré en {formation.modulesCount} modules, avec sous-modules, intro, conclusion et bonus.</li>
-                        <li>• Un format pensé pour une transformation profonde de ta pratique, pas juste un “cours en plus”.</li>
-                        <li>• Une pédagogie douce et claire, alignée avec tout l’univers Explor’Art.</li>
-                    </ul>
-
-                    {/* Meta durée / structure */}
-                    <div className="flex flex-wrap gap-2 pt-2 text-[0.8rem] text-ivory/90">
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">⏱ ≈ {formation.approximateHours} h de contenu guidé</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">{formation.modulesCount} modules · intro · conclusion</span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">Niveau {levelLabel.toLowerCase()}</span>
+                    {/* Meta courte */}
+                    <div className="flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-[0.18em] text-ivory/85">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3 py-1 backdrop-blur-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-ivory" />
+                            Formation Explor&apos;Art
+                        </span>
+                        <span className="mx-1 h-px w-6 bg-ivory/60" />
+                        <span>{pillar.title}</span>
+                        <span className="mx-1 h-px w-6 bg-ivory/60" />
+                        <span>{levelLabel}</span>
                     </div>
                 </div>
 
-                {/* COLONNE DROITE : VISUEL + MINI BLOC VENTE */}
-                <aside className="relative w-full max-w-md lg:w-[360px]">
-                    <div className="relative h-full overflow-hidden rounded-3xl border border-ivory/25 bg-black/20 shadow-md backdrop-blur-sm">
-                        <div className="grid h-full grid-rows-[minmax(0,1.2fr)_auto]">
-                            {/* Visuel formation */}
-                            <div className="relative border-b border-ivory/20 overflow-hidden">
-                                <div className="relative aspect-4/3 w-full">
-                                    <Image src={formation.coverImage} alt={formation.title} fill className="object-cover scale-[1.03]" />
-                                    <div className="pointer-events-none absolute inset-0 bg-black/35 mix-blend-multiply" />
-                                    <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/40 to-transparent" />
-                                    <div className="absolute left-4 right-4 bottom-3 flex items-center justify-between text-[0.78rem] text-ivory/90">
-                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1">{pillar.title}</span>
-                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1">{formation.modulesCount} modules</span>
-                                    </div>
-                                </div>
-                            </div>
+                {/* Grid principale : pitch + visuel + mini bloc vente */}
+                <div className="grid gap-7 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1.4fr)] items-stretch">
+                    {/* Colonne gauche : pitch principal */}
+                    <div className="space-y-5 max-w-xl">
+                        <div className="space-y-3">
+                            <h1 className="font-serif-title text-2xl sm:text-3xl md:text-4xl leading-tight text-ivory">{formation.title}</h1>
+                            <p className="text-sm md:text-base text-ivory/90 max-w-2xl">{formation.tagline}</p>
+                        </div>
 
-                            {/* Bloc prix / CTA */}
-                            <div className="space-y-3 p-4 sm:p-5">
-                                <div className="flex items-baseline gap-2">
-                                    <p className="text-xl font-semibold text-ivory">{priceLabel}</p>
-                                    <p className="text-[0.8rem] text-ivory/80">Pour une formation complète, rejouable, structurée en modules.</p>
-                                </div>
-                                <p className="text-[0.82rem] text-ivory/90">
-                                    Les inscriptions ouvriront bientôt. Tu pourras suivre le parcours à ton rythme, en vivant chaque module comme un vrai rendez-vous avec ta
-                                    créativité.
-                                </p>
-                                <Link
-                                    href="/contact"
-                                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ivory px-4 py-2 text-sm font-medium text-main shadow-sm hover:bg-ivory/95"
-                                >
-                                    Être prévenu·e de l’ouverture
-                                    <span>↗</span>
-                                </Link>
-                            </div>
+                        <ul className="text-sm text-ivory/92 space-y-1.5">
+                            <li className="flex gap-2">
+                                <CheckCircle2 className="h-4 w-4 mt-0.5 text-ivory" />
+                                <span>Un grand parcours structuré en {formation.modulesCount} modules, avec sous-modules, intro, conclusion et bonus.</span>
+                            </li>
+                            <li className="flex gap-2">
+                                <CheckCircle2 className="h-4 w-4 mt-0.5 text-ivory" />
+                                <span>Un format pensé pour une transformation profonde de ta pratique, pas juste un “cours en plus”.</span>
+                            </li>
+                            <li className="flex gap-2">
+                                <CheckCircle2 className="h-4 w-4 mt-0.5 text-ivory" />
+                                <span>Une pédagogie douce et claire, alignée avec tout l’univers Explor’Art.</span>
+                            </li>
+                        </ul>
+
+                        {/* Meta durée / structure */}
+                        <div className="flex flex-wrap gap-2 pt-2 text-[0.8rem] text-ivory/90">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">
+                                <Clock className="h-4 w-4" /> ≈ {formation.approximateHours} h de contenu guidé
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">
+                                <Layers className="h-4 w-4" /> {formation.modulesCount} modules · intro · conclusion
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1">Niveau {levelLabel.toLowerCase()}</span>
                         </div>
                     </div>
-                </aside>
+
+                    {/* Colonne droite : visuel + mini bloc vente */}
+                    <aside className="relative">
+                        <div className="relative h-full rounded-3xl border border-ivory/25 bg-black/20 shadow-md backdrop-blur-sm overflow-hidden">
+                            <div className="grid h-full grid-rows-[minmax(0,1.2fr)_auto]">
+                                {/* Visuel formation */}
+                                <div className="relative border-b border-ivory/20 overflow-hidden">
+                                    <div className="relative aspect-4/3 w-full">
+                                        <Image src={formation.coverImage} alt={formation.title} fill className="object-cover scale-[1.03]" />
+                                        <div className="pointer-events-none absolute inset-0 bg-black/35 mix-blend-multiply" />
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/40 to-transparent" />
+                                        <div className="absolute left-4 right-4 bottom-3 flex items-center justify-between text-[0.78rem] text-ivory/90">
+                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1">{pillar.title}</span>
+                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1">{levelLabel}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bloc prix / CTA */}
+                                <div className="space-y-3 p-4 sm:p-5">
+                                    <div className="flex items-baseline gap-2">
+                                        <p className="text-xl font-semibold text-ivory">{priceLabel}</p>
+                                        <p className="text-[0.8rem] text-ivory/80">Pour une formation complète, rejouable, structurée en modules.</p>
+                                    </div>
+                                    <p className="text-[0.82rem] text-ivory/90">
+                                        Les inscriptions ouvriront bientôt. Tu pourras suivre le parcours à ton rythme, en vivant chaque module comme un vrai rendez-vous avec ta
+                                        créativité.
+                                    </p>
+                                    <Link
+                                        href="/contact"
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ivory px-4 py-2 text-sm font-medium text-main shadow-sm hover:bg-ivory/95 transition-colors"
+                                    >
+                                        Être prévenu·e de l’ouverture
+                                        <span>↗</span>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
             </div>
         </header>
     );
