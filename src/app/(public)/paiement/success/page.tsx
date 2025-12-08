@@ -87,10 +87,10 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
                                     </Link>
 
                                     <Link
-                                        href="/tableau-de-bord/cours"
+                                        href="/tableau-de-bord?tab=journeys"
                                         className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-[0.85rem] font-medium text-main/75 hover:bg-background transition-colors"
                                     >
-                                        Voir tous mes cours
+                                        Retrouver mes parcours
                                         <BookOpenCheck className="h-4 w-4" />
                                     </Link>
                                 </div>
@@ -119,10 +119,10 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                                 <Link
-                                    href="/tableau-de-bord/formations"
+                                    href="/tableau-de-bord?tab=journeys"
                                     className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-[0.85rem] font-medium text-main/75 hover:bg-background"
                                 >
-                                    Voir mes formations
+                                    Retrouver mes parcours
                                 </Link>
                             </div>
                         </div>
@@ -134,10 +134,10 @@ export default async function PaymentSuccessPage({ searchParams }: SuccessPagePr
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 <Link
-                                    href="/tableau-de-bord/cours"
+                                    href="/tableau-de-bord?tab=journeys"
                                     className="inline-flex items-center justify-center gap-2 rounded-full bg-main px-4 py-2.5 text-sm font-medium text-ivory hover:bg-main/90"
                                 >
-                                    Accéder à mes cours
+                                    Accéder à mes parcours
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                                 <Link

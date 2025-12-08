@@ -111,8 +111,7 @@ const accountLinksPublic = [
 // 🔒 Espace membre : tout sous /tableau-de-bord
 const accountLinksPrivate = [
     { href: '/tableau-de-bord', label: 'Mon atelier' },
-    { href: '/tableau-de-bord/formations', label: 'Mes formations' },
-    { href: '/tableau-de-bord/cours', label: 'Mes cours' },
+    { href: '/tableau-de-bord?tab=journeys', label: 'Parcours, cours & formations' },
 ];
 
 const adminLinks = [{ href: '/admin', label: 'Dashboard admin', icon: LayoutDashboard }];
