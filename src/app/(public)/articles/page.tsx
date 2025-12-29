@@ -319,15 +319,9 @@ export default function ArticlesPage() {
 
                                                     {/* Badges format / niveau / sous-cat */}
                                                     <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 z-30">
-                                                        <span className="text-[0.6rem] uppercase tracking-[0.16em] rounded-full px-1.5 py-0.5 bg-ivory/90 text-main shadow-sm">
-                                                            {levelLabels[post.level]}
-                                                        </span>
-                                                        <span className={`text-[0.6rem] uppercase tracking-[0.16em] rounded-full px-1.5 py-0.5 ${pillar.badgeClass}`}>
-                                                            {formatLabels[post.format]}
-                                                        </span>
-                                                        <span className="text-[0.6rem] uppercase tracking-[0.16em] rounded-full px-1.5 py-0.5 bg-black/40 backdrop-blur-sm text-ivory/90">
-                                                            {subcatLabels[post.subcategory]}
-                                                        </span>
+                                                        <span className="badge badge-xs badge-level shadow-sm">{levelLabels[post.level]}</span>
+                                                        <span className={`badge badge-xs badge-pillar ${pillar.badgeClass}`}>{formatLabels[post.format]}</span>
+                                                        <span className="badge badge-xs bg-black/40 backdrop-blur-sm text-ivory/90">{subcatLabels[post.subcategory]}</span>
                                                     </div>
 
                                                     {/* ⭐ Favoris flottant en haut à droite */}
