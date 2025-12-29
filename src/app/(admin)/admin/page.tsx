@@ -2,9 +2,6 @@
 import Link from 'next/link';
 import { Sparkles, Plus, Users, BookOpenCheck, HeartHandshake } from 'lucide-react';
 
-const btnOutlineMain =
-    'inline-flex items-center justify-center rounded-full border border-main/70 bg-transparent px-5 py-2.5 text-sm font-medium text-main transition hover:-translate-y-0.5 hover:bg-main hover:text-ivory';
-
 const card = 'rounded-3xl border border-perl/60 bg-white/95 shadow-sm';
 const cardInner = 'rounded-2xl border border-perl/60 bg-page/70 px-4 py-4';
 
@@ -38,17 +35,6 @@ const activityFeed = [
     { title: '23 nouvelles inscriptions', description: 'Module Couleurs & storytelling', time: 'Il y a 2h' },
     { title: 'Quiz final validé', description: 'Cohorte Printemps • 96% de réussite', time: 'Il y a 5h' },
     { title: 'Contenu à réviser', description: 'Module Culture artistique express', time: 'Hier' },
-];
-
-const adminSections = [
-    { title: 'Cours', description: 'Piloter les cours unitaires, formats courts et exercices.', href: '/admin/cours', cta: 'Gérer les cours' },
-    { title: 'Formations', description: 'Structurer les parcours complets et les cohortes associées.', href: '/admin/formations', cta: 'Gérer les formations' },
-    { title: 'Articles', description: 'Créer, modifier et publier les contenus éditoriaux.', href: '/admin/articles', cta: 'Gérer les articles' },
-    { title: 'Catégories', description: 'Organiser les thématiques et les collections.', href: '/admin/categories', cta: 'Gérer les catégories' },
-    { title: 'Palettes', description: 'Structurer les palettes de couleurs utilisées.', href: '/admin/palettes', cta: 'Gérer les palettes' },
-    { title: 'Ressources', description: 'Mettre à jour les ressources et références.', href: '/admin/ressources', cta: 'Gérer les ressources' },
-    { title: 'Utilisateurs', description: 'Suivre les comptes et les permissions.', href: '/admin/utilisateurs', cta: 'Gérer les utilisateurs' },
-    { title: 'Réglages', description: 'Ajuster les paramètres globaux de la plateforme.', href: '/admin/reglages', cta: 'Ouvrir les réglages' },
 ];
 
 export default function AdminPage() {
@@ -280,26 +266,6 @@ export default function AdminPage() {
                         </div>
                     </div>
                 </aside>
-            </section>
-
-            {/* Accès sections admin */}
-            <section className="space-y-4">
-                <div className="space-y-1">
-                    <h3 className="font-serif-title text-lg text-main">Tous les espaces d’administration</h3>
-                    <p className="text-sm text-main/65">Accédez rapidement aux modules clés pour animer votre plateforme e-learning.</p>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                    {adminSections.map((section) => (
-                        <div key={section.href} className={`${card} p-5 sm:p-6`}>
-                            <h4 className="font-serif-title text-lg text-main">{section.title}</h4>
-                            <p className="mt-2 text-sm text-main/65">{section.description}</p>
-                            <Link href={section.href} className={`${btnOutlineMain} mt-4`}>
-                                {section.cta}
-                            </Link>
-                        </div>
-                    ))}
-                </div>
             </section>
         </div>
     );
