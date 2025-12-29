@@ -7,7 +7,20 @@ const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 type PaletteRecord = {
     _id: string;
     name: string;
+    description?: string;
     colors: string[];
+};
+
+type PaletteFormState = {
+    name: string;
+    description: string;
+    colors: string;
+};
+
+const defaultForm: PaletteFormState = {
+    name: '',
+    description: '',
+    colors: '',
 };
 
 export function AdminPalettesManager() {
@@ -16,11 +29,10 @@ export function AdminPalettesManager() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [form, setForm] = useState({
-        name: '',
-        description: '',
-        colors: '',
-    });
+    const [form, setForm] = useState<PaletteFormState>(defaultForm);
+    const [activeMode, setActiveMode] = useState<'create' | 'edit' | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<PaletteRecord | null>(null);
 
     const loadPalettes = async () => {
         try {
@@ -47,6 +59,32 @@ export function AdminPalettesManager() {
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
+    const openCreate = () => {
+        setForm(defaultForm);
+        setEditingId(null);
+        setActiveMode('create');
+        setError(null);
+        setSuccess(null);
+    };
+
+    const openEdit = (palette: PaletteRecord) => {
+        setForm({
+            name: palette.name ?? '',
+            description: palette.description ?? '',
+            colors: palette.colors?.join(', ') ?? '',
+        });
+        setEditingId(palette._id);
+        setActiveMode('edit');
+        setError(null);
+        setSuccess(null);
+    };
+
+    const closeModal = () => {
+        setActiveMode(null);
+        setEditingId(null);
+        setError(null);
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(null);
@@ -71,10 +109,12 @@ export function AdminPalettesManager() {
 
         try {
             setIsSubmitting(true);
+            const method = activeMode === 'edit' ? 'PATCH' : 'POST';
             const response = await fetch('/api/admin/palettes', {
-                method: 'POST',
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    id: editingId,
                     name,
                     description: form.description.trim(),
                     colors,
@@ -82,10 +122,12 @@ export function AdminPalettesManager() {
             });
             const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || 'Impossible de créer cette palette.');
+                throw new Error(data.error || 'Impossible de sauvegarder cette palette.');
             }
-            setSuccess('Palette enregistrée avec succès.');
-            setForm({ name: '', description: '', colors: '' });
+            setSuccess(activeMode === 'edit' ? 'Palette mise à jour.' : 'Palette enregistrée avec succès.');
+            setForm(defaultForm);
+            setActiveMode(null);
+            setEditingId(null);
             await loadPalettes();
         } catch (submitError) {
             setError(submitError instanceof Error ? submitError.message : 'Erreur inconnue.');
@@ -94,72 +136,171 @@ export function AdminPalettesManager() {
         }
     };
 
+    const handleDelete = async () => {
+        if (!deleteTarget) {
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            const response = await fetch('/api/admin/palettes', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: deleteTarget._id }),
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Impossible de supprimer cette palette.');
+            }
+            setSuccess('Palette supprimée.');
+            setDeleteTarget(null);
+            await loadPalettes();
+        } catch (deleteError) {
+            setError(deleteError instanceof Error ? deleteError.message : 'Erreur inconnue.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="space-y-8">
-            <header>
-                <h2 className="font-serif-title text-xl text-main">Palettes</h2>
-                <p className="text-sm text-main/60">Centralisez les palettes proposées dans les contenus.</p>
-            </header>
-
-            <form onSubmit={handleSubmit} className="grid gap-4 rounded-3xl border border-perl/60 bg-white p-6">
-                <label className="text-sm text-main/70">
-                    Nom
-                    <input name="name" value={form.name} onChange={handleChange} className="mt-2 w-full rounded-full border border-perl/60 px-4 py-2 text-sm" />
-                </label>
-                <label className="text-sm text-main/70">
-                    Description
-                    <textarea
-                        name="description"
-                        value={form.description}
-                        onChange={handleChange}
-                        className="mt-2 w-full rounded-2xl border border-perl/60 px-4 py-3 text-sm"
-                        rows={3}
-                    />
-                </label>
-                <label className="text-sm text-main/70">
-                    Couleurs (hex, séparées par des virgules)
-                    <input
-                        name="colors"
-                        value={form.colors}
-                        onChange={handleChange}
-                        className="mt-2 w-full rounded-full border border-perl/60 px-4 py-2 text-sm"
-                        placeholder="#E0B1A1, #F7D6C1"
-                    />
-                </label>
-
-                {error && <p className="text-sm text-red-600">{error}</p>}
-                {success && <p className="text-sm text-green-600">{success}</p>}
+            <header className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-main/40">Couleurs</p>
+                    <h2 className="font-serif-title text-2xl text-main">Palettes</h2>
+                    <p className="text-sm text-main/60">Supervisez vos palettes de couleurs et gardez une cohérence visuelle globale.</p>
+                </div>
 
                 <button
-                    type="submit"
-                    className="w-full rounded-full bg-main px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={isSubmitting}
+                    type="button"
+                    onClick={openCreate}
+                    className="rounded-full bg-main px-4 py-2 cursor-pointer text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-main/90"
                 >
-                    {isSubmitting ? 'Enregistrement...' : 'Enregistrer la palette'}
+                    Nouvelle palette
                 </button>
-            </form>
+            </header>
 
-            <section className="space-y-3">
-                <h3 className="text-sm font-semibold text-main/70">Palettes récentes</h3>
+            {success && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</div>}
+            {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+            <section className="grid gap-4 md:grid-cols-2">
                 {isLoading ? (
                     <p className="text-sm text-main/50">Chargement...</p>
                 ) : palettes.length === 0 ? (
-                    <p className="text-sm text-main/50">Aucune palette pour le moment.</p>
+                    <div className="rounded-2xl border border-dashed border-perl/70 bg-page px-4 py-6 text-sm text-main/60">
+                        Aucune palette pour le moment. Ajoutez un premier set de couleurs.
+                    </div>
                 ) : (
-                    <ul className="space-y-2 text-sm text-main/70">
-                        {palettes.map((palette) => (
-                            <li key={palette._id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-perl/50 bg-white/70 px-4 py-2">
-                                <span className="font-medium text-main">{palette.name}</span>
-                                <div className="flex items-center gap-2">
-                                    {palette.colors?.slice(0, 5).map((color) => (
-                                        <span key={color} className="h-4 w-4 rounded-full" style={{ backgroundColor: color }} />
+                    palettes.map((palette) => (
+                        <article key={palette._id} className="rounded-2xl border border-perl/50 bg-white p-4 shadow-sm">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-main">{palette.name}</h3>
+                                    {palette.description && <p className="mt-2 text-xs text-main/60 line-clamp-2">{palette.description}</p>}
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                    {palette.colors?.slice(0, 6).map((color) => (
+                                        <span key={color} className="h-5 w-5 rounded-full border border-perl/60" style={{ backgroundColor: color }} />
                                     ))}
                                 </div>
-                            </li>
-                        ))}
-                    </ul>
+                            </div>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => openEdit(palette)}
+                                    className="rounded-full border border-main px-3 py-1 text-xs font-semibold text-main transition hover:bg-main hover:text-white"
+                                >
+                                    Modifier
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteTarget(palette)}
+                                    className="rounded-full border border-red-200 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                                >
+                                    Supprimer
+                                </button>
+                            </div>
+                        </article>
+                    ))
                 )}
             </section>
+
+            {activeMode && (
+                <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4 py-8">
+                    <div className="w-full max-w-2xl rounded-4xl bg-white p-6 shadow-xl">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.3em] text-main/40">{activeMode === 'edit' ? 'Modifier' : 'Créer'}</p>
+                                <h3 className="font-serif-title text-2xl text-main">{activeMode === 'edit' ? 'Mettre à jour la palette' : 'Nouvelle palette'}</h3>
+                            </div>
+                            <button type="button" onClick={closeModal} className="text-xs font-semibold uppercase tracking-wide text-main/60">
+                                Fermer
+                            </button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+                            <label className="text-sm text-main/70">
+                                Nom
+                                <input name="name" value={form.name} onChange={handleChange} className="mt-2 w-full rounded-full border border-perl/60 px-4 py-2 text-sm" />
+                            </label>
+                            <label className="text-sm text-main/70">
+                                Description
+                                <textarea
+                                    name="description"
+                                    value={form.description}
+                                    onChange={handleChange}
+                                    className="mt-2 w-full rounded-2xl border border-perl/60 px-4 py-3 text-sm"
+                                    rows={3}
+                                />
+                            </label>
+                            <label className="text-sm text-main/70">
+                                Couleurs (hex, séparées par des virgules)
+                                <input
+                                    name="colors"
+                                    value={form.colors}
+                                    onChange={handleChange}
+                                    className="mt-2 w-full rounded-full border border-perl/60 px-4 py-2 text-sm"
+                                    placeholder="#E0B1A1, #F7D6C1"
+                                />
+                            </label>
+                            <div className="flex flex-wrap justify-end gap-3">
+                                <button
+                                    type="submit"
+                                    className="rounded-full bg-main px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Enregistrement...' : activeMode === 'edit' ? 'Mettre à jour' : 'Enregistrer'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {deleteTarget && (
+                <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4 py-8">
+                    <div className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-xl">
+                        <h3 className="font-serif-title text-xl text-main">Supprimer cette palette ?</h3>
+                        <p className="mt-2 text-sm text-main/60">Vous êtes sur le point de supprimer “{deleteTarget.name}”. Cette action est définitive.</p>
+                        <div className="mt-6 flex flex-wrap justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setDeleteTarget(null)}
+                                className="rounded-full border border-perl/70 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-main"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="rounded-full bg-red-600 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Suppression...' : 'Supprimer'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

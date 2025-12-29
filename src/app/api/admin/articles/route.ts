@@ -69,3 +69,92 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Impossible de créer cet article.' }, { status: 500 });
     }
 }
+
+export async function PATCH(req: Request) {
+    try {
+        const body = await req.json();
+        const id = String(body.id ?? '').trim();
+        const title = String(body.title ?? '').trim();
+        const slug = String(body.slug ?? '')
+            .trim()
+            .toLowerCase();
+        const excerpt = String(body.excerpt ?? '').trim();
+        const format = String(body.format ?? '').trim();
+        const status = String(body.status ?? 'draft').trim();
+        const coverImageUrl = String(body.coverImageUrl ?? '').trim();
+        const categorySlug = String(body.categorySlug ?? '').trim();
+
+        if (!id) {
+            return NextResponse.json({ error: 'Identifiant requis.' }, { status: 400 });
+        }
+
+        if (!title || !slug || !format) {
+            return NextResponse.json({ error: 'Titre, slug et format sont requis.' }, { status: 400 });
+        }
+
+        if (!slugRegex.test(slug)) {
+            return NextResponse.json({ error: 'Le slug doit contenir uniquement des minuscules, chiffres ou tirets.' }, { status: 400 });
+        }
+
+        if (!allowedFormats.includes(format)) {
+            return NextResponse.json({ error: 'Le format sélectionné est invalide.' }, { status: 400 });
+        }
+
+        if (!['draft', 'published'].includes(status)) {
+            return NextResponse.json({ error: 'Le statut est invalide.' }, { status: 400 });
+        }
+
+        await connectToDatabase();
+
+        const existing = await Article.findOne({ slug, _id: { $ne: id } });
+        if (existing) {
+            return NextResponse.json({ error: 'Un article avec ce slug existe déjà.' }, { status: 409 });
+        }
+
+        const article = await Article.findByIdAndUpdate(
+            id,
+            {
+                title,
+                slug,
+                excerpt,
+                format,
+                status,
+                coverImageUrl,
+                categorySlug,
+            },
+            { new: true }
+        );
+
+        if (!article) {
+            return NextResponse.json({ error: 'Article introuvable.' }, { status: 404 });
+        }
+
+        return NextResponse.json({ data: article });
+    } catch (error) {
+        console.error('PATCH /api/admin/articles', error);
+        return NextResponse.json({ error: 'Impossible de mettre à jour cet article.' }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    try {
+        const body = await req.json();
+        const id = String(body.id ?? '').trim();
+
+        if (!id) {
+            return NextResponse.json({ error: 'Identifiant requis.' }, { status: 400 });
+        }
+
+        await connectToDatabase();
+        const article = await Article.findByIdAndDelete(id);
+
+        if (!article) {
+            return NextResponse.json({ error: 'Article introuvable.' }, { status: 404 });
+        }
+
+        return NextResponse.json({ data: { id } });
+    } catch (error) {
+        console.error('DELETE /api/admin/articles', error);
+        return NextResponse.json({ error: 'Impossible de supprimer cet article.' }, { status: 500 });
+    }
+}
