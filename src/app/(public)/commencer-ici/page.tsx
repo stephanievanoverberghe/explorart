@@ -4,6 +4,7 @@
 import StartHere from '@/components/start-here/StartHere';
 import { StartHereHero } from '@/components/start-here/StartHereHero';
 import { StartHereHighlights } from '@/components/start-here/StartHereHighlights';
+import Link from 'next/link';
 
 export default function StartHerePage() {
     return (
@@ -23,6 +24,27 @@ export default function StartHerePage() {
                     </div>
                 </div>
                 <StartHere />
+
+                <section className="card bg-background space-y-4">
+                    <div className="space-y-1">
+                        <p className="text-[0.72rem] uppercase tracking-[0.18em] text-main/70">Et après ?</p>
+                        <h3 className="font-serif-title text-lg md:text-xl">Prolonge le chemin à ton rythme</h3>
+                        <p className="text-sm text-main/70 max-w-2xl">
+                            Une fois les bases posées, tu peux explorer des articles ciblés, piocher des ressources ou choisir un cours pour t&apos;entraîner en douceur.
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        <Link href="/articles" className="btn btn-secondary">
+                            Explorer les articles
+                        </Link>
+                        <Link href="/ressources" className="btn btn-primary">
+                            Découvrir les ressources
+                        </Link>
+                        <Link href="/cours" className="btn btn-secondary">
+                            Voir les cours
+                        </Link>
+                    </div>
+                </section>
             </div>
         </section>
     );

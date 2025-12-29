@@ -1,7 +1,7 @@
-// src/components/user/atelier/CommentsPanel.tsx
 import Link from 'next/link';
 import { MessageCircle, Filter, MoreHorizontal } from 'lucide-react';
 import { mockComments, type CommentStatus } from './atelier-data';
+import { PanelHeader } from './PanelHeader';
 
 type FilterId = CommentStatus | 'all';
 
@@ -54,32 +54,28 @@ export function CommentsPanel() {
 
     return (
         <section className="space-y-5 md:space-y-7" aria-label="Commentaires Explor'Art">
-            {/* Bandeau résumé + filtres (UI figée pour l’instant) */}
-            <header className="flex flex-col gap-3 rounded-3xl border border-perl/50 bg-white/95 px-5 py-4 shadow-sm md:flex-row md:items-center md:justify-between">
-                <div className="space-y-1.5">
-                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/60">Commentaires</p>
-                    <h2 className="font-serif-title text-xl md:text-2xl text-main">Tes échanges avec Explor&apos;Art</h2>
-                    <p className="max-w-xl text-sm text-main/70">
-                        Retrouve en un coup d’œil ce que tu as écrit sous les articles, les réponses et les idées que tu veux garder comme repères.
-                    </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 text-[0.8rem] text-main/70 md:justify-end">
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-ivory px-3 py-1 shadow-xxs ring-1 ring-perl/40">
+            {/* ✅ Header seulement si contenu */}
+            <PanelHeader
+                kicker="Commentaires"
+                title="Tes échanges avec Explor'Art"
+                description="Retrouve en un coup d’œil ce que tu as écrit sous les articles, les réponses et les idées que tu veux garder comme repères."
+                chipsSlot={
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-ivory px-3 py-1 shadow-xxs ring-1 ring-perl/40">
                         <MessageCircle className="h-3.5 w-3.5 text-main/70" />
                         <span>{mockComments.length} commentaire(s)</span>
-                    </div>
+                    </span>
+                }
+                rightSlot={
                     <button
                         type="button"
-                        className="cursor-pointer inline-flex items-center gap-1.5 rounded-full border border-perl/60 bg-white px-3 py-1.5 text-main/70 shadow-xxs transition hover:border-sage/70 hover:bg-sage/5"
+                        className="cursor-pointer inline-flex flex-1 md:flex-none items-center justify-center gap-1.5 rounded-full border border-perl/60 bg-white px-3 py-2 text-[0.85rem] text-main/70 shadow-xxs transition hover:border-sage/70 hover:bg-sage/5"
                     >
                         <Filter className="h-3.5 w-3.5" />
                         <span>Filtre (bientôt)</span>
                     </button>
-                </div>
-            </header>
+                }
+            />
 
-            {/* Liste des commentaires */}
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {filtered.map((comment) => (
                     <CommentCard key={comment.id} comment={comment} />
@@ -110,7 +106,6 @@ function CommentCard({ comment }: CommentCardProps) {
 
     return (
         <article className="group relative flex h-full flex-col gap-3 rounded-2xl border border-perl/50 bg-white/96 p-4 shadow-xxs transition-all hover:-translate-y-0.5 hover:border-sage/70 hover:shadow-sm">
-            {/* ligne top : pilier + statut */}
             <div className="flex items-center justify-between gap-2">
                 <div className="inline-flex items-center gap-2 rounded-full bg-ivory px-2.5 py-1 text-[0.78rem] text-main/70 shadow-xxs">
                     <span className={`h-1.5 w-1.5 rounded-full ${comment.pillarColorClass}`} />
@@ -122,7 +117,6 @@ function CommentCard({ comment }: CommentCardProps) {
                 </span>
             </div>
 
-            {/* Article + extrait de commentaire */}
             <div className="space-y-1.5">
                 <Link href={comment.articleHref} className="font-serif-title text-[0.96rem] text-main decoration-1 underline-offset-4 hover:underline md:text-base">
                     {comment.articleTitle}
@@ -130,7 +124,6 @@ function CommentCard({ comment }: CommentCardProps) {
                 <p className="text-[0.83rem] leading-relaxed text-main/70 line-clamp-3">“{comment.excerpt}”</p>
             </div>
 
-            {/* Infos bas + actions futures */}
             <div className="mt-auto flex items-center justify-between gap-2 pt-1 text-[0.78rem] text-main/60">
                 <span>{comment.createdAt}</span>
                 <button

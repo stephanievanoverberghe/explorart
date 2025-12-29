@@ -1,9 +1,9 @@
-// src/components/user/atelier/JourneysPanel.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BookOpenCheck, Clock, Layers, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpenCheck, Clock, Layers } from 'lucide-react';
+import { PanelHeader } from './PanelHeader';
 
 type Status = 'loading' | 'ready' | 'error' | 'unauthenticated';
 
@@ -65,32 +65,8 @@ export function JourneysPanel() {
     const hasAnyJourney = courses.length > 0 || formations.length > 0;
 
     return (
-        <section className="space-y-8 md:space-y-10">
-            {/* Intro onglet Parcours */}
-            <header className="card border-perl/60 bg-white/96 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="space-y-1">
-                        <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70 flex items-center gap-2">
-                            <Sparkles className="h-4 w-4" />
-                            Parcours guidés
-                        </p>
-                        <h2 className="font-serif-title text-lg md:text-xl text-main">Cours & formations qui t&apos;accompagnent dans le temps</h2>
-                    </div>
-                    {status === 'ready' && (
-                        <div className="flex flex-wrap gap-2 text-[0.8rem] text-main/75">
-                            <StatChip label="Cours débloqués" value={courses.length.toString()} />
-                            <StatChip label="Formations débloquées" value={formations.length.toString()} />
-                        </div>
-                    )}
-                </div>
-
-                <p className="text-sm text-main/75 max-w-2xl">
-                    Ici, tu retrouves les parcours que tu as vraiment engagés : les cours individuels pour des sujets ciblés, et les formations plus longues pour des
-                    transformations profondes. Tu peux les rouvrir quand tu veux, même des mois plus tard.
-                </p>
-            </header>
-
-            {/* États techniques */}
+        <section className="space-y-7 md:space-y-10" aria-label="Parcours Explor'Art">
+            {/* Loading */}
             {status === 'loading' && (
                 <div className="grid gap-4 md:grid-cols-2">
                     {[...Array(3)].map((_, idx) => (
@@ -99,6 +75,7 @@ export function JourneysPanel() {
                 </div>
             )}
 
+            {/* Unauth */}
             {status === 'unauthenticated' && (
                 <div className="card border-perl/60 bg-white/96 space-y-3">
                     <h3 className="font-serif-title text-[1.05rem] text-main">Retrouver tes parcours Explor&apos;Art</h3>
@@ -120,11 +97,12 @@ export function JourneysPanel() {
                 </div>
             )}
 
+            {/* Error */}
             {status === 'error' && (
                 <div className="card border-rose/30 bg-rose/5 text-rose-800 text-sm">Une erreur est survenue en récupérant tes parcours. Réessaie dans quelques instants.</div>
             )}
 
-            {/* Aucun parcours */}
+            {/* Empty */}
             {status === 'ready' && !hasAnyJourney && (
                 <div className="card border-perl/60 bg-white/96 space-y-3">
                     <h3 className="font-serif-title text-[1.05rem] text-main">Tu n&apos;as pas encore de parcours débloqué</h3>
@@ -157,61 +135,75 @@ export function JourneysPanel() {
                 </div>
             )}
 
-            {/* Parcours présents : on sépare cours & formations */}
+            {/* ✅ Ready + contenu : PanelHeader + colonnes */}
             {status === 'ready' && hasAnyJourney && (
-                <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.1fr)] items-start">
-                    {/* Colonne cours */}
-                    <section className="space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="space-y-0.5">
-                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Cours & mini-parcours</p>
-                                <p className="text-sm text-main/75">Des formats compacts pour explorer un sujet précis en quelques sessions.</p>
+                <>
+                    <PanelHeader
+                        kicker="Parcours guidés"
+                        title="Cours & formations qui t'accompagnent dans le temps"
+                        description="Ici, tu retrouves les parcours que tu as vraiment engagés : les cours individuels pour des sujets ciblés, et les formations plus longues pour des transformations profondes. Tu peux les rouvrir quand tu veux, même des mois plus tard."
+                        chipsSlot={
+                            <>
+                                <StatChip label="Cours débloqués" value={courses.length.toString()} />
+                                <StatChip label="Formations débloquées" value={formations.length.toString()} />
+                            </>
+                        }
+                    />
+
+                    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1.1fr)] items-start">
+                        {/* Colonne cours */}
+                        <section className="space-y-3">
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="space-y-0.5">
+                                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Cours & mini-parcours</p>
+                                    <p className="text-sm text-main/75">Des formats compacts pour explorer un sujet précis en quelques sessions.</p>
+                                </div>
+                                {courses.length > 0 && (
+                                    <span className="rounded-full bg-ivory px-3 py-1 text-[0.75rem] text-main/70 border border-perl/60">{courses.length} cours</span>
+                                )}
                             </div>
-                            {courses.length > 0 && (
-                                <span className="rounded-full bg-ivory px-3 py-1 text-[0.75rem] text-main/70 border border-perl/60">{courses.length} cours</span>
+
+                            {courses.length === 0 ? (
+                                <div className="card border-perl/60 bg-ivory/80 text-sm text-main/75">
+                                    Aucun cours débloqué pour l&apos;instant. Tu pourras ajouter des parcours plus courts ici.
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {courses.map((course) => (
+                                        <CourseJourneyCard key={course.slug} course={course} />
+                                    ))}
+                                </div>
                             )}
-                        </div>
+                        </section>
 
-                        {courses.length === 0 ? (
-                            <div className="card border-perl/60 bg-ivory/80 text-sm text-main/75">
-                                Aucun cours débloqué pour l&apos;instant. Tu pourras ajouter des parcours plus courts ici.
+                        {/* Colonne formations */}
+                        <section className="space-y-3">
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="space-y-0.5">
+                                    <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Formations longues</p>
+                                    <p className="text-sm text-main/75">Des voyages plus profonds, structurés en plusieurs modules, pour changer ta manière d&apos;apprendre.</p>
+                                </div>
+                                {formations.length > 0 && (
+                                    <span className="rounded-full bg-ivory px-3 py-1 text-[0.75rem] text-main/70 border border-perl/60">
+                                        {formations.length} formation{formations.length > 1 ? 's' : ''}
+                                    </span>
+                                )}
                             </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {courses.map((course) => (
-                                    <CourseJourneyCard key={course.slug} course={course} />
-                                ))}
-                            </div>
-                        )}
-                    </section>
 
-                    {/* Colonne formations */}
-                    <section className="space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="space-y-0.5">
-                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Formations longues</p>
-                                <p className="text-sm text-main/75">Des voyages plus profonds, structurés en plusieurs modules, pour changer ta manière d&apos;apprendre.</p>
-                            </div>
-                            {formations.length > 0 && (
-                                <span className="rounded-full bg-ivory px-3 py-1 text-[0.75rem] text-main/70 border border-perl/60">
-                                    {formations.length} formation{formations.length > 1 ? 's' : ''}
-                                </span>
+                            {formations.length === 0 ? (
+                                <div className="card border-perl/60 bg-ivory/80 text-sm text-main/75">
+                                    Tu n&apos;as pas encore de formation débloquée. Tu pourras les retrouver ici une fois achetées.
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {formations.map((formation) => (
+                                        <FormationJourneyCard key={formation.slug} formation={formation} />
+                                    ))}
+                                </div>
                             )}
-                        </div>
-
-                        {formations.length === 0 ? (
-                            <div className="card border-perl/60 bg-ivory/80 text-sm text-main/75">
-                                Tu n&apos;as pas encore de formation débloquée. Tu pourras les retrouver ici une fois achetées.
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {formations.map((formation) => (
-                                    <FormationJourneyCard key={formation.slug} formation={formation} />
-                                ))}
-                            </div>
-                        )}
-                    </section>
-                </div>
+                        </section>
+                    </div>
+                </>
             )}
         </section>
     );

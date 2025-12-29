@@ -4,14 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BookOpen, Sparkles } from 'lucide-react';
-
-interface CurrentUser {
-    id: string;
-    name: string;
-    email: string;
-    role: 'user' | 'admin';
-    avatarUrl?: string;
-}
+import type { CurrentUser } from '@/types/user';
 
 import { ATELIER_HIGHLIGHTS, ATELIER_TABS, type AtelierTabId } from './atelier-data';
 import { OverviewPanel } from './OverviewPanel';
@@ -209,7 +202,7 @@ export function AtelierShell() {
             {activeTab === 'journeys' && <JourneysPanel />}
             {activeTab === 'downloads' && <DownloadsPanel />}
             {activeTab === 'comments' && <CommentsPanel />}
-            {activeTab === 'profile' && <ProfilePanel />}
+            {activeTab === 'profile' && <ProfilePanel user={user} isLoading={loadingUser} />}
         </section>
     );
 }

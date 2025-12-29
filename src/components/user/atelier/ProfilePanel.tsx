@@ -1,7 +1,18 @@
 // src/components/user/atelier/ProfilePanel.tsx
+import Link from 'next/link';
 import { LogOut, Settings, User, Bell, Palette } from 'lucide-react';
+import type { CurrentUser } from '@/types/user';
 
-export function ProfilePanel() {
+type ProfilePanelProps = {
+    user: CurrentUser | null;
+    isLoading: boolean;
+};
+
+export function ProfilePanel({ user, isLoading }: ProfilePanelProps) {
+    const formKey = user?.id ?? 'guest';
+    const displayName = user?.name ?? '';
+    const displayEmail = user?.email ?? '';
+
     return (
         <section className="space-y-6 md:space-y-7" aria-label="Profil et paramètres de ton atelier">
             {/* Header intro */}
@@ -11,6 +22,14 @@ export function ProfilePanel() {
                 <p className="text-sm text-main/70 max-w-2xl">
                     Personnalise ton espace : ton identité, ton rythme de mails, la façon dont tu aimes explorer… Plus tard, ces réglages seront sauvegardés côté compte.
                 </p>
+                {!isLoading && !user && (
+                    <p className="text-sm text-main/70">
+                        Connecte-toi pour retrouver tes informations personnelles.
+                        <Link href="/connexion" className="ml-2 text-sage underline underline-offset-2">
+                            Se connecter
+                        </Link>
+                    </p>
+                )}
             </header>
 
             {/* Ligne 1 : Profil + Préférences d’exploration */}
@@ -31,13 +50,14 @@ export function ProfilePanel() {
                         Ces infos servent à personnaliser ton atelier (nom affiché dans les tableaux de bord, langue, e-mail pour les nouvelles ressources).
                     </p>
 
-                    <form className="space-y-3 pt-1">
+                    <form key={formKey} className="space-y-3 pt-1">
                         {/* Nom affiché */}
                         <div className="space-y-1.5">
                             <label className="text-[0.78rem] font-medium uppercase tracking-[0.16em] text-main/60">Nom affiché</label>
                             <input
                                 type="text"
                                 placeholder="Ton prénom ou pseudo"
+                                defaultValue={displayName}
                                 className="w-full rounded-full border border-perl/60 bg-ivory/60 px-3.5 py-2.5 text-sm text-main outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/18"
                             />
                         </div>
@@ -48,6 +68,7 @@ export function ProfilePanel() {
                             <input
                                 type="email"
                                 placeholder="toi@exemple.com"
+                                defaultValue={displayEmail}
                                 className="w-full rounded-full border border-perl/60 bg-ivory/40 px-3.5 py-2.5 text-sm text-main/80 outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/18"
                             />
                             <p className="text-[0.75rem] text-main/55">Utilisée uniquement pour ton compte et les e-mails que tu auras choisis dans les préférences.</p>

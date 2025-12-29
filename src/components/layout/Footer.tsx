@@ -66,7 +66,7 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/categories/dessiner-peindre" className="hover:text-terre transition-colors">
+                                <Link href="/categories/dessin-peinture" className="hover:text-terre transition-colors">
                                     Dessiner &amp; peindre
                                 </Link>
                             </li>
