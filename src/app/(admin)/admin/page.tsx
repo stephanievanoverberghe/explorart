@@ -27,7 +27,7 @@ const quickActions = [
     {
         title: 'Créer un nouveau module',
         description: 'Lancez un parcours complet avec quiz et ressources.',
-        href: '/admin/articles',
+        href: '/admin/formations',
         cta: 'Démarrer',
     },
     {
@@ -35,6 +35,12 @@ const quickActions = [
         description: 'Ajoutez de nouveaux apprenants et assignez un mentor.',
         href: '/admin/utilisateurs',
         cta: 'Inviter',
+    },
+    {
+        title: 'Mettre en ligne un cours',
+        description: 'Publiez un cours court avec exercices et ressources.',
+        href: '/admin/cours',
+        cta: 'Publier',
     },
     {
         title: 'Mettre à jour la médiathèque',
@@ -103,6 +109,18 @@ const activityFeed = [
 
 const adminSections = [
     {
+        title: 'Cours',
+        description: 'Piloter les cours unitaires, formats courts et exercices.',
+        href: '/admin/cours',
+        cta: 'Gérer les cours',
+    },
+    {
+        title: 'Formations',
+        description: 'Structurer les parcours complets et les cohortes associées.',
+        href: '/admin/formations',
+        cta: 'Gérer les formations',
+    },
+    {
         title: 'Articles',
         description: 'Créer, modifier et publier les contenus éditoriaux.',
         href: '/admin/articles',
@@ -143,26 +161,48 @@ const adminSections = [
 export default function AdminPage() {
     return (
         <div className="space-y-10">
-            <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="space-y-2">
-                    <h2 className="font-serif-title text-2xl text-main">Dashboard e-learning</h2>
-                    <p className="text-sm text-main/60">Pilotez l&apos;activité, suivez la progression des cohortes et optimisez vos contenus de formation.</p>
+            <section className="rounded-3xl border border-perl/60 bg-page px-6 py-6">
+                <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="space-y-2">
+                        <span className="section-label section-label-terre">Pilotage UX</span>
+                        <h2 className="font-serif-title text-2xl text-main">Dashboard e-learning</h2>
+                        <p className="text-sm text-main/60">Pilotez l&apos;activité, suivez la progression des cohortes et optimisez vos contenus de formation.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        <Link
+                            href="/admin/cours"
+                            className="inline-flex items-center justify-center rounded-full bg-main px-5 py-2 text-sm font-medium text-white transition hover:bg-main/90"
+                        >
+                            Nouveau cours
+                        </Link>
+                        <Link
+                            href="/admin/formations"
+                            className="inline-flex items-center justify-center rounded-full border border-main px-5 py-2 text-sm font-medium text-main transition hover:bg-main hover:text-white"
+                        >
+                            Nouvelle formation
+                        </Link>
+                        <Link
+                            href="/admin/utilisateurs"
+                            className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-medium text-main transition hover:border-main/70"
+                        >
+                            Inviter des apprenants
+                        </Link>
+                    </div>
+                </header>
+                <div className="mt-6 grid gap-3 md:grid-cols-3">
+                    {[
+                        { label: 'Nouveaux parcours', value: '6', detail: 'En préparation pour Q2' },
+                        { label: 'Taux de complétion moyen', value: '82%', detail: 'Sur les 30 derniers jours' },
+                        { label: 'Feedbacks UX collectés', value: '214', detail: 'À analyser cette semaine' },
+                    ].map((item) => (
+                        <div key={item.label} className="rounded-2xl border border-perl/60 bg-white px-4 py-4">
+                            <p className="text-xs uppercase tracking-wide text-main/50">{item.label}</p>
+                            <p className="mt-2 text-lg font-semibold text-main">{item.value}</p>
+                            <p className="mt-1 text-xs text-main/60">{item.detail}</p>
+                        </div>
+                    ))}
                 </div>
-                <div className="flex flex-wrap gap-3">
-                    <Link
-                        href="/admin/articles"
-                        className="inline-flex items-center justify-center rounded-full bg-main px-5 py-2 text-sm font-medium text-white transition hover:bg-main/90"
-                    >
-                        Nouveau cours
-                    </Link>
-                    <Link
-                        href="/admin/utilisateurs"
-                        className="inline-flex items-center justify-center rounded-full border border-main px-5 py-2 text-sm font-medium text-main transition hover:bg-main hover:text-white"
-                    >
-                        Inviter des apprenants
-                    </Link>
-                </div>
-            </header>
+            </section>
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {kpiStats.map((stat) => (
