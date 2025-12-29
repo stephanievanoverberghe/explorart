@@ -6,11 +6,20 @@ import { sendResetEmail } from '@/lib/email/sendResetEmail';
 import { PasswordResetToken } from '@/lib/models/PasswordResetToken';
 import { User } from '@/lib/models/User';
 import { rateLimit } from '@/lib/rate-limit';
+import { cookies } from 'next/headers';
+import { validateCsrf } from '@/lib/security/csrf';
 
 const RESET_TOKEN_EXPIRATION_MINUTES = 60;
 
 export async function POST(req: Request) {
     try {
+        const cookieStore = await cookies();
+        const isValidCsrf = validateCsrf(cookieStore, req);
+
+        if (!isValidCsrf) {
+            return NextResponse.json({ error: 'Jeton CSRF manquant ou invalide.' }, { status: 403 });
+        }
+
         const rateLimitResult = rateLimit(req, {
             limit: 3,
             windowMs: 60_000,

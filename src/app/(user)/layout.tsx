@@ -1,8 +1,17 @@
 // src/app/(user)/layout.tsx
+import type { ReactNode } from 'react';
+import { redirect } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { getAuthUser } from '@/lib/auth/session';
 
-export default function UserLayout({ children }: { children: React.ReactNode }) {
+export default async function UserLayout({ children }: { children: ReactNode }) {
+    const authUser = await getAuthUser();
+
+    if (!authUser) {
+        redirect('/connexion?redirect=/tableau-de-bord');
+    }
+
     return (
         <>
             <Header />

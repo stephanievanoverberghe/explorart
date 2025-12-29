@@ -6,9 +6,18 @@ import { connectToDatabase } from '@/lib/db/connect';
 import { PasswordResetToken } from '@/lib/models/PasswordResetToken';
 import { User } from '@/lib/models/User';
 import { rateLimit } from '@/lib/rate-limit';
+import { cookies } from 'next/headers';
+import { validateCsrf } from '@/lib/security/csrf';
 
 export async function POST(req: Request) {
     try {
+        const cookieStore = await cookies();
+        const isValidCsrf = validateCsrf(cookieStore, req);
+
+        if (!isValidCsrf) {
+            return NextResponse.json({ error: 'Jeton CSRF manquant ou invalide.' }, { status: 403 });
+        }
+
         const rateLimitResult = rateLimit(req, {
             limit: 5,
             windowMs: 60_000,

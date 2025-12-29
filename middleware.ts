@@ -1,9 +1,15 @@
 // middleware.ts
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { CSRF_COOKIE_NAME, setCsrfCookie } from '@/lib/security/csrf';
 
 export function middleware(request: NextRequest) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _unused = request;
-    return NextResponse.next();
+    const response = NextResponse.next();
+    const existingCsrf = request.cookies.get(CSRF_COOKIE_NAME)?.value;
+
+    if (!existingCsrf) {
+        setCsrfCookie(response);
+    }
+
+    return response;
 }

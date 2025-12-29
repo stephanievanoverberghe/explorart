@@ -5,6 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { X, Mail } from 'lucide-react';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '@/lib/security/csrf';
+
+function getCsrfTokenFromCookie() {
+    return document.cookie
+        .split('; ')
+        .find((cookie) => cookie.startsWith(`${CSRF_COOKIE_NAME}=`))
+        ?.split('=')[1];
+}
 
 export default function MotDePasseOubliePage() {
     const router = useRouter();
@@ -31,9 +39,13 @@ export default function MotDePasseOubliePage() {
         setIsSubmitting(true);
 
         try {
+            const csrfToken = getCsrfTokenFromCookie();
             const response = await fetch('/api/auth/forgot-password', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrfToken ? { [CSRF_HEADER_NAME]: decodeURIComponent(csrfToken) } : {}),
+                },
                 body: JSON.stringify({ email }),
             });
 

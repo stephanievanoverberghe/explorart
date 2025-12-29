@@ -1,4 +1,14 @@
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+import type { ReactNode } from 'react';
+import { redirect } from 'next/navigation';
+import { getAuthUser } from '@/lib/auth/session';
+
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+    const authUser = await getAuthUser();
+
+    if (!authUser || authUser.role !== 'admin') {
+        redirect('/connexion?redirect=/admin');
+    }
+
     return (
         <main className="min-h-screen bg-page text-main">
             <div className="max-w-6xl mx-auto px-6 py-10">

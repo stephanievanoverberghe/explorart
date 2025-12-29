@@ -1,3 +1,6 @@
+// src/lib/rate-limit.ts
+import crypto from 'crypto';
+
 type RateLimitOptions = {
     limit: number;
     windowMs: number;
@@ -16,13 +19,27 @@ type RateLimitResult = {
 
 const rateLimitStore = new Map<string, RateLimitState>();
 
-function getClientIdentifier(req: Request) {
+function getClientIp(req: Request) {
+    const cfConnectingIp = req.headers.get('cf-connecting-ip');
+    if (cfConnectingIp) {
+        return cfConnectingIp.trim();
+    }
+
     const forwardedFor = req.headers.get('x-forwarded-for');
     if (forwardedFor) {
         return forwardedFor.split(',')[0]?.trim() || 'unknown';
     }
 
     return req.headers.get('x-real-ip') ?? 'unknown';
+}
+
+function getClientIdentifier(req: Request) {
+    const ip = getClientIp(req);
+    const userAgent = req.headers.get('user-agent') ?? 'unknown';
+    const acceptLanguage = req.headers.get('accept-language') ?? 'unknown';
+
+    const rawIdentifier = `${ip}:${userAgent}:${acceptLanguage}`;
+    return crypto.createHash('sha256').update(rawIdentifier).digest('hex');
 }
 
 export function rateLimit(req: Request, options: RateLimitOptions): RateLimitResult {

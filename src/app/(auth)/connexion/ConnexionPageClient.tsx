@@ -4,6 +4,14 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { X, Mail, Lock } from 'lucide-react';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '@/lib/security/csrf';
+
+function getCsrfTokenFromCookie() {
+    return document.cookie
+        .split('; ')
+        .find((cookie) => cookie.startsWith(`${CSRF_COOKIE_NAME}=`))
+        ?.split('=')[1];
+}
 
 export function ConnexionPageClient() {
     const router = useRouter();
@@ -22,9 +30,13 @@ export function ConnexionPageClient() {
         setIsSubmitting(true);
 
         try {
+            const csrfToken = getCsrfTokenFromCookie();
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrfToken ? { [CSRF_HEADER_NAME]: decodeURIComponent(csrfToken) } : {}),
+                },
                 body: JSON.stringify({ email, password }),
             });
 
