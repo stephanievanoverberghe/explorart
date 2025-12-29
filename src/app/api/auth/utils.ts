@@ -1,6 +1,8 @@
 // src/app/api/auth/utils.ts
 import { NextResponse } from 'next/server';
 import { signAuthToken } from '@/lib/auth/jwt';
+import { cookies } from 'next/headers';
+import { ensureCsrfCookie } from '@/lib/security/csrf';
 import type { UserDocument } from '@/lib/models/User';
 
 export function createAuthSuccessResponse(user: UserDocument, message: string) {
@@ -30,6 +32,8 @@ export function createAuthSuccessResponse(user: UserDocument, message: string) {
         path: '/',
         maxAge: 60 * 60 * 24 * 7, // 7 days
     });
+
+    ensureCsrfCookie(cookies(), response);
 
     return response;
 }

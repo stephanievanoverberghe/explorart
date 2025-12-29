@@ -4,13 +4,19 @@ import { connectToDatabase } from '@/lib/db/connect';
 import { User } from '@/lib/models/User';
 import { createAuthSuccessResponse } from '../utils';
 import { hasJwtSecret, MISSING_SECRET_MESSAGE } from '@/lib/auth/secret';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
     try {
-        // 🔍 DEBUG ENV
-        console.log('LOGIN: hasJwtSecret =', hasJwtSecret());
-        console.log('LOGIN: JWT_SECRET length =', process.env.JWT_SECRET?.length || 0);
-        console.log('LOGIN: MONGODB_URI exists =', Boolean(process.env.MONGODB_URI));
+        const rateLimitResult = rateLimit(req, {
+            limit: 5,
+            windowMs: 60_000,
+            prefix: 'auth:login',
+        });
+
+        if (!rateLimitResult.success) {
+            return NextResponse.json({ error: 'Trop de tentatives. Merci de réessayer plus tard.' }, { status: 429, headers: rateLimitResult.headers });
+        }
 
         if (!hasJwtSecret()) {
             console.error(MISSING_SECRET_MESSAGE);
@@ -18,26 +24,20 @@ export async function POST(req: Request) {
         }
 
         const { email, password } = await req.json();
-        console.log('LOGIN: email reçu =', email);
 
         if (!email?.trim() || !password?.trim()) {
             return NextResponse.json({ error: 'Merci de fournir un e-mail et un mot de passe.' }, { status: 400 });
         }
 
-        // 🔍 DEBUG DB
-        console.log('LOGIN: connexion DB...');
         await connectToDatabase();
-        console.log('LOGIN: DB OK');
 
         const user = await User.findOne({ email: email.toLowerCase().trim() });
-        console.log('LOGIN: user trouvé =', Boolean(user));
 
         if (!user) {
             return NextResponse.json({ error: 'Identifiants invalides.' }, { status: 401 });
         }
 
         const isValid = await bcrypt.compare(password, user.password);
-        console.log('LOGIN: password valide =', isValid);
 
         if (!isValid) {
             return NextResponse.json({ error: 'Identifiants invalides.' }, { status: 401 });
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
         return createAuthSuccessResponse(user, 'Connexion réussie.');
     } catch (error) {
-        console.error('POST /api/auth/login - ERREUR', error);
+        console.error('POST /api/auth/login - ERREUR interne', error);
         return NextResponse.json({ error: 'Impossible de te connecter pour le moment. Merci de réessayer dans quelques instants.' }, { status: 500 });
     }
 }

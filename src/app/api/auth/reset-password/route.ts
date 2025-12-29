@@ -5,9 +5,20 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db/connect';
 import { PasswordResetToken } from '@/lib/models/PasswordResetToken';
 import { User } from '@/lib/models/User';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
     try {
+        const rateLimitResult = rateLimit(req, {
+            limit: 5,
+            windowMs: 60_000,
+            prefix: 'auth:reset-password',
+        });
+
+        if (!rateLimitResult.success) {
+            return NextResponse.json({ error: 'Trop de tentatives. Merci de réessayer plus tard.' }, { status: 429, headers: rateLimitResult.headers });
+        }
+
         const { token, password } = await req.json();
 
         if (!token?.trim() || !password?.trim()) {

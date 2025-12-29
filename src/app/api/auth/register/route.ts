@@ -4,9 +4,20 @@ import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db/connect';
 import { User } from '@/lib/models/User';
 import { createAuthSuccessResponse } from '../utils';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
     try {
+        const rateLimitResult = rateLimit(req, {
+            limit: 5,
+            windowMs: 60_000,
+            prefix: 'auth:register',
+        });
+
+        if (!rateLimitResult.success) {
+            return NextResponse.json({ error: 'Trop de tentatives. Merci de réessayer plus tard.' }, { status: 429, headers: rateLimitResult.headers });
+        }
+
         const { name, email, password } = await req.json();
 
         if (!name?.trim() || !email?.trim() || !password?.trim()) {

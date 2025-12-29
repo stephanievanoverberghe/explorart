@@ -6,12 +6,17 @@ import { connectToDatabase } from '@/lib/db/connect';
 import { getAuthUser } from '@/lib/auth/session';
 import { CoursePurchase } from '@/lib/models/CoursePurchase';
 import { saveCoursePurchase } from '@/lib/purchases/saveCoursePurchase';
+import { cookies } from 'next/headers';
+import { ensureCsrfCookie, validateCsrf } from '@/lib/security/csrf';
 
 export async function GET() {
+    const cookieStore = cookies();
     const authUser = await getAuthUser();
 
     if (!authUser) {
-        return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+        const response = NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+        ensureCsrfCookie(cookieStore, response);
+        return response;
     }
 
     await connectToDatabase();
@@ -35,10 +40,19 @@ export async function GET() {
         })
         .filter(Boolean);
 
-    return NextResponse.json({ courses });
+    const response = NextResponse.json({ courses });
+    ensureCsrfCookie(cookieStore, response);
+    return response;
 }
 
 export async function POST(request: Request) {
+    const cookieStore = cookies();
+    const isValidCsrf = validateCsrf(cookieStore, request);
+
+    if (!isValidCsrf) {
+        return NextResponse.json({ error: 'Jeton CSRF manquant ou invalide.' }, { status: 403 });
+    }
+
     const authUser = await getAuthUser();
 
     if (!authUser) {

@@ -8,6 +8,8 @@ import { getAuthUser } from '@/lib/auth/session';
 import { connectToDatabase } from '@/lib/db/connect';
 import { CoursePurchase } from '@/lib/models/CoursePurchase';
 import { FormationPurchase } from '@/lib/models/FormationPurchase';
+import { cookies } from 'next/headers';
+import { validateCsrf } from '@/lib/security/csrf';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
 
@@ -18,6 +20,12 @@ const stripe = stripeSecret
     : null;
 
 export async function POST(request: Request) {
+    const isValidCsrf = validateCsrf(cookies(), request);
+
+    if (!isValidCsrf) {
+        return NextResponse.json({ error: 'Jeton CSRF manquant ou invalide.' }, { status: 403 });
+    }
+
     const body = await request.json().catch(() => null);
     const slug = body?.slug as string | undefined;
     const productType = body?.productType === 'formation' ? 'formation' : 'course';

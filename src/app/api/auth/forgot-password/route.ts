@@ -2,13 +2,25 @@
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db/connect';
+import { sendResetEmail } from '@/lib/email/sendResetEmail';
 import { PasswordResetToken } from '@/lib/models/PasswordResetToken';
 import { User } from '@/lib/models/User';
+import { rateLimit } from '@/lib/rate-limit';
 
 const RESET_TOKEN_EXPIRATION_MINUTES = 60;
 
 export async function POST(req: Request) {
     try {
+        const rateLimitResult = rateLimit(req, {
+            limit: 3,
+            windowMs: 60_000,
+            prefix: 'auth:forgot-password',
+        });
+
+        if (!rateLimitResult.success) {
+            return NextResponse.json({ error: 'Trop de tentatives. Merci de réessayer plus tard.' }, { status: 429, headers: rateLimitResult.headers });
+        }
+
         const { email } = await req.json();
 
         if (!email?.trim()) {
@@ -17,7 +29,8 @@ export async function POST(req: Request) {
 
         await connectToDatabase();
 
-        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await User.findOne({ email: normalizedEmail });
 
         if (!user) {
             return NextResponse.json({ message: 'Si ce compte existe, un e-mail a été envoyé.' });
@@ -39,9 +52,14 @@ export async function POST(req: Request) {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
         const resetUrl = `${siteUrl}/reinitialiser-mot-de-passe/${rawToken}`;
 
+        try {
+            await sendResetEmail({ to: normalizedEmail, resetUrl });
+        } catch (error) {
+            console.error('Failed to send reset email', error);
+        }
+
         return NextResponse.json({
             message: 'Si ce compte existe, un e-mail de réinitialisation a été envoyé.',
-            resetUrl,
         });
     } catch (error) {
         console.error('POST /api/auth/forgot-password', error);

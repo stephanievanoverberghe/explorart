@@ -5,6 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { X, LogOut, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '@/lib/security/csrf';
+
+function getCsrfTokenFromCookie() {
+    return document.cookie
+        .split('; ')
+        .find((cookie) => cookie.startsWith(`${CSRF_COOKIE_NAME}=`))
+        ?.split('=')[1];
+}
 
 type LogoutStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -18,7 +26,11 @@ export default function DeconnexionPage() {
         setError(null);
 
         try {
-            const response = await fetch('/api/auth/logout', { method: 'POST' });
+            const csrfToken = getCsrfTokenFromCookie();
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: csrfToken ? { [CSRF_HEADER_NAME]: decodeURIComponent(csrfToken) } : undefined,
+            });
 
             if (!response.ok) {
                 throw new Error('Impossible de te déconnecter pour le moment.');

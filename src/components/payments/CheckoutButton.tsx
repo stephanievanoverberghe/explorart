@@ -7,6 +7,14 @@ import { usePathname } from 'next/navigation';
 
 import type { Course } from '@/lib/content/courses';
 import type { Formation } from '@/lib/content/formations';
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '@/lib/security/csrf';
+
+function getCsrfTokenFromCookie() {
+    return document.cookie
+        .split('; ')
+        .find((cookie) => cookie.startsWith(`${CSRF_COOKIE_NAME}=`))
+        ?.split('=')[1];
+}
 
 type ProductType = 'course' | 'formation';
 
@@ -87,9 +95,13 @@ export function CheckoutButton({ product, productType = 'course', label, sublabe
         setError(null);
 
         try {
+            const csrfToken = getCsrfTokenFromCookie();
             const response = await fetch('/api/checkout', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrfToken ? { [CSRF_HEADER_NAME]: decodeURIComponent(csrfToken) } : {}),
+                },
                 body: JSON.stringify({ slug: product.slug, productType }),
             });
 
