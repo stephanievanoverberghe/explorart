@@ -1,15 +1,66 @@
-export default function PageEnConstruction() {
+import Link from 'next/link';
+
+const adminSections = [
+    {
+        title: 'Articles',
+        description: 'Créer, modifier et publier les contenus éditoriaux.',
+        href: '/admin/articles',
+        cta: 'Gérer les articles',
+    },
+    {
+        title: 'Catégories',
+        description: 'Organiser les thématiques et les collections.',
+        href: '/admin/categories',
+        cta: 'Gérer les catégories',
+    },
+    {
+        title: 'Palettes',
+        description: 'Structurer les palettes de couleurs utilisées.',
+        href: '/admin/palettes',
+        cta: 'Gérer les palettes',
+    },
+    {
+        title: 'Ressources',
+        description: 'Mettre à jour les ressources et références.',
+        href: '/admin/ressources',
+        cta: 'Gérer les ressources',
+    },
+    {
+        title: 'Utilisateurs',
+        description: 'Suivre les comptes et les permissions.',
+        href: '/admin/utilisateurs',
+        cta: 'Gérer les utilisateurs',
+    },
+    {
+        title: 'Réglages',
+        description: 'Ajuster les paramètres globaux de la plateforme.',
+        href: '/admin/reglages',
+        cta: 'Ouvrir les réglages',
+    },
+];
+
+export default function AdminPage() {
     return (
-        <main className="min-h-[60vh] flex flex-col items-center justify-center text-center px-6 py-20">
-            <div className="max-w-md space-y-4">
-                <h1 className="font-serif-title text-2xl md:text-3xl text-main">Page en construction</h1>
+        <div className="space-y-8">
+            <header className="space-y-2">
+                <h2 className="font-serif-title text-xl text-main">Tableau de bord</h2>
+                <p className="text-sm text-main/60">Accédez rapidement à toutes les sections de l’administration.</p>
+            </header>
 
-                <p className="text-main/70 text-sm md:text-base">Cette section d’Explor’Art est en cours de création. Reviens un peu plus tard, de belles choses arrivent ✨</p>
-
-                <div className="mt-6">
-                    <span className="inline-block px-4 py-2 rounded-full bg-ivory border border-perl/60 text-main text-sm">🚧 Construction en cours</span>
-                </div>
+            <div className="grid gap-4 md:grid-cols-2">
+                {adminSections.map((section) => (
+                    <div key={section.href} className="rounded-3xl border border-perl/60 bg-white px-5 py-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-main">{section.title}</h3>
+                        <p className="mt-2 text-sm text-main/60">{section.description}</p>
+                        <Link
+                            href={section.href}
+                            className="mt-4 inline-flex items-center gap-2 rounded-full border border-main px-4 py-2 text-sm font-medium text-main transition hover:bg-main hover:text-white"
+                        >
+                            {section.cta}
+                        </Link>
+                    </div>
+                ))}
             </div>
-        </main>
+        </div>
     );
 }
