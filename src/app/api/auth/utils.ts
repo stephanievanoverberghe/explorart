@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { ensureCsrfCookie } from '@/lib/security/csrf';
 import type { UserDocument } from '@/lib/models/User';
 
-export function createAuthSuccessResponse(user: UserDocument, message: string) {
+export async function createAuthSuccessResponse(user: UserDocument, message: string) {
     const role = user.role ?? 'user';
 
     const token = signAuthToken({
@@ -33,7 +33,8 @@ export function createAuthSuccessResponse(user: UserDocument, message: string) {
         maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
-    ensureCsrfCookie(cookies(), response);
+    const cookieStore = await cookies();
+    ensureCsrfCookie(cookieStore, response);
 
     return response;
 }

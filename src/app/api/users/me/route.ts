@@ -7,14 +7,14 @@ import { getAuthUser } from '@/lib/auth/session';
 import { ensureCsrfCookie } from '@/lib/security/csrf';
 
 export async function GET() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const authUser = await getAuthUser();
 
     // Pas de session → on renvoie juste user: null
     if (!authUser) {
+        const response = NextResponse.json({ user: null });
         ensureCsrfCookie(cookieStore, response);
         return response;
-        return NextResponse.json({ user: null });
     }
 
     await connectToDatabase();

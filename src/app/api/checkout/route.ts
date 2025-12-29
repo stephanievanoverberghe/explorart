@@ -20,7 +20,8 @@ const stripe = stripeSecret
     : null;
 
 export async function POST(request: Request) {
-    const isValidCsrf = validateCsrf(cookies(), request);
+    const cookieStore = await cookies();
+    const isValidCsrf = validateCsrf(cookieStore, request);
 
     if (!isValidCsrf) {
         return NextResponse.json({ error: 'Jeton CSRF manquant ou invalide.' }, { status: 403 });

@@ -51,7 +51,7 @@ export async function POST(req: Request) {
             role,
         });
 
-        return createAuthSuccessResponse(user, 'Compte créé avec succès.');
+        return await createAuthSuccessResponse(user, 'Compte créé avec succès.');
     } catch (error) {
         console.error('POST /api/auth/register', error);
         return NextResponse.json({ error: 'Impossible de créer le compte pour le moment. Merci de réessayer dans quelques instants.' }, { status: 500 });

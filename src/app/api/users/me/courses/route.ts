@@ -10,7 +10,7 @@ import { cookies } from 'next/headers';
 import { ensureCsrfCookie, validateCsrf } from '@/lib/security/csrf';
 
 export async function GET() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const authUser = await getAuthUser();
 
     if (!authUser) {
@@ -46,7 +46,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const isValidCsrf = validateCsrf(cookieStore, request);
 
     if (!isValidCsrf) {

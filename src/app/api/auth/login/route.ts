@@ -43,7 +43,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Identifiants invalides.' }, { status: 401 });
         }
 
-        return createAuthSuccessResponse(user, 'Connexion réussie.');
+        return await createAuthSuccessResponse(user, 'Connexion réussie.');
     } catch (error) {
         console.error('POST /api/auth/login - ERREUR interne', error);
         return NextResponse.json({ error: 'Impossible de te connecter pour le moment. Merci de réessayer dans quelques instants.' }, { status: 500 });
