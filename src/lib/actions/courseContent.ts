@@ -1,30 +1,41 @@
 'use server';
 
+import { isValidObjectId } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';
-import { Course, type CourseContent, type CourseContentConclusion, type CourseContentIntro, type CourseContentModule } from '@/lib/models/Course';
+import { Course, type CourseDocument } from '@/lib/models/Course';
+import { CourseSetup } from '@/lib/models/CourseSetup';
+import type { CourseReviewContent } from '@/lib/models/Course';
 
-export async function getCourseContent(courseId: string): Promise<CourseContent | null> {
-    if (!courseId) return null;
-    await connectToDatabase();
-    const course = await Course.findById(courseId).select({ content: 1 }).lean();
-    if (!course) return null;
-    return (course.content ?? {}) as CourseContent;
+function buildCourseQuery(courseId: string) {
+    if (isValidObjectId(courseId)) {
+        return { $or: [{ _id: courseId }, { slug: courseId }] };
+    }
+    return { slug: courseId };
 }
 
-export async function saveIntro(courseId: string, intro: CourseContentIntro): Promise<void> {
-    if (!courseId) return;
+export async function getCourseContent(courseId: string): Promise<CourseReviewContent | null> {
     await connectToDatabase();
-    await Course.findByIdAndUpdate(courseId, { $set: { 'content.intro': { text: intro.text } } });
-}
 
-export async function saveModules(courseId: string, modules: CourseContentModule[]): Promise<void> {
-    if (!courseId) return;
-    await connectToDatabase();
-    await Course.findByIdAndUpdate(courseId, { $set: { 'content.modules': modules } });
-}
+    const [course, setup] = await Promise.all([Course.findOne(buildCourseQuery(courseId)).select('slug').lean<CourseDocument>(), CourseSetup.findOne({ courseId }).lean()]);
 
-export async function saveConclusion(courseId: string, conclusion: CourseContentConclusion): Promise<void> {
-    if (!courseId) return;
-    await connectToDatabase();
-    await Course.findByIdAndUpdate(courseId, { $set: { 'content.conclusion': { text: conclusion.text } } });
+    if (!course && !setup) {
+        return null;
+    }
+
+    const modules =
+        setup?.structure?.modules?.map((module, index) => ({
+            order: index + 1,
+            title: module.title,
+            content: module.goal,
+        })) ?? [];
+
+    const introText = setup?.intent?.promise ?? '';
+    const conclusionText = setup?.intent?.outcomes?.filter(Boolean).join('\n') ?? '';
+
+    return {
+        slug: course?.slug ?? courseId,
+        intro: { text: introText },
+        modules,
+        conclusion: { text: conclusionText },
+    };
 }

@@ -33,11 +33,11 @@ export default function EditorReviewPage() {
     }, [courseId]);
 
     async function goPublicPreview() {
-        if (submitting) return;
+        if (submitting || loadingContent) return;
         setSubmitting(true);
         try {
-            // TODO: router.push(`/cours/${slug}`) quand tu auras le public
-            router.push(`/admin/cours/${courseId}`); // fallback : HUB
+            const publicSlug = content?.slug ?? courseId;
+            router.push(`/cours/${publicSlug}`);
         } finally {
             setSubmitting(false);
         }
@@ -138,10 +138,10 @@ export default function EditorReviewPage() {
                                 <button
                                     type="button"
                                     onClick={goPublicPreview}
-                                    disabled={submitting}
+                                    disabled={submitting || loadingContent}
                                     className={cx(
                                         'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition active:scale-[0.99]',
-                                        submitting
+                                        submitting || loadingContent
                                             ? 'border border-perl/60 bg-page text-main/40 cursor-not-allowed'
                                             : 'bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-main/15'
                                     )}

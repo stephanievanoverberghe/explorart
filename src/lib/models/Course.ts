@@ -12,6 +12,23 @@ export interface CourseVideo {
     isPreview?: boolean;
 }
 
+export interface CourseReviewSection {
+    text: string;
+}
+
+export interface CourseReviewModule {
+    order: number;
+    title: string;
+    content: string;
+}
+
+export interface CourseReviewContent {
+    slug: string;
+    intro?: CourseReviewSection;
+    modules: CourseReviewModule[];
+    conclusion?: CourseReviewSection;
+}
+
 export interface CourseResource {
     title: string;
     url: string;

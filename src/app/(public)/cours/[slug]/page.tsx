@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import { ArrowRight, BadgeCheck, CheckCircle2, Clock, CreditCard, Layers, Lock, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
 
 import { getCourseBySlug, type CourseData } from '@/lib/data/courses';
+import { getCourseSetup } from '@/lib/data/courseSetup';
 import { levelLabels, pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
 import { CheckoutButton } from '@/components/payments/CheckoutButton';
 
@@ -35,9 +36,16 @@ export default async function CoursePage({ params }: CoursePageProps) {
         notFound();
     }
 
+    const setup = await getCourseSetup(course.slug);
     const isFree = course.priceEUR === 0 || course.isMini;
     const priceLabel = isFree ? 'Gratuit' : `${course.priceEUR.toString().replace('.', ',')} €`;
     const levelLabel = levelLabels[course.level];
+    const modules = setup.structure.modules;
+    const introMinutes = setup.structure.introMinutes;
+    const conclusionMinutes = setup.structure.conclusionMinutes;
+    const resources = setup.resources.resources;
+    const outcomes = setup.intent.outcomes.filter(Boolean);
+    const moduleCount = modules.length;
 
     return (
         <section className="relative bg-linear-to-b from-ivory via-white to-ivory pt-4 pb-24 md:pt-24 md:pb-28">
@@ -49,8 +57,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 <section className="grid gap-4 md:grid-cols-3">
                     <QuickStat
                         label="Format professionnel"
-                        value={`${course.modulesCount} modules guidés`}
-                        detail="Introduction, 3 modules structurés, conclusion avec pistes concrètes."
+                        value={`${moduleCount} modules guidés`}
+                        detail={`Introduction, ${moduleCount} modules structurés, conclusion avec pistes concrètes.`}
                     />
                     <QuickStat label="Rythme adapté" value={getDurationPhrase(course.durationMinutes)} detail="Un format compact, pensé pour s’intégrer dans un vrai quotidien." />
                     <QuickStat
@@ -157,7 +165,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
                         <section id="programme" className="card space-y-5">
                             <div>
                                 <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Programme du cours</p>
-                                <h3 className="font-serif-title text-lg md:text-xl">Un parcours en 5 temps : intro · 3 modules · conclusion</h3>
+                                <h3 className="font-serif-title text-lg md:text-xl">
+                                    Un parcours en {moduleCount + 2} temps : intro · {moduleCount} modules · conclusion
+                                </h3>
                                 <p className="text-sm text-main/75 mt-1 max-w-2xl">
                                     Tu peux suivre le cours d’un bloc ou module par module. Chaque étape est pensée pour se glisser dans ton rythme actuel, sans tout bouleverser.
                                 </p>
@@ -166,30 +176,45 @@ export default async function CoursePage({ params }: CoursePageProps) {
                             <div className="space-y-3">
                                 <ProgrammeRow
                                     step="Introduction"
-                                    badge="Accueil & cadre"
-                                    description="On pose l’intention du cours, le matériel minimal et la meilleure façon d’en tirer quelque chose de vraiment utile pour toi."
+                                    badge={`${introMinutes} min`}
+                                    description={
+                                        setup.intent.promise ||
+                                        'On pose l’intention du cours, le matériel minimal et la meilleure façon d’en tirer quelque chose de vraiment utile pour toi.'
+                                    }
                                 />
-                                <ProgrammeRow
-                                    step="Module 1"
-                                    badge="Premier socle"
-                                    description="Un exercice guidé pour entrer dans le cœur du sujet, en douceur, avec un objectif clair et atteignable dès maintenant."
-                                />
-                                <ProgrammeRow
-                                    step="Module 2"
-                                    badge="Approfondir sans se perdre"
-                                    description="On complexifie un peu : nouvelles pistes, exemples concrets, mais toujours avec un fil rouge rassurant."
-                                />
-                                <ProgrammeRow
-                                    step="Module 3"
-                                    badge="Intégrer dans ta pratique"
-                                    description="On relie ce que tu as vu, ressenti et expérimenté, pour que ce cours laisse une trace durable dans ta pratique."
-                                />
+                                {modules.map((module) => (
+                                    <ProgrammeRow key={module.id} step={module.title} badge={`${module.minutes} min`} description={module.goal} />
+                                ))}
                                 <ProgrammeRow
                                     step="Conclusion"
-                                    badge="Pistes pour la suite"
-                                    description="On fait le point, tu poses tes propres mots, et tu repars avec des idées concrètes pour continuer seule, à ton rythme."
+                                    badge={`${conclusionMinutes} min`}
+                                    description={
+                                        outcomes.length
+                                            ? `Tu repars avec ${outcomes.join(' · ')}.`
+                                            : 'On fait le point, tu poses tes propres mots, et tu repars avec des idées concrètes pour continuer seule, à ton rythme.'
+                                    }
                                 />
                             </div>
+                        </section>
+                        <section className="card space-y-4 bg-ivory/95 border-perl/60">
+                            <div className="space-y-1">
+                                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/70">Ressources incluses</p>
+                                <h3 className="font-serif-title text-lg md:text-xl">Supports fournis pour t’aider à pratiquer</h3>
+                                <p className="text-sm text-main/75">Téléchargements et supports pensés pour te guider avant, pendant et après le cours.</p>
+                            </div>
+
+                            {resources.length ? (
+                                <ul className="grid gap-2 md:grid-cols-2">
+                                    {resources.map((resource) => (
+                                        <li key={resource.id} className="rounded-2xl border border-perl/60 bg-white px-3.5 py-3 text-sm text-main/75">
+                                            <p className="font-medium text-main">{resource.title}</p>
+                                            <p className="text-[0.8rem] uppercase tracking-[0.16em] text-main/50">{resource.format}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-sm text-main/60">Aucune ressource additionnelle n’est listée pour l’instant.</p>
+                            )}
                         </section>
 
                         {/* 4. APRÈS LE COURS / LIEN AVEC LE RESTE DU SITE */}
