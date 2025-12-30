@@ -6,13 +6,13 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Eye, Sparkles } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
 import { getCourseContent } from '@/lib/actions/courseContent';
-import type { CourseContent } from '@/lib/models/Course';
+import type { CourseReviewContent } from '@/lib/models/Course';
 
 export default function EditorReviewPage() {
     const router = useRouter();
     const { courseId } = useParams<{ courseId: string }>();
     const [submitting, setSubmitting] = useState(false);
-    const [content, setContent] = useState<CourseContent | null>(null);
+    const [content, setContent] = useState<CourseReviewContent | null>(null);
     const [loadingContent, setLoadingContent] = useState(true);
 
     useEffect(() => {
