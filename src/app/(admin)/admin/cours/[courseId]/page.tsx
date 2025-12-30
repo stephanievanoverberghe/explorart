@@ -53,7 +53,7 @@ export default function AdminCourseHubPage({ params }: { params: { courseId: str
                                     Continuer le cheminement <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                                 </>
                             }
-                            desc="Identité → Intention → Structure → Accès → Publication"
+                            desc="Identité → Intention → Structure → Accès → Prix → Ressources → Publication"
                         />
 
                         <ActionTile

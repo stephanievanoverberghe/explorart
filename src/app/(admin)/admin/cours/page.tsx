@@ -22,6 +22,7 @@ type Course = {
     modulesCount: 3 | 4 | 5;
     hasIntro: true;
 
+    access: 'free' | 'premium';
     isFree?: boolean;
     pinned?: boolean;
 
@@ -34,6 +35,11 @@ type Course = {
     hrefPreview: string;
 
     summary?: string;
+
+    priceLabel: string;
+    videoCount: number;
+    resourceCount: number;
+    resourcesLabel: string;
 };
 
 const courseMetrics = [
@@ -52,6 +58,7 @@ const courses: Course[] = [
         students: 'Entrée principale',
         modulesCount: 5,
         hasIntro: true,
+        access: 'free',
         isFree: true,
         pinned: true,
         pillar: 'dessin-peinture',
@@ -60,6 +67,10 @@ const courses: Course[] = [
         hrefEdit: '/admin/cours/commencer-ici',
         hrefPreview: '/commencer-ici',
         summary: 'Le parcours d’entrée : intro + 5 modules guidés, progression douce, sans pression.',
+        priceLabel: 'Gratuit',
+        videoCount: 7,
+        resourceCount: 6,
+        resourcesLabel: 'PDF + palettes + fiches',
     },
     {
         id: 'colors-express',
@@ -70,12 +81,17 @@ const courses: Course[] = [
         students: '260 apprenants',
         modulesCount: 3,
         hasIntro: true,
+        access: 'premium',
         pillar: 'couleurs-harmonie',
         heroImage: { src: '/courses/colors-express.jpg', alt: 'Couverture du cours Couleurs express' },
         icon: FileText,
         hrefEdit: '/admin/cours/colors-express',
         hrefPreview: '/cours/couleurs-express-harmonies-rapides',
         summary: 'Construire des harmonies simples et efficaces avec des exercices courts.',
+        priceLabel: '29 €',
+        videoCount: 4,
+        resourceCount: 4,
+        resourcesLabel: 'Fiches + palettes',
     },
     {
         id: 'urban-sketch',
@@ -86,12 +102,17 @@ const courses: Course[] = [
         students: 'Planifié',
         modulesCount: 4,
         hasIntro: true,
+        access: 'premium',
         pillar: 'dessin-peinture',
         heroImage: { src: '/courses/urban-sketch.jpg', alt: 'Couverture du cours Croquis urbain' },
         icon: BookOpenCheck,
         hrefEdit: '/admin/cours/croquis-urbain-sans-pression',
         hrefPreview: '/cours/croquis-urbain-sans-pression',
         summary: 'Croquis en conditions réelles : observer, simplifier, garder le plaisir.',
+        priceLabel: '39 €',
+        videoCount: 6,
+        resourceCount: 5,
+        resourcesLabel: 'Templates + checklists',
     },
     {
         id: 'reading-artwork',
@@ -102,12 +123,17 @@ const courses: Course[] = [
         students: '180 apprenants',
         modulesCount: 3,
         hasIntro: true,
+        access: 'premium',
         pillar: 'comprendre-une-oeuvre',
         heroImage: { src: '/courses/regards-oeuvre.jpg', alt: 'Couverture du cours Regards sur une œuvre' },
         icon: BookOpenCheck,
         hrefEdit: '/admin/cours/regards-sur-une-oeuvre',
         hrefPreview: '/cours/regards-sur-une-oeuvre',
         summary: 'Lire une image avec des questions simples : masses, trajet du regard, ambiance.',
+        priceLabel: '34 €',
+        videoCount: 5,
+        resourceCount: 3,
+        resourcesLabel: 'PDF + guide visuel',
     },
 ];
 
@@ -237,13 +263,15 @@ function MobileCourseCard({ course, onOpen }: { course: Course; onOpen: () => vo
                 <div className="min-w-0 space-y-1">
                     <p className="font-serif-title text-lg text-main leading-snug wrap-break-words">{course.title}</p>
                     <p className="text-xs text-main/60 wrap-break-words">
-                        {course.level} • {course.duration} • {course.students}
+                        {course.level} • {course.duration} • {course.students} • {course.priceLabel}
                     </p>
                 </div>
 
-                {/* chips ligne 2 (flags + modules) */}
+                {/* chips ligne 2 (contenu & accès) */}
                 <div className="flex flex-wrap items-center gap-2">
                     <Pill className="border-perl/60 bg-page/60 text-main/70">{course.modulesCount} modules + intro</Pill>
+                    <Pill className="border-perl/60 bg-page/60 text-main/70">{course.videoCount} vidéos</Pill>
+                    <Pill className="border-perl/60 bg-page/60 text-main/70">{course.resourceCount} ressources</Pill>
 
                     {course.pinned ? (
                         <Pill className="border-perl/60 bg-page/60 text-main/75">
@@ -263,6 +291,8 @@ function MobileCourseCard({ course, onOpen }: { course: Course; onOpen: () => vo
                         </Pill>
                     ) : null}
                 </div>
+
+                <p className="text-xs text-main/60">{course.resourcesLabel}</p>
 
                 <div className="pt-1">
                     <span className="inline-flex items-center gap-2 text-sm font-semibold text-main/80">
@@ -380,6 +410,11 @@ export default function AdminCoursPage() {
                 c.duration,
                 c.students,
                 `${c.modulesCount} modules`,
+                `${c.videoCount} videos`,
+                `${c.resourceCount} ressources`,
+                c.resourcesLabel,
+                c.priceLabel,
+                c.access === 'premium' ? 'premium' : 'gratuit',
                 c.isFree ? 'gratuit' : '',
                 c.pinned ? 'epingle' : '',
             ]
@@ -718,7 +753,8 @@ export default function AdminCoursPage() {
                                             <div className="space-y-1 min-w-0">
                                                 <p className="font-serif-title text-lg text-main leading-snug truncate">{course.title}</p>
                                                 <p className="text-xs text-main/60">
-                                                    {course.level} • {course.duration} • {course.students} • {course.modulesCount} modules + intro
+                                                    {course.level} • {course.duration} • {course.students} • {course.modulesCount} modules + intro • {course.videoCount} vidéos •{' '}
+                                                    {course.resourceCount} ressources • {course.priceLabel}
                                                 </p>
                                             </div>
                                         </div>
@@ -829,15 +865,22 @@ export default function AdminCoursPage() {
                             </div>
 
                             <p className="text-sm text-main/70">
-                                {selected.level} • {selected.duration} • {selected.students}
+                                {selected.level} • {selected.duration} • {selected.students} • {selected.priceLabel}
                             </p>
 
                             <div className="flex flex-wrap gap-2">
                                 <Pill className="border-perl/60 bg-page/70 text-main/70">{selected.modulesCount} modules</Pill>
                                 <Pill className="border-perl/60 bg-page/70 text-main/70">Intro incluse</Pill>
+                                <Pill className="border-perl/60 bg-page/70 text-main/70">{selected.videoCount} vidéos</Pill>
+                                <Pill className="border-perl/60 bg-page/70 text-main/70">{selected.resourceCount} ressources</Pill>
                             </div>
 
                             {selected.summary ? <p className="text-sm text-main/70 max-w-2xl">{selected.summary}</p> : null}
+
+                            <div className="rounded-2xl border border-perl/60 bg-page/50 p-4">
+                                <p className="text-xs uppercase tracking-[0.18em] text-main/55">Ressources incluses</p>
+                                <p className="mt-1 text-sm text-main/70">{selected.resourcesLabel}</p>
+                            </div>
                         </div>
 
                         {/* ACTIONS */}

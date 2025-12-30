@@ -80,11 +80,11 @@ export default function SetupPublishPage() {
     return (
         <div className="space-y-6">
             <TopBar
-                backHref={`/admin/cours/${courseId}/setup/access`}
+                backHref={`/admin/cours/${courseId}/setup/resources`}
                 backLabel={
                     <span className="inline-flex items-center gap-2">
                         <ChevronLeft className="h-4 w-4" />
-                        Retour (accès)
+                        Retour (ressources)
                     </span>
                 }
                 right={
@@ -95,13 +95,13 @@ export default function SetupPublishPage() {
                                 { href: '/admin/cours', label: 'Cours' },
                             ]}
                         />
-                        <Badge>Setup • Étape 4</Badge>
+                        <Badge>Setup • Étape 6</Badge>
                     </div>
                 }
             />
 
             <PageHeader
-                label="Étape 4"
+                label="Étape 6"
                 title="Publication"
                 description={
                     <>
@@ -210,11 +210,11 @@ export default function SetupPublishPage() {
 
                         <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <Link
-                                href={`/admin/cours/${courseId}/setup/access`}
+                                href={`/admin/cours/${courseId}/setup/resources`}
                                 className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
                             >
                                 <ChevronLeft className="h-4 w-4" />
-                                Retour (accès)
+                                Retour (ressources)
                             </Link>
 
                             <button

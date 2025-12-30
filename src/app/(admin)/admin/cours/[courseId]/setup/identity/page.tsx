@@ -231,7 +231,7 @@ export default function SetupIdentityPage() {
                                         </span>
                                     </button>
                                 </div>
-                                <p className="text-xs text-main/55">On affinera plus tard dans “Accès & monétisation”.</p>
+                                <p className="text-xs text-main/55">On affinera plus tard dans “Accès & prix”.</p>
                             </div>
 
                             <div className="rounded-3xl border border-perl/60 bg-page/40 p-4 space-y-3">

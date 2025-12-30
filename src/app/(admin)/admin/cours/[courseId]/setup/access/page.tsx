@@ -72,7 +72,7 @@ export default function SetupAccessPage() {
         setSubmitting(true);
         try {
             // TODO: saveAccess(...)
-            router.push(`/admin/cours/${courseId}/setup/publish`);
+            router.push(`/admin/cours/${courseId}/setup/pricing`);
         } finally {
             setSubmitting(false);
         }
@@ -106,7 +106,7 @@ export default function SetupAccessPage() {
                 title="Accès & monétisation"
                 description={
                     <>
-                        On définit qui peut accéder au cours. Ensuite : <span className="font-semibold text-main">publication</span>.
+                        On définit qui peut accéder au cours. Ensuite : <span className="font-semibold text-main">prix & offre</span>.
                     </>
                 }
             />
@@ -184,7 +184,7 @@ export default function SetupAccessPage() {
                                     <span className="text-main/60"> • Affinage possible plus tard dans les réglages.</span>
                                 </p>
                                 <p className="text-xs text-main/55">
-                                    Étape suivante : <span className="font-semibold text-main">publication</span>.
+                                    Étape suivante : <span className="font-semibold text-main">prix</span>.
                                 </p>
                             </div>
                         </div>
@@ -209,7 +209,7 @@ export default function SetupAccessPage() {
                                         : 'bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-main/15'
                                 )}
                             >
-                                Continuer (publication)
+                                Continuer (prix)
                                 <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>

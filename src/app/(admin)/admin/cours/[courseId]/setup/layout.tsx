@@ -13,6 +13,8 @@ const steps = [
     { key: 'intent', label: 'Intention', hrefSuffix: '/setup/intent' },
     { key: 'structure', label: 'Structure', hrefSuffix: '/setup/structure' },
     { key: 'access', label: 'Accès', hrefSuffix: '/setup/access' },
+    { key: 'pricing', label: 'Prix', hrefSuffix: '/setup/pricing' },
+    { key: 'resources', label: 'Ressources', hrefSuffix: '/setup/resources' },
     { key: 'publish', label: 'Publication', hrefSuffix: '/setup/publish' },
 ] as const;
 
