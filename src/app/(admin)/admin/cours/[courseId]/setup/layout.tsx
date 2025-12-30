@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { ChevronLeft, Check } from 'lucide-react';
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -18,15 +18,19 @@ const steps = [
     { key: 'publish', label: 'Publication', hrefSuffix: '/setup/publish' },
 ] as const;
 
-export default function CourseSetupLayout({ children, params }: { children: React.ReactNode; params: { courseId: string } }) {
+export default function CourseSetupLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const base = `/admin/cours/${params.courseId}`;
+    const params = useParams<{ courseId: string }>();
+    const courseId = params?.courseId;
+
+    // Sécurité : évite /admin/cours/undefined/...
+    const base = courseId ? `/admin/cours/${courseId}` : '/admin/cours';
 
     return (
         <div className="space-y-5">
             <div className="flex items-center justify-between gap-3">
                 <Link
-                    href={`${base}`}
+                    href={base}
                     className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
                 >
                     <ChevronLeft className="h-4 w-4" />
@@ -50,15 +54,17 @@ export default function CourseSetupLayout({ children, params }: { children: Reac
                 <div className="p-4 sm:p-5">
                     <div className="flex flex-wrap gap-2">
                         {steps.map((s) => {
-                            const href = `${base}${s.hrefSuffix}`;
+                            const href = courseId ? `${base}${s.hrefSuffix}` : '/admin/cours';
                             const active = pathname === href;
 
                             return (
                                 <Link
                                     key={s.key}
                                     href={href}
+                                    aria-disabled={!courseId}
                                     className={cx(
                                         'inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition cursor-pointer',
+                                        !courseId && 'opacity-60 pointer-events-none',
                                         active ? 'border-main bg-main text-white' : 'border-perl/70 bg-white text-main/75 hover:bg-page'
                                     )}
                                 >
