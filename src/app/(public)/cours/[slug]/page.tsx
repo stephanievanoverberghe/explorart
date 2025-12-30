@@ -6,19 +6,13 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { ArrowRight, BadgeCheck, CheckCircle2, Clock, CreditCard, Layers, Lock, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
 
-import { COURSES, type Course } from '@/lib/content/courses';
+import { getCourseBySlug, type CourseData } from '@/lib/data/courses';
 import { levelLabels, pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
 import { CheckoutButton } from '@/components/payments/CheckoutButton';
 
 interface CoursePageProps {
     // Next 16 : params est un Promise côté serveur
     params: Promise<{ slug: string | string[] }>;
-}
-
-// 🔹 Normalisation du slug pour être tolérant
-function normalizeSlug(raw: string | string[]) {
-    const slug = Array.isArray(raw) ? raw[0] : raw;
-    return decodeURIComponent(slug).trim().toLowerCase();
 }
 
 function formatDuration(minutes: number) {
@@ -35,9 +29,7 @@ function getDurationPhrase(minutes: number) {
 
 export default async function CoursePage({ params }: CoursePageProps) {
     const resolvedParams = await params;
-    const normalizedSlug = normalizeSlug(resolvedParams.slug);
-
-    const course = COURSES.find((c) => c.slug.toLowerCase() === normalizedSlug);
+    const course = await getCourseBySlug(resolvedParams.slug);
 
     if (!course) {
         notFound();
@@ -459,7 +451,7 @@ function FunnelStep({ icon, title, description }: FunnelStepProps) {
 }
 
 type CourseHeroProps = {
-    course: Course;
+    course: CourseData;
     isFree: boolean;
     priceLabel: string;
     levelLabel: string;

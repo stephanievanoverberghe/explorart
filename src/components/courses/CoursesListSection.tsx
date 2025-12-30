@@ -1,13 +1,13 @@
 // src/components/courses/CoursesListSection.tsx
 
-import { COURSES, type Course } from '@/lib/content/courses';
+import type { CourseData } from '@/lib/data/courses';
 import { CourseCard } from './CourseCard';
 
 type CoursesListSectionProps = {
-    courses?: Course[];
+    courses: CourseData[];
 };
 
-export function CoursesListSection({ courses = COURSES }: CoursesListSectionProps) {
+export function CoursesListSection({ courses }: CoursesListSectionProps) {
     const visibleCourses = courses;
 
     return (
@@ -16,7 +16,7 @@ export function CoursesListSection({ courses = COURSES }: CoursesListSectionProp
                 <div className="space-y-1">
                     <p className="text-[0.72rem] uppercase tracking-[0.18em] text-main/70">Catalogue</p>
                     <h2 className="font-serif-title text-2xl">Cours disponibles</h2>
-                    <p className="text-[0.9rem] text-main/65">Chaque carte suit la même structure : intro, 3 modules, conclusion. Tu sais exactement ce que tu achètes.</p>
+                    <p className="text-[0.9rem] text-main/65">Chaque carte suit la même structure : intro, 3 à 5 modules, conclusion. Tu sais exactement ce que tu achètes.</p>
                 </div>
                 <div className="rounded-full border border-perl/70 bg-white px-3 py-1.5 text-[0.82rem] text-main/70">
                     {visibleCourses.length} cours affiché{visibleCourses.length > 1 ? 's' : ''}

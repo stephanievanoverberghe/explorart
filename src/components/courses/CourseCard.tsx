@@ -3,11 +3,11 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import type { Course } from '@/lib/content/courses';
+import type { CourseData } from '@/lib/data/courses';
 import { pillarConfig } from '@/components/categories/category-data';
 
 interface Props {
-    course: Course;
+    course: CourseData;
 }
 
 function formatDuration(minutes: number) {
