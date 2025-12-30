@@ -1,69 +1,482 @@
+// src/app/(admin)/admin/cours/page.tsx
+'use client';
+
 import Link from 'next/link';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Plus, Sparkles, BookOpenCheck, FileText, Pencil, Eye, Trash2, Pin, LockOpen, Layers, X, ChevronRight, Search, SlidersHorizontal, ChevronDown, Tag } from 'lucide-react';
+
+type CourseStatus = 'Publié' | 'Brouillon' | 'En préparation';
+
+type Pillar = 'dessin-peinture' | 'comprendre-une-oeuvre' | 'histoire-de-l-art' | 'histoires-d-artistes' | 'couleurs-harmonie' | 'inspirations' | 'psychologie-de-l-art';
+
+type Course = {
+    id: string;
+    title: string;
+    level: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Tous niveaux';
+    duration: string;
+    status: CourseStatus;
+    students: string;
+
+    modulesCount: 3 | 4 | 5;
+    hasIntro: true;
+
+    isFree?: boolean;
+    pinned?: boolean;
+
+    pillar: Pillar;
+    heroImage: { src: string; alt: string };
+
+    icon?: LucideIcon;
+
+    hrefEdit: string;
+    hrefPreview: string;
+
+    summary?: string;
+};
 
 const courseMetrics = [
     { label: 'Cours actifs', value: '18', detail: '12 en ligne • 6 en préparation' },
     { label: 'Temps moyen', value: '45 min', detail: 'Parcours courts et ciblés' },
     { label: 'Notation moyenne', value: '4,6/5', detail: 'Basée sur 680 avis' },
-];
+] as const;
 
-const courseList = [
+const courses: Course[] = [
     {
+        id: 'start-here',
+        title: 'Commencer ici (parcours gratuit)',
+        level: 'Débutant',
+        duration: '30–45 min',
+        status: 'Publié',
+        students: 'Entrée principale',
+        modulesCount: 5,
+        hasIntro: true,
+        isFree: true,
+        pinned: true,
+        pillar: 'dessin-peinture',
+        heroImage: { src: '/start-here/intro-cover.png', alt: 'Couverture du cours Commencer ici' },
+        icon: Sparkles,
+        hrefEdit: '/admin/cours/commencer-ici',
+        hrefPreview: '/commencer-ici',
+        summary: 'Le parcours d’entrée : intro + 5 modules guidés, progression douce, sans pression.',
+    },
+    {
+        id: 'colors-express',
         title: 'Couleurs express : harmonies rapides',
         level: 'Débutant',
         duration: '30 min',
         status: 'Publié',
         students: '260 apprenants',
+        modulesCount: 3,
+        hasIntro: true,
+        pillar: 'couleurs-harmonie',
+        heroImage: { src: '/courses/colors-express.jpg', alt: 'Couverture du cours Couleurs express' },
+        icon: FileText,
+        hrefEdit: '/admin/cours/colors-express',
+        hrefPreview: '/cours/couleurs-express-harmonies-rapides',
+        summary: 'Construire des harmonies simples et efficaces avec des exercices courts.',
     },
     {
+        id: 'urban-sketch',
         title: 'Croquis urbain sans pression',
         level: 'Intermédiaire',
         duration: '55 min',
         status: 'Brouillon',
         students: 'Planifié',
+        modulesCount: 4,
+        hasIntro: true,
+        pillar: 'dessin-peinture',
+        heroImage: { src: '/courses/urban-sketch.jpg', alt: 'Couverture du cours Croquis urbain' },
+        icon: BookOpenCheck,
+        hrefEdit: '/admin/cours/croquis-urbain-sans-pression',
+        hrefPreview: '/cours/croquis-urbain-sans-pression',
+        summary: 'Croquis en conditions réelles : observer, simplifier, garder le plaisir.',
     },
     {
+        id: 'reading-artwork',
         title: 'Regards sur une œuvre',
         level: 'Tous niveaux',
         duration: '40 min',
         status: 'Publié',
         students: '180 apprenants',
+        modulesCount: 3,
+        hasIntro: true,
+        pillar: 'comprendre-une-oeuvre',
+        heroImage: { src: '/courses/regards-oeuvre.jpg', alt: 'Couverture du cours Regards sur une œuvre' },
+        icon: BookOpenCheck,
+        hrefEdit: '/admin/cours/regards-sur-une-oeuvre',
+        hrefPreview: '/cours/regards-sur-une-oeuvre',
+        summary: 'Lire une image avec des questions simples : masses, trajet du regard, ambiance.',
     },
 ];
 
-const contentGuidelines = [
-    {
-        title: 'Structure recommandée',
-        description: 'Intro courte, 2 séquences pratiques, synthèse + exercice final.',
-    },
-    {
-        title: 'Assets visuels',
-        description: 'Utiliser 3 à 5 images clés, format carré pour la liste.',
-    },
-    {
-        title: 'Évaluation',
-        description: 'Prévoir un quiz rapide et un mini-défi créatif.',
-    },
-];
+function cx(...classes: Array<string | false | null | undefined>) {
+    return classes.filter(Boolean).join(' ');
+}
+
+function pillarStyles(pillar: Pillar) {
+    switch (pillar) {
+        case 'dessin-peinture':
+            return { dot: 'bg-vert', bar: 'bg-vert', badge: 'border-vert/40 bg-vert/10 text-vert' };
+        case 'comprendre-une-oeuvre':
+            return { dot: 'bg-bleu', bar: 'bg-bleu', badge: 'border-bleu/40 bg-bleu/10 text-bleu' };
+        case 'histoire-de-l-art':
+            return { dot: 'bg-terre', bar: 'bg-terre', badge: 'border-terre/40 bg-terre/10 text-terre' };
+        case 'histoires-d-artistes':
+            return { dot: 'bg-prune', bar: 'bg-prune', badge: 'border-prune/40 bg-prune/10 text-prune' };
+        case 'couleurs-harmonie':
+            return { dot: 'bg-rose', bar: 'bg-rose', badge: 'border-rose/40 bg-rose/10 text-rose' };
+        case 'inspirations':
+            return { dot: 'bg-sage', bar: 'bg-sage', badge: 'border-sage/40 bg-sage/10 text-sage' };
+        case 'psychologie-de-l-art':
+            return { dot: 'bg-prune', bar: 'bg-prune', badge: 'border-prune/40 bg-prune/10 text-prune' };
+    }
+}
+
+function pillarLabel(pillar: Pillar) {
+    switch (pillar) {
+        case 'dessin-peinture':
+            return 'Dessin & Peinture';
+        case 'comprendre-une-oeuvre':
+            return 'Comprendre une œuvre';
+        case 'histoire-de-l-art':
+            return "Histoire de l'art";
+        case 'histoires-d-artistes':
+            return "Histoires d'artistes";
+        case 'couleurs-harmonie':
+            return 'Couleurs & harmonie';
+        case 'inspirations':
+            return 'Inspirations';
+        case 'psychologie-de-l-art':
+            return "Psychologie de l'art";
+    }
+}
+
+function StatusPill({ status }: { status: CourseStatus }) {
+    const cls =
+        status === 'Publié' ? 'border-sage/40 bg-sage/10 text-sage' : status === 'Brouillon' ? 'border-perl/70 bg-white text-main/70' : 'border-main/30 bg-page text-main/80';
+
+    return <span className={cx('rounded-full border px-3 py-1 text-[11px] font-semibold', cls)}>{status}</span>;
+}
+
+function Pill({ children, className }: { children: React.ReactNode; className?: string }) {
+    return <span className={cx('rounded-full border px-3 py-1 text-[11px] font-semibold', className)}>{children}</span>;
+}
+
+/**
+ * ✅ Dropdown “pretty”
+ */
+function PrettySelect({
+    label,
+    icon,
+    value,
+    onChange,
+    children,
+    className,
+}: {
+    label: string;
+    icon: React.ReactNode;
+    value: string;
+    onChange: (v: string) => void;
+    children: React.ReactNode;
+    className?: string;
+}) {
+    return (
+        <div className={cx('flex w-full min-w-0 items-center gap-2 sm:w-auto', className)}>
+            <span className="shrink-0 text-xs font-semibold text-main/70">{label}</span>
+
+            <div className="relative w-full min-w-0 sm:w-[220px]">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">{icon}</div>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <ChevronDown className="h-4 w-4 text-main/45" />
+                </div>
+
+                <select
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className={cx(
+                        'h-10 w-full min-w-0 max-w-full appearance-none rounded-full border border-perl/70 bg-white pl-10 pr-10',
+                        'text-xs font-semibold text-main/80 outline-none transition',
+                        'hover:bg-page focus:border-main focus:ring-2 focus:ring-main/10'
+                    )}
+                >
+                    {children}
+                </select>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * ✅ Mobile card (anti scroll horizontal)
+ */
+function MobileCourseCard({ course, onOpen }: { course: Course; onOpen: () => void }) {
+    const Icon = course.icon ?? Layers;
+    const s = pillarStyles(course.pillar);
+
+    return (
+        <button type="button" onClick={onOpen} className="w-full overflow-hidden rounded-3xl border border-perl/60 bg-white text-left shadow-sm transition hover:bg-page/40">
+            <div className="relative aspect-video w-full bg-page/60">
+                <Image src={course.heroImage.src} alt={course.heroImage.alt} fill className="object-cover" />
+                <div className={cx('absolute left-0 top-0 h-1.5 w-full', s.bar)} />
+                <span className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-perl/60 bg-white/90 backdrop-blur">
+                    <Icon className="h-5 w-5 text-main" />
+                </span>
+            </div>
+
+            <div className="p-4 space-y-3">
+                {/* chips ligne 1 (safe mobile) */}
+                <div className="flex flex-wrap items-center gap-2 overflow-hidden">
+                    <span className={cx('inline-flex h-2.5 w-2.5 rounded-full', s.dot)} />
+                    <Pill className={cx('border', s.badge)}>{pillarLabel(course.pillar)}</Pill>
+                    <StatusPill status={course.status} />
+                </div>
+
+                {/* titre + meta */}
+                <div className="min-w-0 space-y-1">
+                    <p className="font-serif-title text-lg text-main leading-snug wrap-break-words">{course.title}</p>
+                    <p className="text-xs text-main/60 wrap-break-words">
+                        {course.level} • {course.duration} • {course.students}
+                    </p>
+                </div>
+
+                {/* chips ligne 2 (flags + modules) */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <Pill className="border-perl/60 bg-page/60 text-main/70">{course.modulesCount} modules + intro</Pill>
+
+                    {course.pinned ? (
+                        <Pill className="border-perl/60 bg-page/60 text-main/75">
+                            <span className="inline-flex items-center gap-1.5">
+                                <Pin className="h-3.5 w-3.5" />
+                                Épinglé
+                            </span>
+                        </Pill>
+                    ) : null}
+
+                    {course.isFree ? (
+                        <Pill className="border-perl/60 bg-page/60 text-main/75">
+                            <span className="inline-flex items-center gap-1.5">
+                                <LockOpen className="h-3.5 w-3.5" />
+                                Gratuit
+                            </span>
+                        </Pill>
+                    ) : null}
+                </div>
+
+                <div className="pt-1">
+                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-main/80">
+                        Ouvrir la fiche
+                        <ChevronRight className="h-4 w-4" />
+                    </span>
+                </div>
+            </div>
+        </button>
+    );
+}
+
+/**
+ * ✅ Modal : lock scroll body quand open
+ */
+function Modal({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: React.ReactNode }) {
+    useEffect(() => {
+        if (!open) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [open]);
+
+    if (!open) return null;
+
+    return (
+        <div className="fixed inset-0 z-50">
+            {/* overlay */}
+            <button type="button" onClick={onClose} className="absolute inset-0 bg-black/30 backdrop-blur-sm cursor-pointer" aria-label="Fermer" />
+
+            {/* dialog */}
+            <div className="relative mx-auto h-full w-full max-w-3xl px-4 py-6 md:py-10 flex items-start justify-center">
+                <div className="w-full overflow-hidden rounded-3xl border border-perl/60 bg-white shadow-xl">
+                    <div className="flex items-center justify-between gap-3 border-b border-perl/50 px-5 py-4">
+                        <div className="min-w-0">
+                            <p className="text-[0.7rem] uppercase tracking-[0.18em] text-main/50">Fiche cours</p>
+                            <h3 className="truncate font-serif-title text-lg text-main">{title}</h3>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-perl/60 bg-page hover:bg-ivory transition-colors cursor-pointer"
+                            aria-label="Fermer la fenêtre"
+                        >
+                            <X className="h-5 w-5 text-main" />
+                        </button>
+                    </div>
+
+                    {/* ✅ scroll interne seulement */}
+                    <div className="max-h-[calc(100vh-140px)] overflow-y-auto overflow-x-hidden">{children}</div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function normalizeText(value: string) {
+    return value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+}
+
+function tokenizeQuery(q: string) {
+    return normalizeText(q)
+        .split(/[\s,]+/g)
+        .map((t) => t.trim())
+        .filter(Boolean);
+}
+
+function matchesTokens(text: string, tokens: string[]) {
+    if (tokens.length === 0) return true;
+    const hay = normalizeText(text);
+    return tokens.every((t) => hay.includes(t));
+}
 
 export default function AdminCoursPage() {
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+    const [query, setQuery] = useState('');
+    const [page, setPage] = useState(1);
+
+    const [statusFilter, setStatusFilter] = useState<CourseStatus | 'all'>('all');
+    const [pillarFilter, setPillarFilter] = useState<Pillar | 'all'>('all');
+    const [flagFree, setFlagFree] = useState(false);
+    const [flagPinned, setFlagPinned] = useState(false);
+
+    const PAGE_SIZE = 8;
+
+    const sorted = useMemo(() => {
+        return [...courses].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)));
+    }, []);
+
+    const filtered = useMemo(() => {
+        const tokens = tokenizeQuery(query);
+
+        return sorted.filter((c) => {
+            if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+            if (pillarFilter !== 'all' && c.pillar !== pillarFilter) return false;
+            if (flagFree && !c.isFree) return false;
+            if (flagPinned && !c.pinned) return false;
+
+            const bucket = [
+                c.title,
+                c.summary ?? '',
+                pillarLabel(c.pillar),
+                c.status,
+                c.level,
+                c.duration,
+                c.students,
+                `${c.modulesCount} modules`,
+                c.isFree ? 'gratuit' : '',
+                c.pinned ? 'epingle' : '',
+            ]
+                .filter(Boolean)
+                .join(' • ');
+
+            return matchesTokens(bucket, tokens);
+        });
+    }, [sorted, query, statusFilter, pillarFilter, flagFree, flagPinned]);
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const safePage = Math.min(page, totalPages);
+
+    const paginated = useMemo(() => {
+        const start = (safePage - 1) * PAGE_SIZE;
+        return filtered.slice(start, start + PAGE_SIZE);
+    }, [filtered, safePage]);
+
+    const selected = useMemo(() => {
+        return sorted.find((c) => c.id === selectedId) ?? null;
+    }, [sorted, selectedId]);
+
+    // ✅ infos pagination (affichage X–Y sur N)
+    const total = filtered.length;
+    const startIndex = total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+    const endIndex = Math.min(total, safePage * PAGE_SIZE);
+
+    // ✅ pages visibles (window)
+    const pageNumbers = useMemo(() => {
+        if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+
+        const pages: Array<number | 'dots'> = [];
+        const left = Math.max(1, safePage - 1);
+        const right = Math.min(totalPages, safePage + 1);
+
+        const push = (v: number | 'dots') => pages.push(v);
+
+        push(1);
+
+        if (left > 2) push('dots');
+
+        for (let p = left; p <= right; p++) {
+            if (p !== 1 && p !== totalPages) push(p);
+        }
+
+        if (right < totalPages - 1) push('dots');
+
+        if (totalPages !== 1) push(totalPages);
+
+        return pages;
+    }, [safePage, totalPages]);
+
+    const openCourse = (id: string) => setSelectedId(id);
+    const closeCourse = () => {
+        setConfirmDeleteId(null);
+        setSelectedId(null);
+    };
+
+    const requestDelete = (id: string) => setConfirmDeleteId(id);
+    const cancelDelete = () => setConfirmDeleteId(null);
+
+    const handleDelete = async (id: string) => {
+        // TODO : brancher suppression réelle (server action / route handler)
+        console.log('DELETE course', id);
+        setConfirmDeleteId(null);
+        setSelectedId(null);
+    };
+
+    const resetFilters = () => {
+        setQuery('');
+        setStatusFilter('all');
+        setPillarFilter('all');
+        setFlagFree(false);
+        setFlagPinned(false);
+        setPage(1);
+    };
+
     return (
-        <div className="space-y-10">
+        <div className="space-y-8 overflow-x-hidden">
+            {/* ✅ Header + CTA */}
             <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="space-y-2">
                     <span className="section-label section-label-sage">Cours unitaires</span>
-                    <h2 className="font-serif-title text-2xl text-main">Catalogue des cours</h2>
-                    <p className="text-sm text-main/60">Gérez les cours courts, les formats d&apos;exercices et le rythme pédagogique pour chaque cohorte.</p>
+                    <h2 className="font-serif-title text-2xl text-main">Cours</h2>
+                    <p className="text-sm text-main/60">Liste → clic → fiche complète en modal (cover + pilier + actions).</p>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                    <button className="inline-flex items-center justify-center rounded-full border border-main px-5 py-2 text-sm font-medium text-main transition hover:bg-main hover:text-white">
-                        Importer un plan
-                    </button>
-                    <button className="inline-flex items-center justify-center rounded-full bg-main px-5 py-2 text-sm font-medium text-white transition hover:bg-main/90">
-                        Créer un cours
-                    </button>
-                </div>
+
+                <Link
+                    href="/admin/cours/new"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-main px-5 py-2 text-sm font-medium text-white transition hover:bg-main/90"
+                >
+                    <Plus className="h-4 w-4" />
+                    Créer un cours
+                </Link>
             </header>
 
+            {/* ✅ Metrics */}
             <section className="grid gap-4 md:grid-cols-3">
                 {courseMetrics.map((metric) => (
                     <div key={metric.label} className="rounded-3xl border border-perl/60 bg-white px-5 py-5 shadow-sm">
@@ -74,66 +487,418 @@ export default function AdminCoursPage() {
                 ))}
             </section>
 
-            <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-                <div className="rounded-3xl border border-perl/60 bg-white px-6 py-6 shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <h3 className="text-lg font-semibold text-main">Cours prioritaires</h3>
-                            <p className="text-sm text-main/60">Suivi des cours à publier ou améliorer.</p>
+            {/* ✅ List + search + pagination */}
+            <section className="rounded-3xl border border-perl/60 bg-white/95 shadow-sm overflow-hidden overflow-x-hidden">
+                {/* header search + filters */}
+                <div className="px-5 py-4 border-b border-perl/50 bg-page/50 space-y-4 overflow-x-hidden">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="space-y-0.5">
+                            <p className="text-xs uppercase tracking-[0.18em] text-main/55">Catalogue</p>
+                            <p className="text-xs text-main/60">
+                                {filtered.length} cours {query.trim() || statusFilter !== 'all' || pillarFilter !== 'all' || flagFree || flagPinned ? 'filtré(s)' : 'au total'}
+                            </p>
                         </div>
-                        <Link href="/admin/articles" className="text-sm font-medium text-main underline decoration-perl/60">
-                            Voir tous les cours
-                        </Link>
-                    </div>
-                    <div className="mt-6 space-y-4">
-                        {courseList.map((course) => (
-                            <div key={course.title} className="rounded-2xl border border-perl/60 bg-page px-4 py-4">
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <div>
-                                        <p className="font-medium text-main">{course.title}</p>
-                                        <p className="text-xs text-main/50">
-                                            {course.level} • {course.duration}
-                                        </p>
-                                    </div>
-                                    <span className="rounded-full border border-perl/70 bg-white px-3 py-1 text-xs text-main/60">{course.status}</span>
-                                </div>
-                                <p className="mt-2 text-xs text-main/60">{course.students}</p>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    <button className="rounded-full border border-main px-3 py-1 text-xs font-semibold text-main transition hover:bg-main hover:text-white">
-                                        Éditer
+
+                        {/* Search */}
+                        <div className="w-full lg:max-w-xl">
+                            <div className="relative">
+                                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-main/45" />
+                                <input
+                                    type="search"
+                                    value={query}
+                                    onChange={(e) => {
+                                        setQuery(e.target.value);
+                                        setPage(1);
+                                    }}
+                                    placeholder="Rechercher… (ex : couleurs publié, dessin débutant, croquis…)"
+                                    className="w-full rounded-2xl border border-perl/70 bg-white pl-10 pr-10 py-2 text-sm text-main outline-none transition focus:border-main focus:ring-2 focus:ring-main/10"
+                                />
+                                {query.trim() ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setQuery('');
+                                            setPage(1);
+                                        }}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-perl/60 bg-page hover:bg-ivory transition cursor-pointer"
+                                        aria-label="Effacer la recherche"
+                                    >
+                                        <X className="h-4 w-4 text-main/70" />
                                     </button>
-                                    <button className="rounded-full border border-perl/70 bg-white px-3 py-1 text-xs font-semibold text-main/70 transition hover:border-main/70">
-                                        Voir le feedback
+                                ) : null}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Filters row */}
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] text-main/55">
+                                <SlidersHorizontal className="h-3.5 w-3.5" />
+                                Filtres :
+                            </span>
+
+                            <PrettySelect
+                                label="Pilier"
+                                value={pillarFilter}
+                                onChange={(v) => {
+                                    setPillarFilter(v as Pillar | 'all');
+                                    setPage(1);
+                                }}
+                                icon={
+                                    pillarFilter !== 'all' ? (
+                                        <span className={cx('inline-flex h-2.5 w-2.5 rounded-full', pillarStyles(pillarFilter as Pillar).dot)} />
+                                    ) : (
+                                        <Tag className="h-4 w-4 text-main/45" />
+                                    )
+                                }
+                            >
+                                <option value="all">Tous</option>
+                                <option value="dessin-peinture">Dessin & Peinture</option>
+                                <option value="comprendre-une-oeuvre">Comprendre une œuvre</option>
+                                <option value="histoire-de-l-art">Histoire de l’art</option>
+                                <option value="histoires-d-artistes">Histoires d’artistes</option>
+                                <option value="couleurs-harmonie">Couleurs & harmonie</option>
+                                <option value="inspirations">Inspirations</option>
+                                <option value="psychologie-de-l-art">Psychologie de l’art</option>
+                            </PrettySelect>
+
+                            <PrettySelect
+                                label="Statut"
+                                value={statusFilter}
+                                onChange={(v) => {
+                                    setStatusFilter(v as CourseStatus | 'all');
+                                    setPage(1);
+                                }}
+                                icon={<span className="inline-flex h-2.5 w-2.5 rounded-full bg-main/40" />}
+                            >
+                                <option value="all">Tous</option>
+                                <option value="Publié">Publié</option>
+                                <option value="Brouillon">Brouillon</option>
+                                <option value="En préparation">En préparation</option>
+                            </PrettySelect>
+
+                            {/* Toggles */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setFlagFree((v) => !v);
+                                        setPage(1);
+                                    }}
+                                    className={cx(
+                                        'rounded-full border px-3 py-2 text-xs font-semibold transition cursor-pointer',
+                                        flagFree ? 'border-sage/50 bg-sage/10 text-sage' : 'border-perl/70 bg-white text-main/70 hover:bg-page'
+                                    )}
+                                >
+                                    Gratuit
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setFlagPinned((v) => !v);
+                                        setPage(1);
+                                    }}
+                                    className={cx(
+                                        'rounded-full border px-3 py-2 text-xs font-semibold transition cursor-pointer',
+                                        flagPinned ? 'border-sage/50 bg-sage/10 text-sage' : 'border-perl/70 bg-white text-main/70 hover:bg-page'
+                                    )}
+                                >
+                                    Épinglé
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Reset */}
+                        <button
+                            type="button"
+                            onClick={resetFilters}
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page transition"
+                        >
+                            <X className="h-4 w-4" />
+                            Réinitialiser
+                        </button>
+                    </div>
+
+                    {/* Active filters summary */}
+                    {(query.trim() || statusFilter !== 'all' || pillarFilter !== 'all' || flagFree || flagPinned) && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] text-main/55">Filtres actifs :</span>
+
+                            {query.trim() ? (
+                                <span className="rounded-full border border-perl/60 bg-white px-3 py-1 text-[11px] font-semibold text-main/70">Recherche : “{query.trim()}”</span>
+                            ) : null}
+
+                            {pillarFilter !== 'all' ? (
+                                <span className="rounded-full border border-perl/60 bg-white px-3 py-1 text-[11px] font-semibold text-main/70">
+                                    Pilier : {pillarLabel(pillarFilter as Pillar)}
+                                </span>
+                            ) : null}
+
+                            {statusFilter !== 'all' ? (
+                                <span className="rounded-full border border-perl/60 bg-white px-3 py-1 text-[11px] font-semibold text-main/70">Statut : {statusFilter}</span>
+                            ) : null}
+
+                            {flagFree ? <span className="rounded-full border border-perl/60 bg-white px-3 py-1 text-[11px] font-semibold text-main/70">Gratuit</span> : null}
+                            {flagPinned ? <span className="rounded-full border border-perl/60 bg-white px-3 py-1 text-[11px] font-semibold text-main/70">Épinglé</span> : null}
+                        </div>
+                    )}
+                </div>
+
+                {/* ✅ MOBILE : cards */}
+                <div className="sm:hidden p-4 space-y-3">
+                    {paginated.length === 0 ? (
+                        <div className="rounded-3xl border border-perl/60 bg-white px-5 py-10 text-center">
+                            <p className="text-sm text-main/70">Aucun cours ne correspond à ta recherche.</p>
+                            <button
+                                type="button"
+                                onClick={resetFilters}
+                                className="mt-3 inline-flex items-center justify-center rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page"
+                            >
+                                Réinitialiser
+                            </button>
+                        </div>
+                    ) : (
+                        paginated.map((course) => <MobileCourseCard key={course.id} course={course} onOpen={() => openCourse(course.id)} />)
+                    )}
+                </div>
+
+                {/* ✅ DESKTOP : liste */}
+                <div className="hidden sm:block divide-y divide-perl/40">
+                    {paginated.length === 0 ? (
+                        <div className="px-5 py-10 text-center">
+                            <p className="text-sm text-main/70">Aucun cours ne correspond à ta recherche.</p>
+                            <button
+                                type="button"
+                                onClick={resetFilters}
+                                className="mt-3 inline-flex items-center justify-center rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page"
+                            >
+                                Réinitialiser
+                            </button>
+                        </div>
+                    ) : (
+                        paginated.map((course) => {
+                            const Icon = course.icon ?? Layers;
+                            const s = pillarStyles(course.pillar);
+
+                            return (
+                                <button
+                                    key={course.id}
+                                    type="button"
+                                    onClick={() => openCourse(course.id)}
+                                    className="w-full text-left px-4 sm:px-5 py-4 hover:bg-page/60 transition cursor-pointer overflow-x-hidden"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0 space-y-2">
+                                            <div className="flex flex-wrap items-center gap-2 min-w-0">
+                                                <span className={cx('inline-flex h-2.5 w-2.5 rounded-full', s.dot)} />
+                                                <Pill className={cx('border', s.badge)}>{pillarLabel(course.pillar)}</Pill>
+                                                <StatusPill status={course.status} />
+
+                                                {course.pinned ? (
+                                                    <Pill className="border-perl/60 bg-page/70 text-main/75">
+                                                        <span className="inline-flex items-center gap-1.5">
+                                                            <Pin className="h-3.5 w-3.5" />
+                                                            Épinglé
+                                                        </span>
+                                                    </Pill>
+                                                ) : null}
+
+                                                {course.isFree ? (
+                                                    <Pill className="border-perl/60 bg-page/70 text-main/75">
+                                                        <span className="inline-flex items-center gap-1.5">
+                                                            <LockOpen className="h-3.5 w-3.5" />
+                                                            Gratuit
+                                                        </span>
+                                                    </Pill>
+                                                ) : null}
+                                            </div>
+
+                                            <div className="space-y-1 min-w-0">
+                                                <p className="font-serif-title text-lg text-main leading-snug truncate">{course.title}</p>
+                                                <p className="text-xs text-main/60">
+                                                    {course.level} • {course.duration} • {course.students} • {course.modulesCount} modules + intro
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-perl/60 bg-page/70">
+                                            <Icon className="h-5 w-5 text-main" />
+                                        </span>
+                                    </div>
+                                </button>
+                            );
+                        })
+                    )}
+                </div>
+
+                {/* pagination */}
+                <div className="border-t border-perl/50 bg-white px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between overflow-x-hidden">
+                    <p className="text-xs text-main/60">
+                        Affichage <span className="font-semibold text-main">{startIndex}</span>–<span className="font-semibold text-main">{endIndex}</span> sur{' '}
+                        <span className="font-semibold text-main">{total}</span>
+                    </p>
+
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={safePage <= 1}
+                            className={cx(
+                                'rounded-full border px-4 py-2 text-sm font-semibold transition',
+                                safePage <= 1 ? 'border-perl/50 bg-page/60 text-main/40 cursor-not-allowed' : 'border-perl/70 bg-white text-main/80 hover:bg-page'
+                            )}
+                        >
+                            Précédent
+                        </button>
+
+                        <div className="hidden sm:flex items-center gap-1.5">
+                            {pageNumbers.map((p, idx) =>
+                                p === 'dots' ? (
+                                    <span key={`dots-${idx}`} className="px-2 text-sm text-main/40">
+                                        …
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={p}
+                                        type="button"
+                                        onClick={() => setPage(p)}
+                                        className={cx(
+                                            'h-9 w-9 rounded-full border text-sm font-semibold transition cursor-pointer',
+                                            p === safePage ? 'border-main bg-main text-white' : 'border-perl/70 bg-white text-main/80 hover:bg-page'
+                                        )}
+                                        aria-current={p === safePage ? 'page' : undefined}
+                                    >
+                                        {p}
+                                    </button>
+                                )
+                            )}
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={safePage >= totalPages}
+                            className={cx(
+                                'rounded-full border px-4 py-2 text-sm font-semibold transition',
+                                safePage >= totalPages ? 'border-perl/50 bg-page/60 text-main/40 cursor-not-allowed' : 'border-perl/70 bg-white text-main/80 hover:bg-page'
+                            )}
+                        >
+                            Suivant
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* ✅ Modal course */}
+            <Modal open={Boolean(selected)} title={selected?.title ?? ''} onClose={closeCourse}>
+                {selected ? (
+                    <div className="p-5 sm:p-6 space-y-5">
+                        {/* HERO */}
+                        <div className="rounded-3xl border border-perl/60 overflow-hidden bg-page/60">
+                            <div className="relative aspect-video w-full">
+                                <Image src={selected.heroImage.src} alt={selected.heroImage.alt} fill className="object-cover" />
+                                <div className={cx('absolute left-0 top-0 h-1.5 w-full', pillarStyles(selected.pillar).bar)} />
+                            </div>
+                        </div>
+
+                        {/* META */}
+                        <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Pill className={cx('border', pillarStyles(selected.pillar).badge)}>{pillarLabel(selected.pillar)}</Pill>
+                                <StatusPill status={selected.status} />
+
+                                {selected.pinned ? (
+                                    <Pill className="border-perl/60 bg-page/70 text-main/75">
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <Pin className="h-3.5 w-3.5" />
+                                            Épinglé
+                                        </span>
+                                    </Pill>
+                                ) : null}
+
+                                {selected.isFree ? (
+                                    <Pill className="border-perl/60 bg-page/70 text-main/75">
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <LockOpen className="h-3.5 w-3.5" />
+                                            Gratuit
+                                        </span>
+                                    </Pill>
+                                ) : null}
+                            </div>
+
+                            <p className="text-sm text-main/70">
+                                {selected.level} • {selected.duration} • {selected.students}
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                                <Pill className="border-perl/60 bg-page/70 text-main/70">{selected.modulesCount} modules</Pill>
+                                <Pill className="border-perl/60 bg-page/70 text-main/70">Intro incluse</Pill>
+                            </div>
+
+                            {selected.summary ? <p className="text-sm text-main/70 max-w-2xl">{selected.summary}</p> : null}
+                        </div>
+
+                        {/* ACTIONS */}
+                        <div className="rounded-3xl border border-perl/60 bg-white/95 p-4 sm:p-5 space-y-3">
+                            <p className="text-xs uppercase tracking-[0.18em] text-main/50">Actions</p>
+
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <Link
+                                    href={selected.hrefEdit}
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-main px-4 py-2 text-sm font-semibold text-white transition hover:bg-main/90"
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                    Éditer
+                                </Link>
+
+                                <Link
+                                    href={selected.hrefPreview}
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 transition hover:border-main/50 hover:bg-page"
+                                >
+                                    <Eye className="h-4 w-4" />
+                                    Prévisualiser
+                                    <ChevronRight className="h-4 w-4" />
+                                </Link>
+
+                                <button
+                                    type="button"
+                                    onClick={() => requestDelete(selected.id)}
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-rose/40 bg-rose/5 px-4 py-2 text-sm font-semibold text-rose transition hover:bg-rose/10 cursor-pointer"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* CONFIRM DELETE */}
+                        {confirmDeleteId === selected.id ? (
+                            <div className="rounded-3xl border border-rose/40 bg-rose/5 p-4 sm:p-5 space-y-3">
+                                <p className="text-sm font-semibold text-main">Confirmer la suppression ?</p>
+                                <p className="text-sm text-main/70">Cette action est définitive.</p>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={cancelDelete}
+                                        className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDelete(selected.id)}
+                                        className="inline-flex items-center justify-center rounded-full bg-rose px-4 py-2 text-sm font-semibold text-ivory hover:bg-rose/90"
+                                    >
+                                        Oui, supprimer
                                     </button>
                                 </div>
                             </div>
-                        ))}
+                        ) : null}
                     </div>
-                </div>
-
-                <aside className="space-y-4">
-                    <div className="rounded-3xl border border-perl/60 bg-white px-6 py-6 shadow-sm">
-                        <h3 className="text-lg font-semibold text-main">Check-list UX</h3>
-                        <ul className="mt-4 space-y-3 text-sm text-main/60">
-                            <li>✔️ Objectif clair en introduction</li>
-                            <li>✔️ Exercices guidés par étapes</li>
-                            <li>✔️ Feedback personnalisé</li>
-                            <li>✔️ Visuels cohérents avec la charte</li>
-                        </ul>
-                    </div>
-                    <div className="rounded-3xl border border-perl/60 bg-white px-6 py-6 shadow-sm">
-                        <h3 className="text-lg font-semibold text-main">Guides de production</h3>
-                        <div className="mt-4 space-y-3">
-                            {contentGuidelines.map((guide) => (
-                                <div key={guide.title} className="rounded-2xl border border-perl/60 bg-page px-4 py-4">
-                                    <p className="text-sm font-medium text-main">{guide.title}</p>
-                                    <p className="mt-2 text-xs text-main/60">{guide.description}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </aside>
-            </section>
+                ) : null}
+            </Modal>
         </div>
     );
 }

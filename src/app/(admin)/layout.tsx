@@ -40,14 +40,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                     <div className="grid gap-6 lg:gap-8 lg:grid-cols-[300px_minmax(0,1fr)] items-start">
                         <aside className="lg:sticky lg:top-24">
                             <div className="rounded-3xl border border-perl/60 bg-white/90 shadow-sm">
-                                <div className="p-4 sm:p-5">
+                                <div className="p-2 sm:p-5">
                                     <AdminSidebar />
                                 </div>
                             </div>
                         </aside>
 
                         <section className="rounded-3xl border border-perl/60 bg-white/90 shadow-sm">
-                            <div className="p-5 sm:p-6 lg:p-8">{children}</div>
+                            <div className="p-5 sm:p-6 lg:p-5">{children}</div>
                         </section>
                     </div>
                 </div>

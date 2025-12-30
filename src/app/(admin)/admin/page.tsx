@@ -1,137 +1,324 @@
 // src/app/(admin)/page.tsx
 import Link from 'next/link';
-import { Sparkles, Plus, Users, BookOpenCheck, HeartHandshake } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Sparkles, Plus, BookOpenCheck, LayoutDashboard, ArrowUpRight, FileText, GraduationCap, Users, TrendingUp, AlertTriangle, CheckCircle2, Palette } from 'lucide-react';
 
-const card = 'rounded-3xl border border-perl/60 bg-white/95 shadow-sm';
-const cardInner = 'rounded-2xl border border-perl/60 bg-page/70 px-4 py-4';
+type Accent = 'main' | 'sage' | 'rose';
 
-const kpiStats = [
-    { label: 'Apprenants actifs', value: '1 284', trend: '+12% sur 30 jours' },
-    { label: 'Taux de complétion', value: '82%', trend: '+4 pts ce mois-ci' },
-    { label: 'Cours publiés', value: '46', trend: '3 lancements prévus' },
-    { label: 'Satisfaction', value: '4,7/5', trend: 'Basé sur 392 avis' },
+type Stat = {
+    label: string;
+    value: string;
+    hint: string;
+    icon: LucideIcon;
+    accent?: Accent;
+};
+
+type PrimaryHub = {
+    title: string;
+    description: string;
+    href: string;
+    cta: string;
+    icon: LucideIcon;
+    accent: Accent;
+    kpis: Array<{ label: string; value: string }>;
+};
+
+type QueueItem = {
+    title: string;
+    meta: string;
+    status: 'à publier' | 'en cours' | 'à revoir';
+    href: string;
+    icon: LucideIcon;
+    priority?: 'urgent' | 'soon' | 'normal';
+};
+
+type ActivityItem = {
+    title: string;
+    description: string;
+    time: string;
+};
+
+const card = 'rounded-3xl border border-perl/60 bg-white/95 shadow-sm ring-1 ring-transparent transition hover:shadow-md hover:-translate-y-0.5 hover:ring-perl/40';
+const soft = 'rounded-2xl border border-perl/60 bg-page/70';
+
+const stats: Stat[] = [
+    { label: 'Apprenants actifs', value: '1 284', hint: '+12% sur 30j', icon: Users, accent: 'main' },
+    { label: 'Complétion moyenne', value: '82%', hint: '+4 pts ce mois-ci', icon: TrendingUp, accent: 'sage' },
+    { label: 'Contenus publiés', value: '46', hint: 'Cours + articles', icon: BookOpenCheck, accent: 'rose' },
 ];
 
-const quickActions = [
-    { title: 'Créer un nouveau module', description: 'Lancez un parcours complet avec quiz et ressources.', href: '/admin/formations', cta: 'Démarrer' },
-    { title: 'Inviter une cohorte', description: 'Ajoutez de nouveaux apprenants et assignez un mentor.', href: '/admin/utilisateurs', cta: 'Inviter' },
-    { title: 'Mettre en ligne un cours', description: 'Publiez un cours court avec exercices et ressources.', href: '/admin/cours', cta: 'Publier' },
-    { title: 'Mettre à jour la médiathèque', description: 'Ajoutez des ressources visuelles et des supports PDF.', href: '/admin/ressources', cta: 'Mettre à jour' },
+const hubs: PrimaryHub[] = [
+    {
+        title: 'Cours',
+        description: 'Créer, structurer, publier — et suivre l’impact.',
+        href: '/admin/cours',
+        cta: 'Gérer les cours',
+        icon: BookOpenCheck,
+        accent: 'main',
+        kpis: [
+            { label: 'À publier', value: '3' },
+            { label: 'En révision', value: '5' },
+        ],
+    },
+    {
+        title: 'Formations',
+        description: 'Parcours, modules, cohérence pédagogique.',
+        href: '/admin/formations',
+        cta: 'Ouvrir les formations',
+        icon: GraduationCap,
+        accent: 'sage',
+        kpis: [
+            { label: 'Parcours', value: '7' },
+            { label: 'Modules', value: '28' },
+        ],
+    },
+    {
+        title: 'Blog',
+        description: 'Articles piliers, SEO, publication éditoriale.',
+        href: '/admin/articles',
+        cta: 'Gérer le blog',
+        icon: FileText,
+        accent: 'rose',
+        kpis: [
+            { label: 'Brouillons', value: '6' },
+            { label: 'À optimiser', value: '4' },
+        ],
+    },
 ];
 
-const learningPulse = [
-    { title: 'Design thinking - Niveau 1', cohort: 'Cohorte Printemps', progress: 68, activity: '120 apprenants • 32% en avance' },
-    { title: 'Couleurs & storytelling visuel', cohort: 'Cohorte Pro', progress: 82, activity: '86 apprenants • 14% en rattrapage' },
-    { title: 'Culture artistique express', cohort: 'Cohorte Découverte', progress: 54, activity: '210 apprenants • 18% en pause' },
+const queues: { title: string; description: string; items: QueueItem[] }[] = [
+    {
+        title: 'À publier',
+        description: 'Ce qui fait avancer le catalogue (cours, parcours, blog).',
+        items: [
+            { title: 'Cours : Harmonies de couleur', meta: 'Exos + ressources à finaliser', status: 'en cours', href: '/admin/cours', icon: Palette, priority: 'soon' },
+            {
+                title: 'Formation : Parcours Découverte',
+                meta: 'Module 3 à relire (rythme)',
+                status: 'à revoir',
+                href: '/admin/formations',
+                icon: GraduationCap,
+                priority: 'urgent',
+            },
+            { title: 'Article : Valeurs & contrastes', meta: 'Brouillon prêt • 1 visuel manque', status: 'à publier', href: '/admin/articles', icon: FileText, priority: 'soon' },
+        ],
+    },
+    {
+        title: 'Qualité & friction',
+        description: 'Les points qui plombent l’expérience (à traiter en premier).',
+        items: [
+            { title: 'Quiz : Palette & contraste', meta: 'Taux de réussite 61%', status: 'à revoir', href: '/admin/cours', icon: AlertTriangle, priority: 'urgent' },
+            { title: 'Module : Culture artistique', meta: '12 retours • 3 critiques', status: 'à revoir', href: '/admin/formations', icon: AlertTriangle, priority: 'urgent' },
+            { title: 'Article : Introduction pilier', meta: 'Optimiser H2 + snippet', status: 'en cours', href: '/admin/articles', icon: FileText, priority: 'normal' },
+        ],
+    },
 ];
 
-const upcomingSessions = [
-    { title: 'Masterclass : Direction artistique', date: 'Mar. 23 Avril • 10:00', host: 'Animé par C. Delacroix' },
-    { title: 'Workshop : IA & création', date: 'Jeu. 25 Avril • 15:00', host: 'Animé par L. Nguyen' },
-    { title: 'Feedback live cohorte Pro', date: 'Ven. 26 Avril • 09:30', host: 'Animé par M. Dubois' },
+const activity: ActivityItem[] = [
+    { title: '23 nouvelles inscriptions', description: 'Parcours Couleurs & storytelling', time: 'Il y a 2h' },
+    { title: 'Cours publié', description: '“Lire une image : 3 repères”', time: 'Il y a 1j' },
+    { title: 'Brouillon modifié', description: 'Article “Comprendre les valeurs”', time: 'Il y a 2j' },
 ];
 
-const activityFeed = [
-    { title: '23 nouvelles inscriptions', description: 'Module Couleurs & storytelling', time: 'Il y a 2h' },
-    { title: 'Quiz final validé', description: 'Cohorte Printemps • 96% de réussite', time: 'Il y a 5h' },
-    { title: 'Contenu à réviser', description: 'Module Culture artistique express', time: 'Hier' },
-];
+function AccentGlow({ accent }: { accent: Accent }) {
+    const cls =
+        accent === 'rose'
+            ? 'bg-[radial-gradient(circle_at_15%_20%,rgba(180,92,119,0.25)_0,transparent_55%)]'
+            : accent === 'sage'
+            ? 'bg-[radial-gradient(circle_at_15%_20%,rgba(120,170,150,0.28)_0,transparent_55%)]'
+            : 'bg-[radial-gradient(circle_at_15%_20%,rgba(30,61,114,0.22)_0,transparent_55%)]';
+    return <div className={`pointer-events-none absolute inset-0 ${cls}`} />;
+}
+
+function Pill({ children }: { children: React.ReactNode }) {
+    return <span className="rounded-full border border-perl/60 bg-page/70 px-3 py-1 text-[11px] text-main/70">{children}</span>;
+}
+
+function PriorityPill({ p }: { p?: QueueItem['priority'] }) {
+    if (!p) return null;
+    const map: Record<NonNullable<QueueItem['priority']>, { label: string; className: string; icon: LucideIcon }> = {
+        urgent: { label: 'Prioritaire', className: 'border-[#b45c77]/25 bg-[#b45c77]/10 text-[#7c3146]', icon: AlertTriangle },
+        soon: { label: 'Cette semaine', className: 'border-main/20 bg-main/10 text-main', icon: TrendingUp },
+        normal: { label: 'À suivre', className: 'border-perl/60 bg-white/60 text-main/70', icon: CheckCircle2 },
+    };
+    const cfg = map[p];
+    const Icon = cfg.icon;
+    return (
+        <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold ${cfg.className}`}>
+            <Icon className="h-3.5 w-3.5" />
+            {cfg.label}
+        </span>
+    );
+}
+
+function SectionHeader({ title, description, href, cta }: { title: string; description: string; href?: string; cta?: string }) {
+    return (
+        <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="space-y-1">
+                <h3 className="font-serif-title text-lg text-main">{title}</h3>
+                <p className="text-sm text-main/65">{description}</p>
+            </div>
+            {href ? (
+                <Link href={href} className="inline-flex items-center gap-2 text-sm font-medium text-main/80 hover:text-main">
+                    <span className="underline underline-offset-4">{cta ?? 'Voir tout'}</span>
+                    <ArrowUpRight className="h-4 w-4" />
+                </Link>
+            ) : null}
+        </div>
+    );
+}
+
+function StatCard({ s }: { s: Stat }) {
+    const Icon = s.icon;
+    return (
+        <div className={`${card} p-5 sm:p-6 relative overflow-hidden`}>
+            <AccentGlow accent={s.accent ?? 'main'} />
+            <div className="relative flex items-start justify-between gap-4">
+                <div className="space-y-2">
+                    <p className="text-[0.72rem] uppercase tracking-[0.18em] text-main/50">{s.label}</p>
+                    <p className="text-2xl font-semibold text-main">{s.value}</p>
+                    <p className="text-sm text-main/60">{s.hint}</p>
+                </div>
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-perl/60 bg-page/70">
+                    <Icon className="h-5 w-5 text-main" />
+                </span>
+            </div>
+        </div>
+    );
+}
+
+function HubCard({ hub }: { hub: PrimaryHub }) {
+    const Icon = hub.icon;
+
+    return (
+        <Link href={hub.href} className={`${card} p-6 relative overflow-hidden block`}>
+            <AccentGlow accent={hub.accent} />
+            <div className="relative space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1.5">
+                        <p className="text-[0.72rem] uppercase tracking-[0.18em] text-main/50">Espace</p>
+                        <h3 className="font-serif-title text-xl text-main">{hub.title}</h3>
+                        <p className="text-sm text-main/65">{hub.description}</p>
+                    </div>
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-perl/60 bg-page/70">
+                        <Icon className="h-6 w-6 text-main" />
+                    </span>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                    {hub.kpis.map((k) => (
+                        <Pill key={k.label}>
+                            <span className="font-semibold text-main">{k.value}</span> <span className="text-main/60">{k.label}</span>
+                        </Pill>
+                    ))}
+                </div>
+
+                <div className="inline-flex items-center gap-2 text-sm font-semibold text-main/80">
+                    <span className="underline underline-offset-4">{hub.cta}</span>
+                    <ArrowUpRight className="h-4 w-4" />
+                </div>
+            </div>
+        </Link>
+    );
+}
+
+function QueueList({ block }: { block: { title: string; description: string; items: QueueItem[] } }) {
+    return (
+        <div className={`${card} p-5 sm:p-6`}>
+            <SectionHeader title={block.title} description={block.description} />
+            <div className="mt-5 space-y-3">
+                {block.items.map((it) => {
+                    const Icon = it.icon;
+                    return (
+                        <Link key={it.title} href={it.href} className={`block ${soft} px-4 py-4 transition hover:bg-white`}>
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="space-y-1">
+                                    <p className="text-sm font-medium text-main">{it.title}</p>
+                                    <p className="text-xs text-main/60">{it.meta}</p>
+
+                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                        <span className="rounded-full border border-perl/60 bg-white/70 px-3 py-1 text-[11px] text-main/60">{it.status}</span>
+                                        <PriorityPill p={it.priority} />
+                                    </div>
+                                </div>
+
+                                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-perl/60 bg-white/70">
+                                    <Icon className="h-5 w-5 text-main" />
+                                </span>
+                            </div>
+                        </Link>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
 
 export default function AdminPage() {
     return (
         <div className="space-y-8 md:space-y-10">
-            {/* HERO admin - version “atelier-like” */}
-            <header className="relative overflow-hidden rounded-3xl bg-linear-to-r from-main via-sage to-sage/80 text-ivory shadow-lg">
-                {/* halo / motif */}
+            {/* HERO compact + utile */}
+            <header className="relative overflow-hidden rounded-xl bg-linear-to-r from-main via-sage to-sage/80 text-ivory shadow-lg">
                 <div className="pointer-events-none absolute inset-0 opacity-35 mix-blend-soft-light bg-[radial-gradient(circle_at_12%_18%,#b45c77_0,transparent_50%),radial-gradient(circle_at_88%_88%,#1e3d72_0,transparent_55%)]" />
                 <div className="pointer-events-none absolute inset-5 rounded-[1.75rem] border border-ivory/15" />
 
-                <div className="relative px-6 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-9 space-y-6">
-                    {/* Ligne principale */}
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                        {/* Texte */}
-                        <div className="space-y-4 max-w-2xl">
+                <div className="relative px-6 py-7 sm:px-8 lg:px-10 space-y-5">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-3 max-w-2xl">
                             <div className="inline-flex items-center gap-2 rounded-full bg-ivory/10 px-3 py-1 text-[0.7rem] uppercase tracking-[0.18em] text-ivory">
-                                <Sparkles className="h-3.5 w-3.5" />
-                                <span>Administration</span>
+                                <LayoutDashboard className="h-3.5 w-3.5" />
+                                <span>Dashboard admin</span>
                             </div>
 
-                            <div className="space-y-2.5">
-                                <h2 className="font-serif-title text-2xl md:text-3xl leading-tight text-ivory">Dashboard Explor&apos;Art</h2>
-                                <p className="text-sm md:text-base text-ivory/90">
-                                    Pilote l’activité, la progression des parcours et la publication des contenus — avec une vue claire, sans friction.
-                                </p>
-                            </div>
+                            <h2 className="font-serif-title text-2xl md:text-3xl leading-tight text-ivory">Explor&apos;Art</h2>
 
-                            {/* chips infos */}
+                            <p className="text-sm md:text-base text-ivory/90">Cours, formations, blog — une vue claire pour publier vite et améliorer la qualité.</p>
+
                             <div className="flex flex-wrap gap-2 pt-1">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-ivory/10 px-3 py-1 text-[0.75rem] text-ivory/90">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-ivory/80" />8 modules à surveiller
+                                <span className="inline-flex items-center gap-2 rounded-full bg-ivory/10 px-3 py-1 text-[0.75rem] text-ivory/90">
+                                    <Sparkles className="h-3 w-3" /> Priorités édito + pédagogie
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-ivory/10 px-3 py-1 text-[0.75rem] text-ivory/90">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-ivory/80" />3 actions prioritaires
-                                </span>
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-ivory/10 px-3 py-1 text-[0.75rem] text-ivory/90">
-                                    <Sparkles className="h-3 w-3 text-ivory/90" />
-                                    Cohérence UX activée
+                                <span className="inline-flex items-center gap-2 rounded-full bg-ivory/10 px-3 py-1 text-[0.75rem] text-ivory/90">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-ivory/80" /> Catalogue en progression
                                 </span>
                             </div>
                         </div>
 
-                        {/* CTA group */}
-                        <div className="w-full max-w-md lg:max-w-xs flex flex-col sm:flex-row lg:flex-col gap-2 lg:items-stretch lg:justify-center">
+                        <div className="w-full max-w-md lg:max-w-xs flex flex-col sm:flex-row lg:flex-col gap-2">
                             <Link
                                 href="/admin/articles"
-                                className="
-                        group flex-1
-                        inline-flex items-center justify-center gap-2
-                        rounded-full bg-ivory text-main
-                        px-5 py-2.5 text-sm font-medium
-                        shadow-md shadow-main/20
-                        transition-all duration-200
-                        hover:bg-ivory/90 hover:-translate-y-0.5
-                    "
+                                className="group inline-flex items-center justify-center gap-2 rounded-full bg-ivory text-main px-5 py-2.5 text-sm font-medium shadow-md shadow-main/20 transition hover:bg-ivory/90 hover:-translate-y-0.5"
                             >
                                 <Plus className="h-4 w-4" />
-                                <span className="whitespace-nowrap">Créer un article</span>
+                                Créer un article
                                 <span className="transition-transform group-hover:translate-x-0.5">↗</span>
                             </Link>
 
                             <Link
-                                href="/admin/formations"
-                                className="
-                        group flex-1
-                        inline-flex items-center justify-center gap-2
-                        rounded-full border border-ivory/70
-                        bg-transparent
-                        px-5 py-2.5 text-sm font-medium text-ivory
-                        transition-all duration-200
-                        hover:bg-ivory hover:text-main hover:-translate-y-0.5
-                    "
+                                href="/admin/cours"
+                                className="group inline-flex items-center justify-center gap-2 rounded-full border border-ivory/70 bg-transparent px-5 py-2.5 text-sm font-medium text-ivory transition hover:bg-ivory hover:text-main hover:-translate-y-0.5"
                             >
                                 <BookOpenCheck className="h-4 w-4" />
-                                <span className="whitespace-nowrap">Ouvrir les formations</span>
+                                Nouveau cours
                                 <span className="transition-transform group-hover:translate-x-0.5">☼</span>
                             </Link>
                         </div>
                     </div>
 
-                    {/* Highlights admin */}
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {/* mini-stats dans le hero */}
+                    <div className="grid gap-3 sm:grid-cols-3">
                         {[
-                            { label: 'Apprenants actifs', value: '1 284', detail: '+12% / 30j', icon: Users },
-                            { label: 'Complétion moyenne', value: '82%', detail: '+4 pts', icon: BookOpenCheck },
-                            { label: 'Satisfaction', value: '4,7/5', detail: '392 avis', icon: HeartHandshake },
-                            { label: 'Alertes contenu', value: '6', detail: 'à optimiser', icon: Sparkles },
-                        ].map((item) => {
-                            const Icon = item.icon;
+                            { label: 'À publier', value: '3', icon: TrendingUp },
+                            { label: 'À revoir', value: '6', icon: AlertTriangle },
+                            { label: 'Brouillons blog', value: '6', icon: FileText },
+                        ].map((x) => {
+                            const Icon = x.icon;
                             return (
-                                <div key={item.label} className="relative overflow-hidden rounded-2xl bg-ivory/10 px-4 py-3 shadow-xxs ring-1 ring-ivory/15 backdrop-blur">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="space-y-1.5">
-                                            <p className="text-[0.75rem] uppercase tracking-[0.18em] text-ivory/80">{item.label}</p>
-                                            <p className="text-lg font-semibold text-ivory">{item.value}</p>
-                                            <p className="text-[0.85rem] text-ivory/80">{item.detail}</p>
+                                <div key={x.label} className="rounded-2xl bg-ivory/10 px-4 py-3 ring-1 ring-ivory/15 backdrop-blur">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-[0.72rem] uppercase tracking-[0.18em] text-ivory/75">{x.label}</p>
+                                            <p className="text-lg font-semibold text-ivory">{x.value}</p>
                                         </div>
                                         <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-ivory/15">
                                             <Icon className="h-5 w-5 text-ivory" />
@@ -144,126 +331,67 @@ export default function AdminPage() {
                 </div>
             </header>
 
-            {/* KPIs */}
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {kpiStats.map((stat) => (
-                    <div key={stat.label} className={`${card} p-5 sm:p-6`}>
-                        <p className="text-[0.72rem] uppercase tracking-[0.18em] text-main/50">{stat.label}</p>
-                        <p className="mt-3 text-2xl font-semibold text-main">{stat.value}</p>
-                        <p className="mt-2 text-sm text-main/60">{stat.trend}</p>
-                    </div>
+            {/* Stats (juste 3, pour éviter la redondance) */}
+            <section className="grid gap-4 md:grid-cols-3">
+                {stats.map((s) => (
+                    <StatCard key={s.label} s={s} />
                 ))}
             </section>
 
-            {/* Main grid */}
+            {/* 3 hubs principaux */}
+            <section className="grid gap-4 lg:grid-cols-3">
+                {hubs.map((h) => (
+                    <HubCard key={h.title} hub={h} />
+                ))}
+            </section>
+
+            {/* Pipeline + Qualité */}
             <section className="grid gap-6 lg:grid-cols-3">
-                <div className="space-y-6 lg:col-span-2">
-                    {/* Suivi des parcours */}
-                    <div className={`${card} p-5 sm:p-6`}>
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="space-y-1">
-                                <h3 className="font-serif-title text-lg text-main">Suivi des parcours</h3>
-                                <p className="text-sm text-main/65">Analysez la progression et les points de friction.</p>
-                            </div>
-                            <Link href="/admin/articles" className="text-sm font-medium text-main/80 underline underline-offset-2 hover:text-main">
-                                Voir tout
-                            </Link>
-                        </div>
-
-                        <div className="mt-6 space-y-5">
-                            {learningPulse.map((course) => (
-                                <div key={course.title} className="space-y-2">
-                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <div>
-                                            <p className="text-sm font-medium text-main">{course.title}</p>
-                                            <p className="text-xs text-main/50">{course.cohort}</p>
-                                        </div>
-                                        <span className="text-sm font-semibold text-main">{course.progress}%</span>
-                                    </div>
-
-                                    <div className="h-2 w-full rounded-full bg-perl/30 overflow-hidden">
-                                        <div className="h-2 rounded-full bg-main" style={{ width: `${course.progress}%` }} />
-                                    </div>
-
-                                    <p className="text-xs text-main/60">{course.activity}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Contenu à optimiser */}
-                    <div className={`${card} p-5 sm:p-6`}>
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="space-y-1">
-                                <h3 className="font-serif-title text-lg text-main">Contenu à optimiser</h3>
-                                <p className="text-sm text-main/65">Priorisez les modules qui demandent un ajustement.</p>
-                            </div>
-                            <Link href="/admin/categories" className="text-sm font-medium text-main/80 underline underline-offset-2 hover:text-main">
-                                Voir la roadmap
-                            </Link>
-                        </div>
-
-                        <div className="mt-6 grid gap-4 md:grid-cols-2">
-                            {[
-                                { title: 'Module 04 - Culture artistique', detail: '12 retours • 3 suggestions critiques', status: 'Mise à jour urgente' },
-                                { title: 'Quiz final - Palette & contraste', detail: 'Taux de réussite 61%', status: 'Révision recommandée' },
-                                { title: 'Séquence vidéo - Histoire de l’art', detail: 'Durée moyenne trop longue', status: 'Couper en 2 parties' },
-                                { title: 'Atelier live - Feedback', detail: 'Planifier un créneau supplémentaire', status: 'Capacité atteinte' },
-                            ].map((item) => (
-                                <div key={item.title} className={cardInner}>
-                                    <p className="text-sm font-medium text-main">{item.title}</p>
-                                    <p className="mt-2 text-xs text-main/60">{item.detail}</p>
-                                    <p className="mt-3 text-xs font-semibold text-main/80">{item.status}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                <div className="lg:col-span-2 space-y-6">
+                    {queues.map((b) => (
+                        <QueueList key={b.title} block={b} />
+                    ))}
                 </div>
 
-                {/* Aside */}
-                <aside className="space-y-6">
-                    {/* Actions rapides */}
-                    <div className={`${card} p-5 sm:p-6`}>
-                        <h3 className="font-serif-title text-lg text-main">Actions rapides</h3>
-                        <div className="mt-4 space-y-3">
-                            {quickActions.map((action) => (
-                                <div key={action.title} className={cardInner}>
-                                    <p className="text-sm font-medium text-main">{action.title}</p>
-                                    <p className="mt-2 text-xs text-main/60">{action.description}</p>
-                                    <Link href={action.href} className="mt-3 inline-flex text-xs font-semibold text-main/80 underline underline-offset-2 hover:text-main">
-                                        {action.cta}
-                                    </Link>
+                {/* Activité légère (pas de répétition de cards inutiles) */}
+                <aside className={`${card} p-5 sm:p-6 h-fit`}>
+                    <SectionHeader title="Activité" description="Ce qui bouge sur le catalogue." href="/admin/utilisateurs" cta="Voir utilisateurs" />
+                    <div className="mt-5 space-y-3">
+                        {activity.map((a) => (
+                            <div key={a.title} className={`${soft} px-4 py-4`}>
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-main">{a.title}</p>
+                                        <p className="text-xs text-main/60">{a.description}</p>
+                                    </div>
+                                    <span className="rounded-full border border-perl/60 bg-white/70 px-3 py-1 text-[11px] text-main/55">{a.time}</span>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
 
-                    {/* Prochaines sessions */}
-                    <div className={`${card} p-5 sm:p-6`}>
-                        <h3 className="font-serif-title text-lg text-main">Prochaines sessions</h3>
-                        <div className="mt-4 space-y-3">
-                            {upcomingSessions.map((session) => (
-                                <div key={session.title} className={cardInner}>
-                                    <p className="text-sm font-medium text-main">{session.title}</p>
-                                    <p className="mt-1 text-xs text-main/60">{session.date}</p>
-                                    <p className="mt-1 text-xs text-main/50">{session.host}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Activité récente */}
-                    <div className={`${card} p-5 sm:p-6`}>
-                        <h3 className="font-serif-title text-lg text-main">Activité récente</h3>
-                        <div className="mt-4 space-y-3">
-                            {activityFeed.map((activity) => (
-                                <div key={activity.title} className={cardInner}>
-                                    <p className="text-sm font-medium text-main">{activity.title}</p>
-                                    <p className="mt-1 text-xs text-main/60">{activity.description}</p>
-                                    <p className="mt-2 text-[11px] text-main/45">{activity.time}</p>
-                                </div>
-                            ))}
-                        </div>
+                    {/* mini raccourcis (pas répétitif) */}
+                    <div className="mt-6 grid gap-2">
+                        {[
+                            { href: '/admin/formations', label: 'Structurer un parcours', icon: GraduationCap },
+                            { href: '/admin/articles', label: 'Optimiser le blog', icon: FileText },
+                            { href: '/admin/cours', label: 'Publier un cours', icon: BookOpenCheck },
+                        ].map((x) => {
+                            const Icon = x.icon;
+                            return (
+                                <Link
+                                    key={x.href}
+                                    href={x.href}
+                                    className="inline-flex items-center justify-between rounded-2xl border border-perl/60 bg-page/70 px-4 py-3 text-sm font-medium text-main transition hover:bg-white hover:border-main/50"
+                                >
+                                    <span className="inline-flex items-center gap-2">
+                                        <Icon className="h-4 w-4" />
+                                        {x.label}
+                                    </span>
+                                    <ArrowUpRight className="h-4 w-4 text-main/70" />
+                                </Link>
+                            );
+                        })}
                     </div>
                 </aside>
             </section>
