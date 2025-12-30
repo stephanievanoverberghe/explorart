@@ -1,7 +1,7 @@
 // src/app/api/users/me/courses/route.ts
 import { NextResponse } from 'next/server';
 
-import { getCoursesBySlugs } from '@/lib/data/courses';
+import { COURSES } from '@/lib/content/courses';
 import { connectToDatabase } from '@/lib/db/connect';
 import { getAuthUser } from '@/lib/auth/session';
 import { CoursePurchase } from '@/lib/models/CoursePurchase';
@@ -22,13 +22,10 @@ export async function GET() {
     await connectToDatabase();
 
     const purchases = await CoursePurchase.find({ userId: authUser.userId }).sort({ createdAt: -1 }).lean();
-    const courseSlugs = purchases.map((purchase) => purchase.courseSlug);
-    const catalog = await getCoursesBySlugs(courseSlugs);
-    const catalogBySlug = new Map(catalog.map((course) => [course.slug, course]));
 
     const courses = purchases
         .map((purchase) => {
-            const course = catalogBySlug.get(purchase.courseSlug);
+            const course = COURSES.find((c) => c.slug === purchase.courseSlug);
             return {
                 slug: purchase.courseSlug,
                 title: course?.title ?? purchase.courseTitle,
