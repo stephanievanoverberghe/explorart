@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Save, Plus, Trash2 } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { saveModules } from '@/lib/actions/courseContent';
 
 type EditorModule = { id: string; title: string; content: string };
 const uid = () => crypto.randomUUID();
@@ -27,7 +28,14 @@ export default function EditorModulesPage() {
         if (submitting) return;
         setSubmitting(true);
         try {
-            // TODO: saveModules(courseId, modules)
+            await saveModules(
+                courseId,
+                modules.map((module, index) => ({
+                    title: module.title,
+                    content: module.content,
+                    order: index + 1,
+                }))
+            );
             const now = new Date();
             setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
         } finally {

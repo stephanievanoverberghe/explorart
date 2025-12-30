@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Save, Sparkles } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { saveIntro } from '@/lib/actions/courseContent';
 
 export default function EditorIntroPage() {
     const router = useRouter();
@@ -18,7 +19,7 @@ export default function EditorIntroPage() {
         if (submitting) return;
         setSubmitting(true);
         try {
-            // TODO: saveIntro(courseId, { text })
+            await saveIntro(courseId, { text });
             const now = new Date();
             setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
         } finally {

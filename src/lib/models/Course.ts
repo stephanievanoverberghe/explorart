@@ -28,6 +28,26 @@ export interface CourseModule {
     resources?: CourseResource[];
 }
 
+export interface CourseContentIntro {
+    text: string;
+}
+
+export interface CourseContentModule {
+    title: string;
+    content: string;
+    order: number;
+}
+
+export interface CourseContentConclusion {
+    text: string;
+}
+
+export interface CourseContent {
+    intro?: CourseContentIntro;
+    modules?: CourseContentModule[];
+    conclusion?: CourseContentConclusion;
+}
+
 export interface CourseDocument extends Document {
     slug: string;
     title: string;
@@ -48,6 +68,7 @@ export interface CourseDocument extends Document {
     videos?: CourseVideo[];
     resources?: CourseResource[];
     modules?: CourseModule[];
+    content?: CourseContent;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -84,6 +105,15 @@ const courseModuleSchema = new Schema<CourseModule>(
     { _id: false }
 );
 
+const courseContentModuleSchema = new Schema<CourseContentModule>(
+    {
+        title: { type: String, required: true, trim: true },
+        content: { type: String, default: '' },
+        order: { type: Number, default: 0 },
+    },
+    { _id: false }
+);
+
 const courseSchema = new Schema<CourseDocument>(
     {
         slug: { type: String, required: true, trim: true, unique: true, lowercase: true },
@@ -105,6 +135,11 @@ const courseSchema = new Schema<CourseDocument>(
         videos: { type: [courseVideoSchema], default: [] },
         resources: { type: [courseResourceSchema], default: [] },
         modules: { type: [courseModuleSchema], default: [] },
+        content: {
+            intro: { text: { type: String, default: '' } },
+            modules: { type: [courseContentModuleSchema], default: [] },
+            conclusion: { text: { type: String, default: '' } },
+        },
     },
     { timestamps: true }
 );
