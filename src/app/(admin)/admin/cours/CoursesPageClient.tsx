@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Plus, Pencil, Eye, Trash2, Pin, LockOpen, Layers, X, ChevronRight, Search, SlidersHorizontal, ChevronDown, Tag } from 'lucide-react';
 
@@ -273,6 +273,7 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
     const [pillarFilter, setPillarFilter] = useState<Pillar | 'all'>('all');
     const [flagFree, setFlagFree] = useState(false);
     const [flagPinned, setFlagPinned] = useState(false);
+    const hasMountedRef = useRef(false);
 
     const totalPages = Math.max(1, meta.totalPages);
     const safePage = Math.min(page, totalPages);
@@ -337,6 +338,11 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
     };
 
     useEffect(() => {
+        if (!hasMountedRef.current) {
+            hasMountedRef.current = true;
+            return;
+        }
+        setPage(1);
         fetchCourses(1);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query, statusFilter, pillarFilter, flagFree, flagPinned]);
