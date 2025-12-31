@@ -13,6 +13,8 @@ import type {
 
 const defaultIdentity: CourseIdentityData = {
     title: '',
+    slug: '',
+    coverImage: '',
     pillar: 'dessin-peinture',
     level: 'Débutant',
     access: 'free',

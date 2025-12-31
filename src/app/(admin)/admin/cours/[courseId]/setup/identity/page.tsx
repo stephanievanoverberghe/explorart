@@ -1,8 +1,14 @@
 import SetupIdentityClient from './SetupIdentityClient';
 import { getCourseSetup } from '@/lib/data/courseSetup';
 
-export default async function SetupIdentityPage({ params }: { params: { courseId: string } }) {
-    const setup = await getCourseSetup(params.courseId);
+type PageProps = {
+    params: Promise<{ courseId: string }>;
+};
 
-    return <SetupIdentityClient courseId={params.courseId} initialIdentity={setup.identity} />;
+export default async function SetupIdentityPage({ params }: PageProps) {
+    const { courseId } = await params;
+
+    const setup = await getCourseSetup(courseId);
+
+    return <SetupIdentityClient courseId={courseId} initialIdentity={setup.identity} />;
 }

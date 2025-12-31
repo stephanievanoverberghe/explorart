@@ -1,59 +1,16 @@
 'use server';
 
-import { isValidObjectId } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';
-import { Course, type CourseDocument } from '@/lib/models/Course';
-import { CourseSetup } from '@/lib/models/CourseSetup';
-import type { CourseReviewContent, CourseReviewModule } from '@/lib/models/Course';
+import { CourseContent } from '@/lib/models/CourseContent';
+import type { CourseIntroData } from '@/types/courseContent';
 
-function buildCourseQuery(courseId: string) {
-    if (isValidObjectId(courseId)) {
-        return { $or: [{ _id: courseId }, { slug: courseId }] };
-    }
-    return { slug: courseId };
+export async function getIntro(courseId: string): Promise<CourseIntroData | null> {
+    await connectToDatabase();
+    const doc = await CourseContent.findOne({ courseId }).lean();
+    return (doc?.intro as CourseIntroData | undefined) ?? null;
 }
 
-export async function getCourseContent(courseId: string): Promise<CourseReviewContent | null> {
+export async function saveIntro(courseId: string, payload: CourseIntroData): Promise<void> {
     await connectToDatabase();
-
-    const [course, setup] = await Promise.all([Course.findOne(buildCourseQuery(courseId)).select('slug content').lean<CourseDocument>(), CourseSetup.findOne({ courseId }).lean()]);
-
-    if (!course && !setup) {
-        return null;
-    }
-
-    const fallbackModules =
-        setup?.structure?.modules?.map((module, index) => ({
-            order: index + 1,
-            title: module.title,
-            content: module.goal,
-        })) ?? [];
-    const fallbackIntro = setup?.intent?.promise ?? '';
-    const fallbackConclusion = setup?.intent?.outcomes?.filter(Boolean).join('\n') ?? '';
-    const content = course?.content ?? null;
-
-    return {
-        slug: course?.slug ?? courseId,
-        intro: { text: content?.intro?.text ?? fallbackIntro },
-        modules: content?.modules?.length ? content.modules : fallbackModules,
-        conclusion: { text: content?.conclusion?.text ?? fallbackConclusion },
-    };
-}
-
-export async function saveIntro(courseId: string, payload: { text: string }) {
-    await connectToDatabase();
-
-    await Course.findOneAndUpdate(buildCourseQuery(courseId), { $set: { 'content.intro.text': payload.text } }, { new: true, upsert: false });
-}
-
-export async function saveModules(courseId: string, modules: CourseReviewModule[]) {
-    await connectToDatabase();
-
-    await Course.findOneAndUpdate(buildCourseQuery(courseId), { $set: { 'content.modules': modules } }, { new: true, upsert: false });
-}
-
-export async function saveConclusion(courseId: string, payload: { text: string }) {
-    await connectToDatabase();
-
-    await Course.findOneAndUpdate(buildCourseQuery(courseId), { $set: { 'content.conclusion.text': payload.text } }, { new: true, upsert: false });
+    await CourseContent.findOneAndUpdate({ courseId }, { $set: { intro: payload } }, { upsert: true, new: true });
 }

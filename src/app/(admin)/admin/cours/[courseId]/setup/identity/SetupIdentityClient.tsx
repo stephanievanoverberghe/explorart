@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Sparkles, Tag, GraduationCap, LockOpen, Lock, Pin, ChevronDown, Save } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Tag, GraduationCap, LockOpen, Lock, Pin, ChevronDown, Save, Image as ImageIcon, Link2 } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
 import { updateCourseIdentity } from '@/lib/actions/courseSetup';
 import type { CourseAccess, CourseIdentityData, CourseLevel, CoursePillar } from '@/types/courseSetup';
@@ -64,6 +64,20 @@ function PrettySelect({ icon, value, onChange, children }: { icon: React.ReactNo
     );
 }
 
+function slugify(input: string) {
+    return input
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+}
+
+function isValidSlug(value: string) {
+    // lettres/chiffres + tirets, pas de double tiret, pas de tiret au début/fin
+    return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
 interface SetupIdentityClientProps {
     courseId: string;
     initialIdentity: CourseIdentityData;
@@ -73,6 +87,8 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
     const router = useRouter();
 
     const [title, setTitle] = useState(initialIdentity.title);
+    const [slug, setSlug] = useState(initialIdentity.slug);
+    const [coverImage, setCoverImage] = useState(initialIdentity.coverImage);
     const [pillar, setPillar] = useState<CoursePillar>(initialIdentity.pillar);
     const [level, setLevel] = useState<CourseLevel>(initialIdentity.level);
     const [access, setAccess] = useState<CourseAccess>(initialIdentity.access);
@@ -81,13 +97,27 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
     const [submitting, setSubmitting] = useState(false);
     const [savedAt, setSavedAt] = useState<string | null>(null);
 
-    const canContinue = useMemo(() => title.trim().length >= 3, [title]);
+    const suggestedSlug = useMemo(() => slugify(title), [title]);
+
+    const titleOk = title.trim().length >= 3;
+    const slugOk = slug.trim().length >= 3 && isValidSlug(slug.trim());
+    const canContinue = titleOk && slugOk;
 
     async function saveDraft() {
         if (submitting) return;
         setSubmitting(true);
+
         try {
-            await updateCourseIdentity(courseId, { title, pillar, level, access, pinned });
+            await updateCourseIdentity(courseId, {
+                title: title.trim(),
+                slug: slug.trim(),
+                coverImage: coverImage.trim(),
+                pillar,
+                level,
+                access,
+                pinned,
+            });
+
             const now = new Date();
             setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
         } finally {
@@ -124,7 +154,8 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
                 title="Identité du cours"
                 description={
                     <>
-                        On pose le minimum (titre + tags). Ensuite : <span className="font-semibold text-main">intention pédagogique</span>.
+                        On pose le minimum : <span className="font-semibold text-main">titre</span>, <span className="font-semibold text-main">URL (slug)</span> et{' '}
+                        <span className="font-semibold text-main">image</span>. Ensuite : <span className="font-semibold text-main">intention pédagogique</span>.
                     </>
                 }
             />
@@ -132,7 +163,7 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
             <Card>
                 <CardHeader
                     title="Identité"
-                    subtitle="Titre • pilier • niveau • accès • mise en avant"
+                    subtitle="Titre • slug • cover • pilier • niveau • accès • mise en avant"
                     right={
                         <div className="flex items-center gap-2">
                             {savedAt ? (
@@ -175,6 +206,86 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
                             </div>
                             <p className="text-xs text-main/55">Tu pourras le modifier ensuite, mais il sert de base au parcours.</p>
                         </Field>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <Field label="Slug (URL) *" hint="minuscules + tirets (ex: couleurs-express)">
+                                <div className="space-y-2">
+                                    <div className="relative">
+                                        <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-main/45" />
+                                        <input
+                                            value={slug}
+                                            onChange={(e) => setSlug(slugify(e.target.value))}
+                                            placeholder={suggestedSlug || 'ex : couleurs-express'}
+                                            className={cx(
+                                                'w-full rounded-2xl border border-perl/70 bg-white pl-10 pr-28 py-3 text-sm text-main outline-none transition',
+                                                'hover:bg-page/50',
+                                                'focus:border-main focus:ring-2 focus:ring-main/10'
+                                            )}
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setSlug(suggestedSlug)}
+                                            disabled={!suggestedSlug}
+                                            className={cx(
+                                                'absolute right-2 top-1/2 -translate-y-1/2 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition',
+                                                !suggestedSlug
+                                                    ? 'border-perl/60 bg-page text-main/40 cursor-not-allowed'
+                                                    : 'border-perl/70 bg-white text-main/75 hover:bg-page cursor-pointer'
+                                            )}
+                                        >
+                                            Utiliser
+                                        </button>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                                        <span
+                                            className={cx(
+                                                'rounded-full border px-2 py-1 font-semibold',
+                                                slugOk ? 'border-sage/40 bg-sage/10 text-sage' : 'border-perl/60 bg-page/60 text-main/55'
+                                            )}
+                                        >
+                                            {slugOk ? 'Slug OK' : 'Slug requis'}
+                                        </span>
+                                        <span className="text-main/55">
+                                            URL publique : <span className="font-semibold text-main/75">/cours/{slug || 'mon-cours'}</span>
+                                        </span>
+                                    </div>
+
+                                    {!slugOk && slug.trim().length > 0 ? (
+                                        <p className="text-xs text-rose-700">Le slug doit contenir uniquement des lettres/chiffres et des tirets (pas d’espace, pas d’accents).</p>
+                                    ) : null}
+                                </div>
+                            </Field>
+
+                            <Field label="Image principale (cover)" hint="Chemin /images/... ou URL https://...">
+                                <div className="relative">
+                                    <ImageIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-main/45" />
+                                    <input
+                                        value={coverImage}
+                                        onChange={(e) => setCoverImage(e.target.value)}
+                                        placeholder="/images/cours/commencer-ici-cover.png"
+                                        className={cx(
+                                            'w-full rounded-2xl border border-perl/70 bg-white pl-10 pr-4 py-3 text-sm text-main outline-none transition',
+                                            'hover:bg-page/50',
+                                            'focus:border-main focus:ring-2 focus:ring-main/10'
+                                        )}
+                                    />
+                                </div>
+
+                                <div className="mt-2 rounded-2xl border border-perl/60 bg-page/40 p-3">
+                                    <p className="text-[11px] font-semibold text-main/60">Aperçu</p>
+                                    <div className="mt-2 flex items-center gap-3">
+                                        <div className="h-12 w-16 overflow-hidden rounded-xl border border-perl/60 bg-white">
+                                            {/* aperçu simple sans next/image pour éviter config domains */}
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={coverImage || '/images/cours/commencer-ici-cover.png'} alt="" className="h-full w-full object-cover" />
+                                        </div>
+                                        <p className="text-xs text-main/55">Utilisée sur les cards + page cours. Laisse vide pour garder l’image par défaut.</p>
+                                    </div>
+                                </div>
+                            </Field>
+                        </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                             <Field label="Pilier *">
@@ -262,6 +373,9 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
                                     — {pillarLabel(pillar)} • {level} • {access === 'free' ? 'Gratuit' : 'Premium'}
                                     {pinned ? ' • Épinglé' : ''}
                                 </span>
+                            </p>
+                            <p className="mt-2 text-xs text-main/55">
+                                URL : <span className="font-semibold text-main/75">/cours/{slug || 'mon-cours'}</span>
                             </p>
                         </div>
 

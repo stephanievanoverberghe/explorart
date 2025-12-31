@@ -1,4 +1,3 @@
-// src/app/(admin)/admin/cours/[courseId]/setup/layout.tsx
 'use client';
 
 import Link from 'next/link';
@@ -10,32 +9,30 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 const steps = [
-    { key: 'identity', label: 'Identité', hrefSuffix: '/setup/identity' },
-    { key: 'intent', label: 'Intention', hrefSuffix: '/setup/intent' },
-    { key: 'structure', label: 'Structure', hrefSuffix: '/setup/structure' },
-    { key: 'access', label: 'Accès', hrefSuffix: '/setup/access' },
-    { key: 'pricing', label: 'Prix', hrefSuffix: '/setup/pricing' },
-    { key: 'resources', label: 'Ressources', hrefSuffix: '/setup/resources' },
-    { key: 'publish', label: 'Publication', hrefSuffix: '/setup/publish' },
+    { key: 'intro', label: 'Intro', hrefSuffix: '/editor/intro' },
+    { key: 'modules', label: 'Modules', hrefSuffix: '/editor/modules' },
+    { key: 'conclusion', label: 'Conclusion', hrefSuffix: '/editor/conclusion' },
+    { key: 'review', label: 'Review', hrefSuffix: '/editor/review' },
+    { key: 'publish', label: 'Publication', hrefSuffix: '/editor/publish' },
 ] as const;
 
-export default function CourseSetupLayout({ children }: { children: React.ReactNode }) {
+export default function CourseEditorLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const params = useParams<{ courseId: string }>();
     const courseId = params?.courseId;
 
-    // Sécurité : évite /admin/cours/undefined/...
     const base = courseId ? `/admin/cours/${courseId}` : '/admin/cours';
 
     return (
         <div className="space-y-5">
+            {/* BARRE RETOUR */}
             <div className="flex items-center justify-between gap-3">
                 <Link
-                    href={base}
+                    href={`${base}`}
                     className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
                 >
                     <ChevronLeft className="h-4 w-4" />
-                    Retour à l’aperçu
+                    Retour au HUB
                 </Link>
 
                 <Link
@@ -46,21 +43,22 @@ export default function CourseSetupLayout({ children }: { children: React.ReactN
                 </Link>
             </div>
 
+            {/* STEPPER EDITOR */}
             <section className="rounded-3xl border border-perl/60 bg-white/95 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-perl/50 bg-page/50">
-                    <p className="text-xs uppercase tracking-[0.18em] text-main/55">Setup du cours</p>
-                    <p className="mt-1 text-xs text-main/60">Cheminement guidé (progression visible, jamais “perdue”).</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-main/55">Éditeur du cours</p>
+                    <p className="mt-1 text-xs text-main/60">Construction du contenu réel (modules, exercices, intentions).</p>
                 </div>
 
                 <div className="p-4 sm:p-5">
                     <div className="flex flex-wrap gap-2">
-                        {steps.map((s) => {
-                            const href = courseId ? `${base}${s.hrefSuffix}` : '/admin/cours';
-                            const active = pathname === href;
+                        {steps.map((step) => {
+                            const href = courseId ? `${base}${step.hrefSuffix}` : '/admin/cours';
+                            const active = pathname === href || pathname.startsWith(href + '/');
 
                             return (
                                 <Link
-                                    key={s.key}
+                                    key={step.key}
                                     href={href}
                                     aria-disabled={!courseId}
                                     className={cx(
@@ -70,7 +68,7 @@ export default function CourseSetupLayout({ children }: { children: React.ReactN
                                     )}
                                 >
                                     {active ? <Check className="h-4 w-4" /> : <span className="h-2 w-2 rounded-full bg-main/30" />}
-                                    {s.label}
+                                    {step.label}
                                 </Link>
                             );
                         })}
@@ -78,6 +76,7 @@ export default function CourseSetupLayout({ children }: { children: React.ReactN
                 </div>
             </section>
 
+            {/* CONTENU */}
             {children}
         </div>
     );

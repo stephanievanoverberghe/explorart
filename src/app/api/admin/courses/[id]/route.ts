@@ -1,3 +1,4 @@
+// src/app/api/admin/courses/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { Types } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';

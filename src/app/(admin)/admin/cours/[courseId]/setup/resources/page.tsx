@@ -1,8 +1,14 @@
 import SetupResourcesClient from './SetupResourcesClient';
 import { getCourseSetup } from '@/lib/data/courseSetup';
 
-export default async function SetupResourcesPage({ params }: { params: { courseId: string } }) {
-    const setup = await getCourseSetup(params.courseId);
+type PageProps = {
+    params: Promise<{ courseId: string }>;
+};
 
-    return <SetupResourcesClient courseId={params.courseId} initialResources={setup.resources} />;
+export default async function SetupResourcesPage({ params }: PageProps) {
+    const { courseId } = await params;
+
+    const setup = await getCourseSetup(courseId);
+
+    return <SetupResourcesClient courseId={courseId} initialResources={setup.resources} />;
 }

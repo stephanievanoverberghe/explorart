@@ -1,7 +1,14 @@
 import SetupIntentClient from './SetupIntentClient';
 import { getCourseSetup } from '@/lib/data/courseSetup';
 
-export default async function SetupIntentPage({ params }: { params: { courseId: string } }) {
-    const setup = await getCourseSetup(params.courseId);
-    return <SetupIntentClient courseId={params.courseId} initialIntent={setup.intent} />;
+type PageProps = {
+    params: Promise<{ courseId: string }>;
+};
+
+export default async function SetupIntentPage({ params }: PageProps) {
+    const { courseId } = await params;
+
+    const setup = await getCourseSetup(courseId);
+
+    return <SetupIntentClient courseId={courseId} initialIntent={setup.intent} />;
 }

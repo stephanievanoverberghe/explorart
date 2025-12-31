@@ -21,6 +21,8 @@ export type PublishStatus = 'draft' | 'published';
 
 export interface CourseIdentityData {
     title: string;
+    slug: string;
+    coverImage: string;
     pillar: CoursePillar;
     level: CourseLevel;
     access: CourseAccess;

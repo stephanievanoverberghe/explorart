@@ -48,11 +48,14 @@ const courseSetupSchema = new Schema<CourseSetupDocument>(
         courseId: { type: String, required: true, index: true, unique: true },
         identity: {
             title: { type: String, default: '' },
+            slug: { type: String, default: '' },
+            coverImage: { type: String, default: '' },
             pillar: { type: String, default: 'dessin-peinture' },
             level: { type: String, default: 'Débutant' },
             access: { type: String, default: 'free' },
             pinned: { type: Boolean, default: false },
         },
+
         intent: {
             promise: { type: String, default: '' },
             outcomes: { type: [String], default: [] },

@@ -1,8 +1,13 @@
 import SetupPricingClient from './SetupPricingClient';
 import { getCourseSetup } from '@/lib/data/courseSetup';
 
-export default async function SetupPricingPage({ params }: { params: { courseId: string } }) {
-    const setup = await getCourseSetup(params.courseId);
+type PageProps = {
+    params: Promise<{ courseId: string }>;
+};
 
-    return <SetupPricingClient courseId={params.courseId} initialPricing={setup.pricing} />;
+export default async function SetupPricingPage({ params }: PageProps) {
+    const { courseId } = await params;
+    const setup = await getCourseSetup(courseId);
+
+    return <SetupPricingClient courseId={courseId} initialPricing={setup.pricing} />;
 }
