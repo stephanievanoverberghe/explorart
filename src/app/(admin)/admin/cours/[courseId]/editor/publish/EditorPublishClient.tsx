@@ -47,7 +47,6 @@ interface EditorPublishClientProps {
     courseId: string;
     checklist: PublishChecklistResult;
     slug: string;
-    isPublished: boolean;
     status: CourseStatus;
     listed: boolean;
 }

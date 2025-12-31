@@ -73,7 +73,8 @@ export function buildSetupChecklist(courseId: string, setup: CourseSetupData, co
         href: `/admin/cours/${courseId}/setup/access`,
     });
 
-    const isFree = commerce?.pricing?.isFree ?? (setup.access.access === 'free' || setup.pricing.price <= 0);
+    const commerceIsFree = commerce?.pricing?.isFree;
+    const isFree = commerceIsFree ?? (setup.access.access === 'free' || setup.pricing.price <= 0);
     const pricingOk = isFree || setup.pricing.price >= 1;
     items.push({
         key: 'pricing',

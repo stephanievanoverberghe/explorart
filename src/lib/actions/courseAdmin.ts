@@ -9,15 +9,7 @@ import { CourseCommerce } from '@/lib/models/CourseCommerce';
 import { CourseContent } from '@/lib/models/CourseContent';
 import { CourseSetup } from '@/lib/models/CourseSetup';
 import type { AdminCourseDTO, PublicCourseDTO } from '@/types/courseDto';
-import type {
-    CourseAccessData,
-    CourseIdentityData,
-    CourseIntentData,
-    CoursePricingData,
-    CourseResourcesData,
-    CourseSetupData,
-    CourseStructureData,
-} from '@/types/courseSetup';
+import type { CourseAccessData, CourseIdentityData, CourseIntentData, CoursePricingData, CourseResourcesData, CourseSetupData, CourseStructureData } from '@/types/courseSetup';
 import type { CourseCommerceData, CourseCouponData, CoursePromotionData } from '@/types/courseCommerce';
 import type { CourseContentData } from '@/types/courseContent';
 import { buildDefaultCourseSetup } from '@/lib/utils//courseSetupDefaults';
@@ -435,6 +427,7 @@ export async function publishCourse(courseId: string): Promise<{ ok: boolean; ch
     await connectToDatabase();
     const [courseDoc, setupDoc, contentDoc, commerceDoc] = await Promise.all([
         Course.findById(courseId).lean(),
+        CourseSetup.findOne({ courseId }).lean(),
         CourseContent.findOne({ courseId }).lean(),
         CourseCommerce.findOne({ courseId }).lean(),
     ]);
@@ -489,19 +482,6 @@ export async function unpublishCourse(courseId: string): Promise<void> {
 
     await Course.findOneAndUpdate(
         { _id: courseId },
-        {
-            $set: {
-                status: 'published',
-                listed,
-                publishedAt: new Date(),
-                slug,
-            },
-        },
-        { new: true }
-    );
-
-    await CourseSetup.findOneAndUpdate(
-        { courseId },
         {
             $set: {
                 status: 'draft',
