@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Save, Sparkles, Video, CheckCircle2, HeartHandshake, Compass, Download, Link2, Trash2, Plus, StickyNote } from 'lucide-react';
+import { ChevronLeft, Sparkles, Video, CheckCircle2, HeartHandshake, Compass, Download, Link2, Trash2, Plus, StickyNote } from 'lucide-react';
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { getIntro, saveIntro } from '@/lib/actions/courseContent';
 import type { CourseIntroData, CourseIntroVideo, CourseIntroSectionList, CourseIntroDownload } from '@/types/courseContent';
 
@@ -639,29 +640,14 @@ export default function EditorIntroPage() {
                 </CardBody>
             </Card>
 
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
-                <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className={cx(
-                        'inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 transition',
-                        isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-page'
-                    )}
-                >
-                    <Save className="h-4 w-4" />
-                    {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => router.push(`/admin/cours/${courseId}/editor/modules`)}
-                    className="inline-flex items-center gap-2 rounded-full bg-main px-5 py-2 text-sm font-semibold text-white hover:bg-main/90"
-                >
-                    Continuer (modules)
-                    <ChevronRight className="h-4 w-4" />
-                </button>
-            </div>
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/setup/publish`}
+                hubHref={`/admin/cours/${courseId}`}
+                onSave={handleSave}
+                onContinue={() => router.push(`/admin/cours/${courseId}/editor/modules`)}
+                continueLabel="Continuer (modules)"
+                isSaving={isSaving}
+            />
 
             {savedAt && <p className="text-xs text-main/60">Dernière sauvegarde à {savedAt}</p>}
         </div>

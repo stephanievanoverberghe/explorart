@@ -1,77 +1,13 @@
 import { connectToDatabase } from '@/lib/db/connect';
 import { CourseSetup } from '@/lib/models/CourseSetup';
-import type {
-    CourseAccessData,
-    CourseIdentityData,
-    CourseIntentData,
-    CoursePricingData,
-    CoursePublishData,
-    CourseResourcesData,
-    CourseStructureData,
-    CourseSetupData,
-} from '@/types/courseSetup';
-
-const defaultIdentity: CourseIdentityData = {
-    title: '',
-    slug: '',
-    coverImage: '',
-    pillar: 'dessin-peinture',
-    level: 'Débutant',
-    access: 'free',
-    pinned: false,
-};
-
-const defaultIntent: CourseIntentData = {
-    promise: '',
-    outcomes: ['', '', ''],
-    audience: '',
-    notFor: '',
-    prerequisites: '',
-    teachingStyle: 'guided',
-    tone: 'soft',
-};
-
-const defaultStructure: CourseStructureData = {
-    introMinutes: 5,
-    conclusionMinutes: 5,
-    modules: [
-        { id: crypto.randomUUID(), title: 'Module 1 — Bases', goal: 'Poser les repères essentiels.', minutes: 12 },
-        { id: crypto.randomUUID(), title: 'Module 2 — Application', goal: 'Mettre en pratique sur un exercice guidé.', minutes: 15 },
-        { id: crypto.randomUUID(), title: 'Module 3 — Mini défi', goal: 'Consolider avec un défi court.', minutes: 10 },
-    ],
-};
-
-const defaultAccess: CourseAccessData = {
-    access: 'free',
-    hasFreePreview: true,
-    requiresAccount: false,
-};
-
-const defaultPricing: CoursePricingData = {
-    pricingModel: 'one_off',
-    price: 29,
-    promoPrice: '',
-    taxIncluded: true,
-};
-
-const defaultResources: CourseResourcesData = {
-    videoIntro: true,
-    videoModules: true,
-    videoConclusion: true,
-    resources: [
-        { id: crypto.randomUUID(), title: 'Fiche mémo harmonies', format: 'PDF' },
-        { id: crypto.randomUUID(), title: 'Palette d’exercices', format: 'ASE/PNG' },
-    ],
-};
-
-const defaultPublish: CoursePublishData = {
-    status: 'draft',
-    listed: true,
-};
+import type { CourseSetupData } from '@/types/courseSetup';
+import { buildDefaultResources, buildDefaultStructure, defaultAccess, defaultIdentity, defaultIntent, defaultPricing, defaultPublish } from '@/lib/utils/courseSetupDefaults';
 
 export async function getCourseSetup(courseId: string): Promise<CourseSetupData> {
     await connectToDatabase();
     const setup = await CourseSetup.findOne({ courseId }).lean();
+    const fallbackStructure = buildDefaultStructure();
+    const fallbackResources = buildDefaultResources();
 
     return {
         courseId,
@@ -85,20 +21,20 @@ export async function getCourseSetup(courseId: string): Promise<CourseSetupData>
             : defaultIntent,
         structure: setup?.structure
             ? {
-                  ...defaultStructure,
+                  ...fallbackStructure,
                   ...setup.structure,
-                  modules: setup.structure.modules?.length ? setup.structure.modules : defaultStructure.modules,
+                  modules: setup.structure.modules?.length ? setup.structure.modules : fallbackStructure.modules,
               }
-            : defaultStructure,
+            : fallbackStructure,
         access: setup?.access ? { ...defaultAccess, ...setup.access } : defaultAccess,
         pricing: setup?.pricing ? { ...defaultPricing, ...setup.pricing } : defaultPricing,
         resources: setup?.resources
             ? {
-                  ...defaultResources,
+                  ...fallbackResources,
                   ...setup.resources,
-                  resources: setup.resources.resources?.length ? setup.resources.resources : defaultResources.resources,
+                  resources: setup.resources.resources?.length ? setup.resources.resources : fallbackResources.resources,
               }
-            : defaultResources,
+            : fallbackResources,
         publish: setup?.publish ? { ...defaultPublish, ...setup.publish } : defaultPublish,
     };
 }

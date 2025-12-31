@@ -3,8 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { QueryFilter, SortOrder } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';
 import { Course, type CourseDocument, type CourseStatus } from '@/lib/models/Course';
+import { CourseCommerce } from '@/lib/models/CourseCommerce';
 import { CoursePurchase } from '@/lib/models/CoursePurchase';
 import { CourseSetup } from '@/lib/models/CourseSetup';
+import { computeCommerce } from '@/lib/utils/courseCommerce';
 
 type CourseSort = 'createdAt' | 'title' | 'duration' | 'price';
 
@@ -12,7 +14,7 @@ const sortMap: Record<CourseSort, Record<string, SortOrder>> = {
     createdAt: { createdAt: -1 },
     title: { title: 1 },
     duration: { durationMinutes: 1 },
-    price: { priceEUR: 1 },
+    price: { durationMinutes: 1 },
 };
 
 const statusLabelMap: Record<CourseStatus, 'Publié' | 'Brouillon' | 'En préparation'> = {
@@ -27,13 +29,15 @@ const setupStatusLabelMap: Record<string, 'Publié' | 'Brouillon' | 'En prépara
     archived: 'En préparation',
 };
 
-const levelLabelMap: Record<string, 'Débutant' | 'Intermédiaire' | 'Tous niveaux'> = {
+const levelLabelMap: Record<string, 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Tous niveaux'> = {
     beginner: 'Débutant',
     intermediate: 'Intermédiaire',
+    advanced: 'Avancé',
+    all: 'Tous niveaux',
 };
 
 type UiCourseStatus = 'Publié' | 'Brouillon' | 'En préparation';
-type UiLevel = 'Débutant' | 'Intermédiaire' | 'Tous niveaux';
+type UiLevel = 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Tous niveaux';
 type UiPillar = 'dessin-peinture' | 'comprendre-une-oeuvre' | 'histoire-de-l-art' | 'histoires-d-artistes' | 'couleurs-harmonie' | 'inspirations' | 'psychologie-de-l-art';
 
 type UiCourseRow = {
@@ -116,18 +120,7 @@ function formatPrice(priceEUR: number) {
 }
 
 function normalizeModulesCount(course: CourseDocument) {
-    if (Array.isArray(course.modules) && course.modules.length > 0) return course.modules.length;
     return course.modulesCount ?? 0;
-}
-
-function getVideoCount(course: CourseDocument) {
-    const moduleVideos = (course.modules ?? []).reduce((total, module) => total + (module.videos?.length ?? 0), 0);
-    return (course.videos?.length ?? 0) + moduleVideos;
-}
-
-function getResourceCount(course: CourseDocument) {
-    const moduleResources = (course.modules ?? []).reduce((total, module) => total + (module.resources?.length ?? 0), 0);
-    return (course.resources?.length ?? 0) + moduleResources;
 }
 
 function getResourcesLabel(resourceCount: number) {
@@ -140,10 +133,11 @@ function isValidSlug(value: string) {
 }
 
 function normalizeUiLevel(value: unknown): UiLevel {
-    if (value === 'Débutant' || value === 'Intermédiaire' || value === 'Tous niveaux') return value;
+    if (value === 'Débutant' || value === 'Intermédiaire' || value === 'Avancé' || value === 'Tous niveaux') return value;
     // compat si ton setup stocke beginner/intermediate
     if (value === 'beginner') return 'Débutant';
     if (value === 'intermediate') return 'Intermédiaire';
+    if (value === 'advanced') return 'Avancé';
     return 'Tous niveaux';
 }
 
@@ -189,7 +183,7 @@ export async function GET(request: NextRequest) {
         if (pillar !== 'all') courseQuery.pillarSlug = pillar;
         if (level !== 'all') courseQuery.level = level;
 
-        if (freeOnly === 'true') courseQuery.priceEUR = { $lte: 0 };
+        // filter prix après merge commerce
         if (pinnedOnly === 'true') courseQuery.pinned = true;
 
         if (queryText) {
@@ -199,20 +193,21 @@ export async function GET(request: NextRequest) {
 
         const sortKey = sortMap[sortParam] ? sortParam : 'createdAt';
 
-        const [courses, purchases, statusCounts, averages] = await Promise.all([
-            Course.find(courseQuery)
-                .sort(sortMap[sortKey])
-                .skip((page - 1) * pageSize)
-                .limit(pageSize)
-                .lean(),
+        const courses = await Course.find(courseQuery)
+            .sort(sortMap[sortKey])
+            .skip((page - 1) * pageSize)
+            .limit(pageSize)
+            .lean();
+
+        const [purchases, statusCounts, averages, commerceDocs] = await Promise.all([
             CoursePurchase.aggregate<{ _id: string; count: number }>([{ $group: { _id: '$courseSlug', count: { $sum: 1 } } }]),
             Course.aggregate<{ _id: CourseStatus; count: number }>([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-            Course.aggregate<{ _id: null; avgDuration: number; avgPrice: number }>([
-                { $group: { _id: null, avgDuration: { $avg: '$durationMinutes' }, avgPrice: { $avg: '$priceEUR' } } },
-            ]),
+            Course.aggregate<{ _id: null; avgDuration: number }>([{ $group: { _id: null, avgDuration: { $avg: '$durationMinutes' } } }]),
+            CourseCommerce.find({ courseId: { $in: courses.map((course) => String(course._id)) } }).lean(),
         ]);
 
         const purchaseMap = new Map(purchases.map((purchase) => [purchase._id, purchase.count]));
+        const commerceMap = new Map(commerceDocs.map((doc) => [doc.courseId, doc]));
 
         const totals = statusCounts.reduce(
             (acc, entry) => {
@@ -223,44 +218,59 @@ export async function GET(request: NextRequest) {
         );
 
         const avgDuration = Math.round(averages[0]?.avgDuration ?? 0);
-        const avgPrice = Math.round(averages[0]?.avgPrice ?? 0);
+        const avgPrice = Math.round(
+            commerceDocs.reduce((total, commerce) => total + (commerce?.computed?.effectivePrice ?? commerce?.pricing?.basePrice ?? 0), 0) / Math.max(1, commerceDocs.length)
+        );
 
-        const normalizedCourses: UiCourseRow[] = courses.map((course) => {
-            const modulesCount = normalizeModulesCount(course);
-            const resourceCount = getResourceCount(course);
-            const videoCount = getVideoCount(course);
-            const studentsCount = purchaseMap.get(course.slug) ?? 0;
+        const normalizedCourses: UiCourseRow[] = courses
+            .map((course) => {
+                const modulesCount = normalizeModulesCount(course);
+                const studentsCount = purchaseMap.get(course.slug) ?? 0;
 
-            const isFree = (course.priceEUR ?? 0) <= 0;
-            const pinned = Boolean((course as { pinned?: boolean }).pinned);
+                const commerceDoc = commerceMap.get(String(course._id));
+                const commerce = computeCommerce({
+                    courseId: String(course._id),
+                    pricing: commerceDoc?.pricing ?? { currency: 'EUR', basePrice: 0, isFree: true },
+                    promotions: commerceDoc?.promotions ?? [],
+                    coupons: commerceDoc?.coupons ?? [],
+                    stock: commerceDoc?.stock ?? { isUnlimited: true },
+                    computed: commerceDoc?.computed ?? { effectivePrice: 0 },
+                });
+                const isFree = commerce.pricing.isFree || commerce.computed.effectivePrice <= 0;
+                const priceValue = commerce.computed.effectivePrice;
+                const pinned = Boolean((course as { pinned?: boolean }).pinned);
 
-            return {
-                id: String(course._id),
-                slug: course.slug,
-                title: course.title,
-                level: levelLabelMap[course.level] ?? 'Tous niveaux',
-                duration: formatDuration(course.durationMinutes),
-                status: statusLabelMap[course.status],
-                students: studentsCount > 0 ? `${studentsCount} apprenant${studentsCount > 1 ? 's' : ''}` : 'Aucun apprenant',
-                modulesCount,
-                hasIntro: course.hasIntro,
-                access: isFree ? 'free' : 'premium',
-                isFree,
-                pinned,
-                pillar: normalizeUiPillar(course.pillarSlug),
-                heroImage: {
-                    src: course.coverImage || '/images/cours/commencer-ici-cover.png',
-                    alt: `Couverture du cours ${course.title}`,
-                },
-                hrefEdit: `/admin/cours/${String(course._id)}`,
-                hrefPreview: `/cours/${course.slug}`,
-                summary: course.summary || course.tagline,
-                priceLabel: formatPrice(course.priceEUR ?? 0),
-                videoCount,
-                resourceCount,
-                resourcesLabel: getResourcesLabel(resourceCount),
-            };
-        });
+                return {
+                    id: String(course._id),
+                    slug: course.slug,
+                    title: course.title,
+                    level: levelLabelMap[course.level] ?? 'Tous niveaux',
+                    duration: formatDuration(course.durationMinutes),
+                    status: statusLabelMap[course.status],
+                    students: studentsCount > 0 ? `${studentsCount} apprenant${studentsCount > 1 ? 's' : ''}` : 'Aucun apprenant',
+                    modulesCount,
+                    hasIntro: course.hasIntro,
+                    access: isFree ? 'free' : 'premium',
+                    isFree,
+                    pinned,
+                    pillar: normalizeUiPillar(course.pillarSlug),
+                    heroImage: {
+                        src: course.coverImage || '/images/cours/commencer-ici-cover.png',
+                        alt: `Couverture du cours ${course.title}`,
+                    },
+                    hrefEdit: `/admin/cours/${String(course._id)}`,
+                    hrefPreview: `/cours/${course.slug}`,
+                    summary: course.summary || course.tagline,
+                    priceLabel: formatPrice(priceValue ?? 0),
+                    videoCount: 0,
+                    resourceCount: 0,
+                    resourcesLabel: getResourcesLabel(0),
+                };
+            })
+            .filter((course) => {
+                if (freeOnly === 'true' && !course.isFree) return false;
+                return true;
+            });
 
         // 2) CourseSetup (drafts non sync)
         let setupRows: UiCourseRow[] = [];

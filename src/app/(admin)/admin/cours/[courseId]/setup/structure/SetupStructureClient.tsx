@@ -1,11 +1,11 @@
 // src/app/(admin)/admin/cours/[courseId]/setup/structure/page.tsx
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Save, Plus, GripVertical, ArrowUp, ArrowDown, Trash2, Clock, Layers, BookOpen, Flag, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
+import { ChevronLeft, Plus, GripVertical, ArrowUp, ArrowDown, Trash2, Clock, Layers, BookOpen, Flag, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { updateCourseStructure } from '@/lib/actions/courseSetup';
 import type { CourseModuleData, CourseStructureData } from '@/types/courseSetup';
 
@@ -239,19 +239,6 @@ export default function SetupStructureClient({ courseId, initialStructure }: Set
                             ) : (
                                 <span className="rounded-full border border-perl/60 bg-white px-3 py-1 text-[11px] font-semibold text-main/60">Non sauvegardé</span>
                             )}
-
-                            <button
-                                type="button"
-                                onClick={saveDraft}
-                                disabled={submitting}
-                                className={cx(
-                                    'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition',
-                                    submitting ? 'border-perl/60 bg-page text-main/40 cursor-not-allowed' : 'border-perl/70 bg-white text-main/80 hover:bg-page cursor-pointer'
-                                )}
-                            >
-                                <Save className="h-4 w-4" />
-                                Sauvegarder
-                            </button>
                         </div>
                     }
                 />
@@ -427,46 +414,6 @@ export default function SetupStructureClient({ courseId, initialStructure }: Set
 
                         <MiniTip>Règle simple : 1 module = 1 compétence. Si tu as 2 idées dans un module, découpe → meilleure progression + meilleure rétention.</MiniTip>
 
-                        <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <Link
-                                href={`/admin/cours/${courseId}/setup/intent`}
-                                className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                                Retour (intention)
-                            </Link>
-
-                            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                                <button
-                                    type="button"
-                                    onClick={saveDraft}
-                                    disabled={submitting}
-                                    className={cx(
-                                        'inline-flex items-center justify-center gap-2 rounded-full border px-5 py-2 text-sm font-semibold transition',
-                                        submitting ? 'border-perl/60 bg-page text-main/40 cursor-not-allowed' : 'border-perl/70 bg-white text-main/80 hover:bg-page cursor-pointer'
-                                    )}
-                                >
-                                    <Save className="h-4 w-4" />
-                                    Sauvegarder
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={saveAndContinue}
-                                    disabled={!canContinue || submitting}
-                                    className={cx(
-                                        'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition active:scale-[0.99]',
-                                        !canContinue || submitting
-                                            ? 'border border-perl/60 bg-page text-main/40 cursor-not-allowed'
-                                            : 'bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-main/15'
-                                    )}
-                                >
-                                    Continuer (accès)
-                                    <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
-
                         {!canContinue ? (
                             <div className="rounded-3xl border border-perl/60 bg-white/80 p-4">
                                 <p className="text-xs uppercase tracking-[0.18em] text-main/55">Pour continuer</p>
@@ -480,6 +427,14 @@ export default function SetupStructureClient({ courseId, initialStructure }: Set
                     </div>
                 </CardBody>
             </Card>
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/setup/intent`}
+                hubHref={`/admin/cours/${courseId}`}
+                onSave={saveDraft}
+                onContinue={saveAndContinue}
+                disableContinue={!canContinue}
+                isSaving={submitting}
+            />
         </div>
     );
 }

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { ChevronLeft, Save, Compass, HeartHandshake, Link2, Trash2, Video, Sparkles, StickyNote } from 'lucide-react';
+import { ChevronLeft, Compass, HeartHandshake, Link2, Trash2, Video, Sparkles, StickyNote } from 'lucide-react';
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { getConclusion, saveConclusion } from '@/lib/actions/courseContent';
 import type { CourseConclusionData, CourseModuleListSection, CourseModuleVideo } from '@/types/courseContent';
 
@@ -474,18 +475,14 @@ export default function EditorConclusionPage() {
                 </CardBody>
             </Card>
 
-            <button
-                type="button"
-                onClick={handleSave}
-                disabled={isSaving}
-                className={cx(
-                    'inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 transition',
-                    isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-page'
-                )}
-            >
-                <Save className="h-4 w-4" />
-                {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-            </button>
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/editor/modules`}
+                hubHref={`/admin/cours/${courseId}`}
+                onSave={handleSave}
+                continueHref={`/admin/cours/${courseId}/editor/review`}
+                continueLabel="Continuer (review)"
+                isSaving={isSaving}
+            />
 
             {savedAt && <p className="text-xs text-main/60">Dernière sauvegarde à {savedAt}</p>}
         </div>

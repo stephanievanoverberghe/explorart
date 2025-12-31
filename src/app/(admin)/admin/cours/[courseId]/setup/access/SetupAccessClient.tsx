@@ -1,11 +1,11 @@
 // src/app/(admin)/admin/cours/[courseId]/setup/access/page.tsx
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, LockOpen, Lock, CreditCard, Info } from 'lucide-react';
+import { ChevronLeft, LockOpen, Lock, CreditCard, Info } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { saveAccess } from '@/lib/actions/courseSetup';
 import type { CourseAccess, CourseAccessData } from '@/types/courseSetup';
 
@@ -70,15 +70,20 @@ export default function SetupAccessClient({ courseId, initialAccess }: SetupAcce
         return parts.join(' • ');
     }, [access, hasFreePreview, requiresAccount]);
 
-    async function handleNext() {
+    async function saveDraft() {
         if (submitting) return;
         setSubmitting(true);
         try {
             await saveAccess(courseId, { access, hasFreePreview, requiresAccount });
-            router.push(`/admin/cours/${courseId}/setup/pricing`);
         } finally {
             setSubmitting(false);
         }
+    }
+
+    async function handleNext() {
+        if (submitting) return;
+        await saveDraft();
+        router.push(`/admin/cours/${courseId}/setup/pricing`);
     }
 
     return (
@@ -191,34 +196,17 @@ export default function SetupAccessClient({ courseId, initialAccess }: SetupAcce
                                 </p>
                             </div>
                         </div>
-
-                        <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <Link
-                                href={`/admin/cours/${courseId}/setup/structure`}
-                                className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                                Retour (structure)
-                            </Link>
-
-                            <button
-                                type="button"
-                                onClick={handleNext}
-                                disabled={submitting}
-                                className={cx(
-                                    'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition active:scale-[0.99]',
-                                    submitting
-                                        ? 'border border-perl/60 bg-page text-main/40 cursor-not-allowed'
-                                        : 'bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-main/15'
-                                )}
-                            >
-                                Continuer (prix)
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
                     </div>
                 </CardBody>
             </Card>
+
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/setup/structure`}
+                hubHref={`/admin/cours/${courseId}`}
+                onSave={saveDraft}
+                onContinue={handleNext}
+                isSaving={submitting}
+            />
         </div>
     );
 }

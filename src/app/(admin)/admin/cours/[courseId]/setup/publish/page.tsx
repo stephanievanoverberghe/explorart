@@ -1,5 +1,7 @@
+import { notFound } from 'next/navigation';
 import SetupPublishClient from './SetupPublishClient';
-import { getCourseSetup } from '@/lib/data/courseSetup';
+import { getCourseAdmin } from '@/lib/actions/courseAdmin';
+import { buildPublishChecklist } from '@/lib/utils/coursePublishValidation';
 
 type PageProps = {
     params: Promise<{ courseId: string }>;
@@ -7,7 +9,21 @@ type PageProps = {
 
 export default async function SetupPublishPage({ params }: PageProps) {
     const { courseId } = await params;
-    const setup = await getCourseSetup(courseId);
+    const adminCourse = await getCourseAdmin(courseId);
 
-    return <SetupPublishClient courseId={courseId} initialPublish={setup.publish} />;
+    if (!adminCourse) {
+        notFound();
+    }
+
+    const checklist = buildPublishChecklist(courseId, adminCourse.setup, adminCourse.content, adminCourse.commerce);
+
+    return (
+        <SetupPublishClient
+            courseId={courseId}
+            initialPublish={adminCourse.setup.publish}
+            checklist={checklist}
+            slug={adminCourse.slug}
+            isPublished={adminCourse.status === 'published'}
+        />
+    );
 }

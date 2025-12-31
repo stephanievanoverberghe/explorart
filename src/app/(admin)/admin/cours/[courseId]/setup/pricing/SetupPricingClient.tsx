@@ -1,11 +1,11 @@
 // src/app/(admin)/admin/cours/[courseId]/setup/pricing/page.tsx
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, CreditCard, BadgeEuro, Sparkles } from 'lucide-react';
+import { ChevronLeft, CreditCard, BadgeEuro, Sparkles } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { savePricing } from '@/lib/actions/courseSetup';
 import type { CoursePricingData, PricingModel } from '@/types/courseSetup';
 
@@ -30,15 +30,20 @@ export default function SetupPricingClient({ courseId, initialPricing }: SetupPr
         return `${price}€${promo} • ${taxIncluded ? 'TTC' : 'HT'}`;
     }, [pricingModel, price, promoPrice, taxIncluded]);
 
-    async function handleNext() {
+    async function saveDraft() {
         if (submitting) return;
         setSubmitting(true);
         try {
             await savePricing(courseId, { pricingModel, price, promoPrice, taxIncluded });
-            router.push(`/admin/cours/${courseId}/setup/resources`);
         } finally {
             setSubmitting(false);
         }
+    }
+
+    async function handleNext() {
+        if (submitting) return;
+        await saveDraft();
+        router.push(`/admin/cours/${courseId}/setup/resources`);
     }
 
     return (
@@ -210,34 +215,16 @@ export default function SetupPricingClient({ courseId, initialPricing }: SetupPr
                                 </p>
                             </div>
                         </div>
-
-                        <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <Link
-                                href={`/admin/cours/${courseId}/setup/access`}
-                                className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                                Retour (accès)
-                            </Link>
-
-                            <button
-                                type="button"
-                                onClick={handleNext}
-                                disabled={submitting}
-                                className={cx(
-                                    'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition active:scale-[0.99]',
-                                    submitting
-                                        ? 'border border-perl/60 bg-page text-main/40 cursor-not-allowed'
-                                        : 'bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-main/15'
-                                )}
-                            >
-                                Continuer (ressources)
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
                     </div>
                 </CardBody>
             </Card>
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/setup/access`}
+                hubHref={`/admin/cours/${courseId}`}
+                onSave={saveDraft}
+                onContinue={handleNext}
+                isSaving={submitting}
+            />
         </div>
     );
 }

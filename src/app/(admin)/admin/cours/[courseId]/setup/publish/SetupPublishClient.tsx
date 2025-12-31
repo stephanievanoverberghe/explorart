@@ -5,7 +5,10 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Eye, EyeOff, CheckCircle2, FileText, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
-import { finalizeCourseSetup, type SetupMissingItem } from '@/lib/actions/courseSetup';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
+import { publishCourse } from '@/lib/actions/courseAdmin';
+import { savePublish } from '@/lib/actions/courseSetup';
+import type { PublishChecklistItem, PublishChecklistResult } from '@/lib/utils/coursePublishValidation';
 import type { CoursePublishData, PublishStatus } from '@/types/courseSetup';
 
 function OptionCard({ active, title, desc, icon, badge, onClick }: { active: boolean; title: string; desc: string; icon: React.ReactNode; badge?: string; onClick: () => void }) {
@@ -82,9 +85,12 @@ function Modal({ open, title, children, onClose }: { open: boolean; title: strin
 interface SetupPublishClientProps {
     courseId: string;
     initialPublish: CoursePublishData;
+    checklist: PublishChecklistResult;
+    slug: string;
+    isPublished: boolean;
 }
 
-export default function SetupPublishClient({ courseId, initialPublish }: SetupPublishClientProps) {
+export default function SetupPublishClient({ courseId, initialPublish, checklist: initialChecklist, slug, isPublished }: SetupPublishClientProps) {
     const router = useRouter();
 
     const [status, setStatus] = useState<PublishStatus>(initialPublish.status);
@@ -94,7 +100,10 @@ export default function SetupPublishClient({ courseId, initialPublish }: SetupPu
     const [submitting, setSubmitting] = useState(false);
 
     const [error, setError] = useState<string | null>(null);
-    const [missing, setMissing] = useState<SetupMissingItem[]>([]);
+    const [missing, setMissing] = useState<PublishChecklistItem[]>([]);
+    const [checklist, setChecklist] = useState(initialChecklist);
+    const [published, setPublished] = useState(isPublished);
+    const previewHref = published ? `/cours/${slug}` : `/admin/cours/${courseId}/editor/review`;
 
     const summary = useMemo(() => {
         const a = status === 'published' ? 'Publié' : 'Brouillon';
@@ -102,23 +111,38 @@ export default function SetupPublishClient({ courseId, initialPublish }: SetupPu
         return `${a} • ${b}`;
     }, [status, listed]);
 
-    async function confirmAndGoEditor() {
+    async function saveDraft() {
+        if (submitting) return;
+        setSubmitting(true);
+        try {
+            await savePublish(courseId, { status, listed });
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    async function confirmAndPublish() {
         if (submitting) return;
         setSubmitting(true);
         setError(null);
         setMissing([]);
 
         try {
-            const res = await finalizeCourseSetup(courseId, { status, listed });
+            await savePublish(courseId, { status, listed });
+            const res = await publishCourse(courseId);
+
+            setChecklist(res.checklist);
 
             if (!res.ok) {
-                setError(res.message);
-                setMissing(res.missing);
-                return; // on reste dans la modal
+                setError('Publication bloquée : certains éléments manquent encore.');
+                setMissing(res.checklist.items.filter((item) => item.status === 'missing'));
+                return;
             }
 
+            setStatus('published');
+            setPublished(true);
             setConfirmOpen(false);
-            router.push(res.nextHref);
+            router.push(`/admin/cours/${courseId}`);
         } finally {
             setSubmitting(false);
         }
@@ -140,6 +164,7 @@ export default function SetupPublishClient({ courseId, initialPublish }: SetupPu
                             items={[
                                 { href: `/admin/cours/${courseId}`, label: 'HUB' },
                                 { href: '/admin/cours', label: 'Cours' },
+                                { href: previewHref, label: 'Prévisualiser' },
                             ]}
                         />
                         <Badge>Setup • Étape 6</Badge>
@@ -246,50 +271,59 @@ export default function SetupPublishClient({ courseId, initialPublish }: SetupPu
                                 <div className="rounded-2xl border border-perl/60 bg-page/50 p-4">
                                     <p className="text-sm font-semibold text-main flex items-center gap-2">
                                         <Sparkles className="h-4 w-4" />
-                                        Après cette étape
+                                        Publication
                                     </p>
-                                    <p className="mt-1 text-sm text-main/65">
-                                        Tu bascules dans l’éditeur : <span className="font-semibold text-main">Intro</span> → Modules → Conclusion → Review.
-                                    </p>
+                                    <p className="mt-1 text-sm text-main/65">Une fois publié, le cours devient visible côté public (selon la visibilité choisie).</p>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <Link
-                                href={`/admin/cours/${courseId}/setup/resources`}
-                                className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                                Retour (ressources)
-                            </Link>
-
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setError(null);
-                                    setMissing([]);
-                                    setConfirmOpen(true);
-                                }}
-                                className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition active:scale-[0.99] bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-main/15"
-                            >
-                                Passer à l’éditeur (intro)
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
                         </div>
                     </div>
                 </CardBody>
             </Card>
 
-            <Modal open={confirmOpen} title="Enregistrer & passer à l’éditeur" onClose={() => (submitting ? null : setConfirmOpen(false))}>
+            <Card>
+                <CardHeader title="Checklist de publication" subtitle="Ce qui doit être prêt avant la mise en ligne." />
+                <CardBody>
+                    <div className="space-y-3 text-sm text-main/75">
+                        {checklist.items.map((item) => (
+                            <div key={item.key} className="flex items-start gap-2">
+                                <CheckCircle2 className={cx('h-4 w-4 mt-0.5', item.status === 'ok' ? 'text-sage' : 'text-main/30')} />
+                                {item.href ? (
+                                    <Link className="hover:underline" href={item.href}>
+                                        {item.label}
+                                    </Link>
+                                ) : (
+                                    <span>{item.label}</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </CardBody>
+            </Card>
+
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/setup/resources`}
+                hubHref={`/admin/cours/${courseId}`}
+                onSave={saveDraft}
+                onContinue={() => {
+                    setError(null);
+                    setMissing([]);
+                    setConfirmOpen(true);
+                }}
+                continueLabel={published ? 'Cours publié' : 'Publier'}
+                disableContinue={!checklist.canPublish || status !== 'published' || published}
+                isSaving={submitting}
+            />
+
+            <Modal open={confirmOpen} title="Confirmer la publication" onClose={() => (submitting ? null : setConfirmOpen(false))}>
                 <div className="space-y-4">
                     <div className="rounded-3xl border border-perl/60 bg-page/40 p-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-main/55">Ce qui va être enregistré</p>
                         <div className="mt-2 flex flex-wrap items-center gap-2">
                             <Pill className="border-perl/60 bg-white text-main/70">{summary}</Pill>
-                            <Pill className="border-perl/60 bg-white text-main/60">Validation setup</Pill>
+                            <Pill className="border-perl/60 bg-white text-main/60">Checklist publication</Pill>
                         </div>
-                        <p className="mt-2 text-xs text-main/55">On vérifie les infos indispensables (titre + slug) avant d’ouvrir l’éditeur.</p>
+                        <p className="mt-2 text-xs text-main/55">On vérifie les points essentiels (setup + contenu + commerce) avant de publier.</p>
                     </div>
 
                     {error ? (
@@ -303,9 +337,13 @@ export default function SetupPublishClient({ courseId, initialPublish }: SetupPu
                                     {missing.map((m) => (
                                         <li key={m.key}>
                                             •{' '}
-                                            <Link className="underline font-semibold" href={m.href}>
-                                                {m.label}
-                                            </Link>
+                                            {m.href ? (
+                                                <Link className="underline font-semibold" href={m.href}>
+                                                    {m.label}
+                                                </Link>
+                                            ) : (
+                                                <span className="font-semibold">{m.label}</span>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
@@ -315,7 +353,7 @@ export default function SetupPublishClient({ courseId, initialPublish }: SetupPu
                         <div className="rounded-3xl border border-perl/60 bg-white p-4">
                             <p className="text-sm font-semibold text-main">Confirmer ?</p>
                             <p className="mt-1 text-sm text-main/65">
-                                Clique sur <span className="font-semibold text-main">Confirmer</span> pour enregistrer et ouvrir l’éditeur.
+                                Clique sur <span className="font-semibold text-main">Publier</span> pour mettre le cours en ligne.
                             </p>
                         </div>
                     )}
@@ -335,14 +373,14 @@ export default function SetupPublishClient({ courseId, initialPublish }: SetupPu
 
                         <button
                             type="button"
-                            onClick={confirmAndGoEditor}
+                            onClick={confirmAndPublish}
                             disabled={submitting}
                             className={cx(
                                 'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition active:scale-[0.99]',
                                 submitting ? 'border border-perl/60 bg-page text-main/40 cursor-not-allowed' : 'bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm'
                             )}
                         >
-                            Confirmer & ouvrir l’éditeur
+                            Publier le cours
                             <ChevronRight className="h-4 w-4" />
                         </button>
                     </div>

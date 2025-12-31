@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { ChevronRight, Layers, AlertTriangle } from 'lucide-react';
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { getCourseSetup } from '@/lib/data/courseSetup';
 
 interface EditorModulesPageProps {
@@ -102,22 +103,12 @@ export default async function EditorModulesPage({ params }: EditorModulesPagePro
                 </p>
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <Link
-                    href={`/admin/cours/${courseId}/editor/intro`}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page transition"
-                >
-                    ← Revenir à l’intro
-                </Link>
-
-                <Link
-                    href={`/admin/cours/${courseId}/editor/conclusion`}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-main px-6 py-2.5 text-sm font-semibold text-white hover:bg-main/90 hover:shadow-sm transition"
-                >
-                    Next : Conclusion
-                    <ChevronRight className="h-4 w-4" />
-                </Link>
-            </div>
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/editor/intro`}
+                hubHref={`/admin/cours/${courseId}`}
+                continueHref={`/admin/cours/${courseId}/editor/conclusion`}
+                continueLabel="Continuer (conclusion)"
+            />
         </div>
     );
 }

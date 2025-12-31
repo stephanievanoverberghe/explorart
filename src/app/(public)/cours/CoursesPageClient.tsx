@@ -16,7 +16,7 @@ interface CoursesPageClientProps {
 }
 
 export function CoursesPageClient({ courses }: CoursesPageClientProps) {
-    const [level, setLevel] = useState<'all' | 'beginner' | 'intermediate'>('all');
+    const [level, setLevel] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
     const [pillar, setPillar] = useState<'all' | PillarSlug>('all');
 
     const filtered = useMemo(

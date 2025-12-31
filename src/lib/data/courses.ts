@@ -2,9 +2,12 @@
 import type { QueryFilter, SortOrder } from 'mongoose';
 import type { Level, PillarSlug } from '@/components/categories/category-data';
 import { connectToDatabase } from '@/lib/db/connect';
-import { Course, type CourseDocument, type CourseModule, type CourseResource, type CourseStatus, type CourseVideo, type DurationLabel } from '@/lib/models/Course';
+import { Course, type CourseDocument, type CourseStatus } from '@/lib/models/Course';
+import { CourseCommerce } from '@/lib/models/CourseCommerce';
+import type { CourseCommerceData } from '@/types/courseCommerce';
+import { computeCommerce } from '@/lib/utils/courseCommerce';
 
-export type { CourseModule, CourseResource, CourseStatus, CourseVideo, DurationLabel };
+export type { CourseStatus };
 
 export interface CourseData {
     slug: string;
@@ -15,17 +18,12 @@ export interface CourseData {
     pillarLabel: string;
     coverImage: string;
     durationMinutes: number;
-    durationLabel: DurationLabel;
     modulesCount: number;
     hasIntro: boolean;
     hasConclusion: boolean;
-    priceEUR: number;
-    isMini: boolean;
+    pricing: CourseCommerceData['pricing'] & CourseCommerceData['computed'];
     status: CourseStatus;
     summary?: string;
-    videos?: CourseVideo[];
-    resources?: CourseResource[];
-    modules?: CourseModule[];
 }
 
 export type CourseSort = 'title' | 'duration' | 'price' | 'createdAt';
@@ -40,18 +38,11 @@ export interface CourseFilters {
 const sortMap: Record<CourseSort, Record<string, SortOrder>> = {
     title: { title: 1 },
     duration: { durationMinutes: 1 },
-    price: { priceEUR: 1 },
+    price: { durationMinutes: 1 },
     createdAt: { createdAt: -1 },
 };
 
-function normalizeModulesCount(course: CourseDocument) {
-    if (Array.isArray(course.modules) && course.modules.length > 0) {
-        return course.modules.length;
-    }
-    return course.modulesCount ?? 0;
-}
-
-function mapCourse(course: CourseDocument): CourseData {
+function mapCourse(course: CourseDocument, commerce: CourseCommerceData): CourseData {
     return {
         slug: course.slug,
         title: course.title,
@@ -61,17 +52,19 @@ function mapCourse(course: CourseDocument): CourseData {
         pillarLabel: course.pillarLabel,
         coverImage: course.coverImage,
         durationMinutes: course.durationMinutes,
-        durationLabel: course.durationLabel,
-        modulesCount: normalizeModulesCount(course),
+        modulesCount: course.modulesCount ?? 0,
         hasIntro: course.hasIntro,
         hasConclusion: course.hasConclusion,
-        priceEUR: course.priceEUR,
-        isMini: course.isMini,
+        pricing: {
+            currency: commerce.pricing.currency,
+            basePrice: commerce.pricing.basePrice,
+            isFree: commerce.pricing.isFree,
+            compareAtPrice: commerce.pricing.compareAtPrice,
+            effectivePrice: commerce.computed.effectivePrice,
+            promoLabel: commerce.computed.promoLabel,
+        },
         status: course.status,
         summary: course.summary,
-        videos: course.videos ?? [],
-        resources: course.resources ?? [],
-        modules: course.modules ?? [],
     };
 }
 
@@ -99,9 +92,31 @@ export async function getCourses(filters: CourseFilters = {}): Promise<CourseDat
 
     await connectToDatabase();
 
-    const courses = await Course.find(query).sort(sortMap[sort]);
+    const shouldSortInMemory = sort === 'price';
+    const courses = await Course.find({ ...query, listed: true })
+        .sort(sortMap[shouldSortInMemory ? 'createdAt' : sort])
+        .lean();
+    const commerceDocs = await CourseCommerce.find({ courseId: { $in: courses.map((course) => String(course._id)) } }).lean();
+    const commerceMap = new Map(commerceDocs.map((doc) => [doc.courseId, doc]));
 
-    return courses.map((course) => mapCourse(course));
+    const mapped = courses.map((course) => {
+        const commerceDoc = commerceMap.get(String(course._id));
+        const commerce = computeCommerce({
+            courseId: String(course._id),
+            pricing: commerceDoc?.pricing ?? { currency: 'EUR', basePrice: 0, isFree: true },
+            promotions: commerceDoc?.promotions ?? [],
+            coupons: commerceDoc?.coupons ?? [],
+            stock: commerceDoc?.stock ?? { isUnlimited: true },
+            computed: commerceDoc?.computed ?? { effectivePrice: 0 },
+        });
+        return mapCourse(course, commerce);
+    });
+
+    if (shouldSortInMemory) {
+        return mapped.sort((a, b) => a.pricing.effectivePrice - b.pricing.effectivePrice);
+    }
+
+    return mapped;
 }
 
 export async function getCourseBySlug(slug: string | string[], status: CourseStatus = 'published'): Promise<CourseData | null> {
@@ -109,11 +124,21 @@ export async function getCourseBySlug(slug: string | string[], status: CourseSta
 
     await connectToDatabase();
 
-    const course = await Course.findOne({ slug: normalizedSlug, status });
+    const course = await Course.findOne({ slug: normalizedSlug, status, listed: true }).lean();
 
     if (!course) {
         return null;
     }
 
-    return mapCourse(course);
+    const commerceDoc = await CourseCommerce.findOne({ courseId: String(course._id) }).lean();
+    const commerce = computeCommerce({
+        courseId: String(course._id),
+        pricing: commerceDoc?.pricing ?? { currency: 'EUR', basePrice: 0, isFree: true },
+        promotions: commerceDoc?.promotions ?? [],
+        coupons: commerceDoc?.coupons ?? [],
+        stock: commerceDoc?.stock ?? { isUnlimited: true },
+        computed: commerceDoc?.computed ?? { effectivePrice: 0 },
+    });
+
+    return mapCourse(course, commerce);
 }

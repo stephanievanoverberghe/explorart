@@ -6,8 +6,8 @@ import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { ArrowRight, BadgeCheck, CheckCircle2, Clock, CreditCard, Layers, Lock, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react';
 
-import { getCourseBySlug, type CourseData } from '@/lib/data/courses';
-import { getCourseSetup } from '@/lib/data/courseSetup';
+import { getCoursePublic } from '@/lib/actions/courseAdmin';
+import type { PublicCourseDTO } from '@/types/courseDto';
 import { levelLabels, pillarConfig, pillarHeroThemes } from '@/components/categories/category-data';
 import { CheckoutButton } from '@/components/payments/CheckoutButton';
 
@@ -30,16 +30,19 @@ function getDurationPhrase(minutes: number) {
 
 export default async function CoursePage({ params }: CoursePageProps) {
     const resolvedParams = await params;
-    const course = await getCourseBySlug(resolvedParams.slug);
+    const course = await getCoursePublic(Array.isArray(resolvedParams.slug) ? resolvedParams.slug[0] : resolvedParams.slug);
 
     if (!course) {
         notFound();
     }
 
-    const setup = await getCourseSetup(course.slug);
-    const isFree = course.priceEUR === 0 || course.isMini;
-    const priceLabel = isFree ? 'Gratuit' : `${course.priceEUR.toString().replace('.', ',')} €`;
-    const levelLabel = levelLabels[course.level];
+    const setup = course.setup;
+    const isFree = course.commerce.pricing.isFree || course.commerce.computed.effectivePrice === 0;
+    const priceLabel = isFree ? 'Gratuit' : `${course.commerce.computed.effectivePrice.toString().replace('.', ',')} €`;
+    const promoLabel = course.commerce.computed.promoLabel;
+    const compareAt = course.commerce.pricing.compareAtPrice;
+    const showPromo = !isFree && promoLabel && compareAt && compareAt > course.commerce.computed.effectivePrice;
+    const levelLabel = levelLabels[course.level as keyof typeof levelLabels] ?? 'Tous niveaux';
     const modules = setup.structure.modules;
     const introMinutes = setup.structure.introMinutes;
     const conclusionMinutes = setup.structure.conclusionMinutes;
@@ -51,7 +54,15 @@ export default async function CoursePage({ params }: CoursePageProps) {
         <section className="relative bg-linear-to-b from-ivory via-white to-ivory pt-4 pb-24 md:pt-24 md:pb-28">
             <div className="container-page space-y-10 md:space-y-12">
                 {/* HERO / PITCH PRINCIPAL */}
-                <CourseHero course={course} isFree={isFree} priceLabel={priceLabel} levelLabel={levelLabel} />
+                <CourseHero
+                    course={course}
+                    isFree={isFree}
+                    priceLabel={priceLabel}
+                    levelLabel={levelLabel}
+                    showPromo={Boolean(showPromo)}
+                    promoLabel={promoLabel ?? ''}
+                    compareAtLabel={showPromo ? `${compareAt?.toString().replace('.', ',')} €` : ''}
+                />
 
                 {/* APERÇU RAPIDE DU COURS */}
                 <section className="grid gap-4 md:grid-cols-3">
@@ -143,7 +154,17 @@ export default async function CoursePage({ params }: CoursePageProps) {
                             <div className="card bg-ivory/95 border-perl/60 space-y-3">
                                 <h3 className="font-serif-title text-lg">Ce cours est pour toi si…</h3>
                                 <ul className="text-sm text-main/75 space-y-1.5">
-                                    <li>• Tu veux un cours {course.level === 'beginner' ? 'débutant' : 'intermédiaire'} mais assumé, pas « bébé ».</li>
+                                    <li>
+                                        • Tu veux un cours{' '}
+                                        {course.level === 'beginner'
+                                            ? 'débutant'
+                                            : course.level === 'intermediate'
+                                            ? 'intermédiaire'
+                                            : course.level === 'advanced'
+                                            ? 'avancé'
+                                            : 'tous niveaux'}{' '}
+                                        mais assumé, pas « bébé ».
+                                    </li>
                                     <li>• Tu as besoin d’un cadre clair, sans jargon d’école d’art.</li>
                                     <li>• Tu cherches un format réaliste : {getDurationPhrase(course.durationMinutes).toLowerCase()}.</li>
                                     <li>• Tu veux que ton temps, ton énergie et ton argent soient respectés.</li>
@@ -476,13 +497,16 @@ function FunnelStep({ icon, title, description }: FunnelStepProps) {
 }
 
 type CourseHeroProps = {
-    course: CourseData;
+    course: PublicCourseDTO;
     isFree: boolean;
     priceLabel: string;
     levelLabel: string;
+    showPromo: boolean;
+    promoLabel: string;
+    compareAtLabel: string;
 };
 
-function CourseHero({ course, isFree, priceLabel, levelLabel }: CourseHeroProps) {
+function CourseHero({ course, isFree, priceLabel, levelLabel, showPromo, promoLabel, compareAtLabel }: CourseHeroProps) {
     const pillar = pillarConfig[course.pillarSlug];
     const heroTheme = pillarHeroThemes[course.pillarSlug];
 
@@ -587,8 +611,12 @@ function CourseHero({ course, isFree, priceLabel, levelLabel }: CourseHeroProps)
 
                                 {/* Mini bloc vente en bas du hero */}
                                 <div className="p-4 sm:p-5 space-y-3">
-                                    <div className="flex items-baseline gap-2">
+                                    <div className="flex flex-wrap items-baseline gap-2">
                                         <p className="text-xl font-semibold text-ivory">{priceLabel}</p>
+                                        {showPromo ? <span className="text-sm text-ivory/70 line-through">{compareAtLabel}</span> : null}
+                                        {showPromo ? (
+                                            <span className="rounded-full bg-sage/20 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.16em] text-ivory">{promoLabel}</span>
+                                        ) : null}
                                         {!isFree && (
                                             <p className="text-[0.8rem] text-ivory/80">
                                                 Pour un cours complet, rejouable, d&apos;au moins {course.durationMinutes >= 60 ? '1 heure' : '45 minutes'}.

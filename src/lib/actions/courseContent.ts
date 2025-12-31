@@ -3,7 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/lib/db/connect';
 import { CourseContent } from '@/lib/models/CourseContent';
+import { CourseSetup } from '@/lib/models/CourseSetup';
 import type { CourseConclusionData, CourseContentData, CourseIntroData, CourseModuleData, CourseContentStatus } from '@/types/courseContent';
+import { normalizeConclusion, normalizeIntro, normalizeModule } from '@/lib/utils/courseFactories';
 
 export async function getIntro(courseId: string): Promise<CourseIntroData | null> {
     await connectToDatabase();
@@ -12,8 +14,7 @@ export async function getIntro(courseId: string): Promise<CourseIntroData | null
 }
 
 export async function saveIntro(courseId: string, payload: CourseIntroData): Promise<void> {
-    await connectToDatabase();
-    await CourseContent.findOneAndUpdate({ courseId }, { $set: { intro: payload } }, { upsert: true, new: true });
+    await saveCourseIntro(courseId, payload);
     revalidatePath(`/admin/cours/${courseId}/editor/intro`);
 }
 
@@ -25,8 +26,7 @@ export async function getModule(courseId: string, moduleId: string): Promise<Cou
 }
 
 export async function saveModule(courseId: string, moduleId: string, payload: CourseModuleData): Promise<void> {
-    await connectToDatabase();
-    await CourseContent.findOneAndUpdate({ courseId }, { $set: { [`modules.${moduleId}`]: payload } }, { upsert: true, new: true });
+    await saveCourseModule(courseId, moduleId, payload);
     revalidatePath(`/admin/cours/${courseId}/editor/modules/${moduleId}`);
 }
 
@@ -37,8 +37,7 @@ export async function getConclusion(courseId: string): Promise<CourseConclusionD
 }
 
 export async function saveConclusion(courseId: string, payload: CourseConclusionData): Promise<void> {
-    await connectToDatabase();
-    await CourseContent.findOneAndUpdate({ courseId }, { $set: { conclusion: payload } }, { upsert: true, new: true });
+    await saveCourseConclusion(courseId, payload);
     revalidatePath(`/admin/cours/${courseId}/editor/conclusion`);
 }
 
@@ -63,4 +62,32 @@ export async function publishCourseContent(courseId: string): Promise<void> {
     await connectToDatabase();
     await CourseContent.findOneAndUpdate({ courseId }, { $set: { contentStatus: 'published', contentPublishedAt: new Date() } }, { upsert: true, new: true });
     revalidatePath(`/admin/cours/${courseId}/editor/publish`);
+}
+
+export async function saveCourseIntro(courseId: string, payload: CourseIntroData): Promise<void> {
+    await connectToDatabase();
+    const normalized = normalizeIntro(payload);
+    await CourseContent.findOneAndUpdate({ courseId }, { $set: { intro: normalized } }, { upsert: true, new: true });
+}
+
+export async function saveCourseModule(courseId: string, moduleId: string, payload: CourseModuleData): Promise<{ ok: boolean; reason?: 'missing-module' }> {
+    await connectToDatabase();
+    const setup = await CourseSetup.findOne({ courseId }).lean();
+    const modules = (setup?.structure?.modules as Array<{ id: string; title?: string }> | undefined) ?? [];
+    const exists = modules.some((module) => module.id === moduleId);
+
+    if (!exists) {
+        return { ok: false, reason: 'missing-module' };
+    }
+
+    const fallbackTitle = modules.find((module) => module.id === moduleId)?.title ?? '';
+    const normalized = normalizeModule(payload, fallbackTitle);
+    await CourseContent.findOneAndUpdate({ courseId }, { $set: { [`modules.${moduleId}`]: normalized } }, { upsert: true, new: true });
+    return { ok: true };
+}
+
+export async function saveCourseConclusion(courseId: string, payload: CourseConclusionData): Promise<void> {
+    await connectToDatabase();
+    const normalized = normalizeConclusion(payload);
+    await CourseContent.findOneAndUpdate({ courseId }, { $set: { conclusion: normalized } }, { upsert: true, new: true });
 }

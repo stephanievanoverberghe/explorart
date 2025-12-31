@@ -1,10 +1,8 @@
 // src/lib/actions/courseSetup.ts
 'use server';
 
-import { Types } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';
 import { CourseSetup } from '@/lib/models/CourseSetup';
-import { Course } from '@/lib/models/Course';
 import type {
     CourseAccessData,
     CourseIdentityData,
@@ -15,13 +13,13 @@ import type {
     CourseStructureData,
     PublishStatus,
 } from '@/types/courseSetup';
+import { saveCourseSetup } from '@/lib/actions/courseAdmin';
 
 /* ---------------------------------------------
    Generic update helper
 ---------------------------------------------- */
 async function updateCourseSetupSection<T>(courseId: string, section: string, payload: T) {
-    await connectToDatabase();
-    await CourseSetup.findOneAndUpdate({ courseId }, { $set: { [section]: payload } }, { upsert: true, new: true });
+    await saveCourseSetup(courseId, { [section]: payload } as Record<string, T>);
 }
 
 export async function updateCourseIdentity(courseId: string, payload: CourseIdentityData) {
@@ -86,7 +84,6 @@ function isValidSlug(value: string) {
  */
 type LeanCourseSetup = {
     identity?: Partial<CourseIdentityData>;
-    pricing?: Partial<CoursePricingData>;
 };
 
 export async function finalizeCourseSetup(courseId: string, payload: FinalizePayload): Promise<FinalizeOk | FinalizeKo> {
@@ -95,16 +92,8 @@ export async function finalizeCourseSetup(courseId: string, payload: FinalizePay
     const setup = (await CourseSetup.findOne({ courseId }).lean()) as LeanCourseSetup | null;
 
     const identity: Partial<CourseIdentityData> = setup?.identity ?? {};
-    const pricing: Partial<CoursePricingData> = setup?.pricing ?? {};
-
     const title = String(identity.title ?? '').trim();
     const slug = String(identity.slug ?? '').trim();
-    const coverImage = String(identity.coverImage ?? '').trim();
-
-    const pillar = identity.pillar ?? 'dessin-peinture';
-    const level = identity.level ?? 'Tous niveaux';
-    const access = identity.access ?? 'free';
-    const pinned = Boolean(identity.pinned);
 
     const missing: SetupMissingItem[] = [];
 
@@ -137,31 +126,7 @@ export async function finalizeCourseSetup(courseId: string, payload: FinalizePay
         return { ok: false, message: 'Il manque des infos essentielles avant de passer à l’éditeur.', missing };
     }
 
-    // ✅ 1) Save publish dans CourseSetup
-    await CourseSetup.findOneAndUpdate({ courseId }, { $set: { publish: payload } }, { upsert: true, new: true });
-
-    // ✅ 2) Sync dans Course (catalogue)
-    const priceEUR = access === 'free' ? 0 : Number(pricing.price ?? 29);
-
-    const coursePatch = {
-        slug,
-        title,
-        pillarSlug: pillar,
-        level,
-        coverImage: coverImage || undefined,
-        pinned,
-        priceEUR,
-        status: payload.status === 'published' ? 'published' : 'draft',
-        listed: payload.listed,
-    };
-
-    // courseId peut être un ObjectId (si tu utilises l'id Mongo) ou un slug (si tu fais slug = id route)
-    if (Types.ObjectId.isValid(courseId)) {
-        await Course.findOneAndUpdate({ _id: courseId }, { $set: coursePatch }, { upsert: false, new: true });
-    } else {
-        // upsert true pour créer la fiche catalogue si elle n'existe pas encore
-        await Course.findOneAndUpdate({ slug: courseId }, { $set: coursePatch }, { upsert: true, new: true });
-    }
+    await saveCourseSetup(courseId, { publish: payload });
 
     return { ok: true, nextHref: `/admin/cours/${courseId}/editor/intro` };
 }

@@ -1,11 +1,11 @@
 // src/app/(admin)/admin/cours/[courseId]/setup/identity/page.tsx
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Sparkles, Tag, GraduationCap, LockOpen, Lock, Pin, ChevronDown, Save, Image as ImageIcon, Link2 } from 'lucide-react';
+import { ChevronLeft, Sparkles, Tag, GraduationCap, LockOpen, Lock, Pin, ChevronDown, Image as ImageIcon, Link2 } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { updateCourseIdentity } from '@/lib/actions/courseSetup';
 import type { CourseAccess, CourseIdentityData, CourseLevel, CoursePillar } from '@/types/courseSetup';
 
@@ -171,19 +171,6 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
                             ) : (
                                 <span className="rounded-full border border-perl/60 bg-white px-3 py-1 text-[11px] font-semibold text-main/60">Non sauvegardé</span>
                             )}
-
-                            <button
-                                type="button"
-                                onClick={saveDraft}
-                                disabled={submitting}
-                                className={cx(
-                                    'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition',
-                                    submitting ? 'border-perl/60 bg-page text-main/40 cursor-not-allowed' : 'border-perl/70 bg-white text-main/80 hover:bg-page cursor-pointer'
-                                )}
-                            >
-                                <Save className="h-4 w-4" />
-                                Sauvegarder
-                            </button>
                         </div>
                     }
                 />
@@ -378,34 +365,18 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
                                 URL : <span className="font-semibold text-main/75">/cours/{slug || 'mon-cours'}</span>
                             </p>
                         </div>
-
-                        <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <Link
-                                href={`/admin/cours/${courseId}`}
-                                className="inline-flex items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                                Retour au HUB
-                            </Link>
-
-                            <button
-                                type="button"
-                                onClick={saveAndContinue}
-                                disabled={!canContinue || submitting}
-                                className={cx(
-                                    'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition active:scale-[0.99]',
-                                    !canContinue || submitting
-                                        ? 'border border-perl/60 bg-page text-main/40 cursor-not-allowed'
-                                        : 'bg-main text-white cursor-pointer hover:bg-main/90 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-main/15'
-                                )}
-                            >
-                                Continuer (intention)
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
                     </div>
                 </CardBody>
             </Card>
+
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}`}
+                hubHref={`/admin/cours/${courseId}`}
+                onSave={saveDraft}
+                onContinue={saveAndContinue}
+                disableContinue={!canContinue}
+                isSaving={submitting}
+            />
         </div>
     );
 }

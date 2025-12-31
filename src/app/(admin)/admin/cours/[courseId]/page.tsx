@@ -1,9 +1,21 @@
 // src/app/(admin)/admin/cours/[courseId]/page.tsx
 import { ArrowRight, Eye, ListChecks, Pencil, Settings, ChevronLeft } from 'lucide-react';
 import { ActionTile, Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks } from '@/components/admin/courses/CourseUI';
+import { getCourseAdmin } from '@/lib/actions/courseAdmin';
+import { notFound } from 'next/navigation';
 
-export default function AdminCourseHubPage({ params }: { params: { courseId: string } }) {
+export default async function AdminCourseHubPage({ params }: { params: { courseId: string } }) {
     const { courseId } = params;
+    const course = await getCourseAdmin(courseId);
+
+    if (!course) {
+        notFound();
+    }
+
+    const statusLabel = course.status === 'published' ? 'Publié' : course.status === 'archived' ? 'Archivé' : 'Brouillon';
+    const setupLabel = course.progress.setupComplete ? 'Setup complet' : 'Setup à compléter';
+    const contentLabel = course.progress.contentComplete ? 'Contenu complet' : 'Contenu à compléter';
+    const publishLabel = course.progress.publishReady ? 'Prêt à publier' : 'Publication bloquée';
 
     return (
         <div className="space-y-6">
@@ -20,7 +32,7 @@ export default function AdminCourseHubPage({ params }: { params: { courseId: str
 
             <PageHeader
                 label="Aperçu"
-                title="Tableau du cours"
+                title={course.title}
                 description={
                     <>
                         Ton point d’ancrage : <span className="font-semibold text-main">setup</span> → <span className="font-semibold text-main">éditeur</span> →{' '}
@@ -32,7 +44,7 @@ export default function AdminCourseHubPage({ params }: { params: { courseId: str
             <Card>
                 <CardHeader
                     title="Raccourcis"
-                    subtitle={`CourseId : ${courseId}`}
+                    subtitle={`${courseId} • ${statusLabel} • ${setupLabel}`}
                     right={
                         <QuickLinks
                             items={[
@@ -68,14 +80,14 @@ export default function AdminCourseHubPage({ params }: { params: { courseId: str
                         />
 
                         <ActionTile
-                            href={`/admin/cours/${courseId}/setup/structure`}
+                            href={`/admin/cours/${courseId}/setup/publish`}
                             kicker="Checklist"
                             title={
                                 <>
                                     Voir la progression <ListChecks className="h-4 w-4" />
                                 </>
                             }
-                            desc="Plan du cours : intro + modules + conclusion"
+                            desc={`${contentLabel} • ${publishLabel}`}
                         />
 
                         <div className="grid gap-2">
@@ -91,14 +103,14 @@ export default function AdminCourseHubPage({ params }: { params: { courseId: str
                             />
 
                             <ActionTile
-                                href={`/admin/cours/${courseId}/editor/review`}
+                                href={course.status === 'published' ? `/cours/${course.slug}` : `/admin/cours/${courseId}/editor/review`}
                                 kicker="Prévisualisation"
                                 title={
                                     <>
                                         Ouvrir la review <Eye className="h-4 w-4" />
                                     </>
                                 }
-                                desc="Aperçu avant publication"
+                                desc={course.status === 'published' ? 'Voir la page publique' : 'Aperçu avant publication'}
                             />
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 // src/components/categories/category-data.ts
 
-export type Level = 'beginner' | 'intermediate';
+export type Level = 'beginner' | 'intermediate' | 'advanced' | 'all';
 
 export type PillarSlug = 'dessin-peinture' | 'comprendre-une-oeuvre' | 'histoires-d-artistes' | 'histoire-de-l-art' | 'couleurs-harmonie' | 'inspirations' | 'psychologie-de-l-art';
 
@@ -436,4 +436,6 @@ export const formatLabels: Record<PostFormat, string> = {
 export const levelLabels: Record<Level, string> = {
     beginner: 'Débutant',
     intermediate: 'Intermédiaire',
+    advanced: 'Avancé',
+    all: 'Tous niveaux',
 };

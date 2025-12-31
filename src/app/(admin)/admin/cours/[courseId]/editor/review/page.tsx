@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ChevronLeft, CheckCircle2, AlertTriangle, XCircle, ArrowRight } from 'lucide-react';
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { getCourseContent } from '@/lib/actions/courseContent';
 import { getCourseSetup } from '@/lib/data/courseSetup';
 import { buildEditorChecklist } from '@/lib/utils/courseContentValidation';
@@ -105,19 +106,13 @@ export default async function EditorReviewPage({ params }: EditorReviewPageProps
                 </CardBody>
             </Card>
 
-            <div className="flex justify-end pt-2">
-                <Link
-                    href={`/admin/cours/${courseId}/editor/publish`}
-                    className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition',
-                        checklist.canPublish ? 'bg-main text-white hover:bg-main/90' : 'bg-perl/60 text-main/50 cursor-not-allowed'
-                    )}
-                    aria-disabled={!checklist.canPublish}
-                >
-                    Continuer vers la publication
-                    <ArrowRight className="h-4 w-4" />
-                </Link>
-            </div>
+            <CourseWizardFooter
+                backHref={`/admin/cours/${courseId}/editor/conclusion`}
+                hubHref={`/admin/cours/${courseId}`}
+                continueHref={`/admin/cours/${courseId}/setup/publish`}
+                continueLabel="Continuer (publication)"
+                disableContinue={!checklist.canPublish}
+            />
         </div>
     );
 }

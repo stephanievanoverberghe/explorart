@@ -1,11 +1,12 @@
 // src/components/courses/course-filters-data.ts
 import type { PillarSlug } from '@/components/categories/category-data';
-import type { DurationLabel } from '@/lib/data/courses';
+type DurationLabel = 'short' | 'medium' | 'long';
 
-export const levelOptions: { value: 'all' | 'beginner' | 'intermediate'; label: string }[] = [
+export const levelOptions: { value: 'all' | 'beginner' | 'intermediate' | 'advanced'; label: string }[] = [
     { value: 'all', label: 'Tous les niveaux' },
     { value: 'beginner', label: 'Débutant' },
     { value: 'intermediate', label: 'Intermédiaire' },
+    { value: 'advanced', label: 'Avancé' },
 ];
 
 export const durationOptions: { value: 'all' | DurationLabel; label: string }[] = [
