@@ -1,3 +1,4 @@
+// src/app/(admin)/admin/cours/page.tsx
 import { headers } from 'next/headers';
 import { CoursesPageClient, type CourseListResponse } from './CoursesPageClient';
 

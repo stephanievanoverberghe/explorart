@@ -3,6 +3,7 @@ import { Schema, model, models, type Document, type Model } from 'mongoose';
 
 export type CourseLevel = 'beginner' | 'intermediate' | 'advanced' | 'all';
 export type CourseStatus = 'draft' | 'published' | 'archived';
+export type CourseDurationLabel = 'short' | 'medium' | 'long';
 
 export interface CourseDocument extends Document {
     slug: string;
@@ -12,6 +13,7 @@ export interface CourseDocument extends Document {
     pillarSlug: string;
     pillarLabel: string;
     coverImage: string;
+    durationLabel: CourseDurationLabel;
     durationMinutes: number;
     modulesCount: number;
     hasIntro: boolean;
@@ -35,6 +37,7 @@ const courseSchema = new Schema<CourseDocument>(
         pillarSlug: { type: String, required: true, trim: true },
         pillarLabel: { type: String, required: true, trim: true },
         coverImage: { type: String, default: '', trim: true },
+        durationLabel: { type: String, required: true, enum: ['short', 'medium', 'long'], default: 'short' },
         durationMinutes: { type: Number, default: 0 },
         modulesCount: { type: Number, default: 0 },
         hasIntro: { type: Boolean, default: true },

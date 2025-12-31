@@ -1,3 +1,4 @@
+// src/lib/actions/courseAdmin.ts
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -123,6 +124,12 @@ function computeDuration(structure: CourseStructureData) {
     return structure.modules.reduce((total, module) => total + (Number(module.minutes) || 0), 0) + structure.introMinutes + structure.conclusionMinutes;
 }
 
+function getDurationLabel(minutes: number) {
+    if (minutes <= 45) return 'short';
+    if (minutes <= 70) return 'medium';
+    return 'long';
+}
+
 function parsePrice(value: string) {
     const normalized = value.replace(',', '.').trim();
     const parsed = Number.parseFloat(normalized);
@@ -213,11 +220,12 @@ export async function createCourseDraft(): Promise<{ courseId: string; slug: str
     const course = await Course.create({
         slug: draftSlug,
         title: 'Nouveau cours',
-        tagline: '',
+        tagline: 'À compléter',
         level: 'beginner',
         pillarSlug: 'dessin-peinture',
         pillarLabel: pillarLabels['dessin-peinture'],
-        coverImage: '',
+        coverImage: '/images/cours/commencer-ici-cover.png',
+        durationLabel: 'short',
         durationMinutes: 0,
         modulesCount: 0,
         hasIntro: true,
@@ -295,6 +303,7 @@ export async function saveCourseSetup(
 
     const durationMinutes = computeDuration(next.structure);
     const modulesCount = next.structure.modules.length;
+    const durationLabel = getDurationLabel(durationMinutes);
 
     await Course.findOneAndUpdate(
         { _id: courseId },
@@ -307,6 +316,7 @@ export async function saveCourseSetup(
                 pillarSlug: next.identity.pillar,
                 pillarLabel: pillarLabels[next.identity.pillar] ?? 'Dessin & Peinture',
                 coverImage: next.identity.coverImage,
+                durationLabel,
                 durationMinutes,
                 modulesCount,
                 hasIntro: next.structure.introMinutes > 0,
@@ -349,6 +359,7 @@ export async function getCourseAdmin(courseId: string): Promise<AdminCourseDTO |
             pillarSlug: setup.identity.pillar,
             pillarLabel: pillarLabels[setup.identity.pillar] ?? 'Dessin & Peinture',
             coverImage: setup.identity.coverImage,
+            durationLabel: getDurationLabel(computeDuration(setup.structure)),
             durationMinutes: computeDuration(setup.structure),
             modulesCount: setup.structure.modules.length,
             hasIntro: setup.structure.introMinutes > 0,
