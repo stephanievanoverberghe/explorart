@@ -129,10 +129,10 @@ function parsePrice(value: string) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-type CommerceDocLike = Partial<CourseCommerceData> & {
+type CommerceDocLike = Omit<Partial<CourseCommerceData>, 'updatedAt' | 'promotions' | 'coupons'> & {
     updatedAt?: string | Date;
-    promotions?: Array<CoursePromotionData & { startsAt?: string | Date; endsAt?: string | Date }>;
-    coupons?: Array<CourseCouponData & { startsAt?: string | Date; endsAt?: string | Date }>;
+    promotions?: Array<Omit<CoursePromotionData, 'startsAt' | 'endsAt'> & { startsAt?: string | Date; endsAt?: string | Date }>;
+    coupons?: Array<Omit<CourseCouponData, 'startsAt' | 'endsAt'> & { startsAt?: string | Date; endsAt?: string | Date }>;
 };
 
 function normalizeCommerceDoc(courseId: string, doc: CommerceDocLike | null | undefined): CourseCommerceData {
