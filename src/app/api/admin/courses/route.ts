@@ -23,12 +23,6 @@ const statusLabelMap: Record<CourseStatus, 'Publié' | 'Brouillon' | 'En prépar
     archived: 'En préparation',
 };
 
-const setupStatusLabelMap: Record<string, 'Publié' | 'Brouillon' | 'En préparation'> = {
-    published: 'Publié',
-    draft: 'Brouillon',
-    archived: 'En préparation',
-};
-
 const levelLabelMap: Record<string, 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Tous niveaux'> = {
     beginner: 'Débutant',
     intermediate: 'Intermédiaire',
@@ -87,18 +81,12 @@ type CourseSetupResourcesLite = {
     resources?: Array<unknown>;
 };
 
-type CourseSetupPublishLite = {
-    status?: 'draft' | 'published' | 'archived';
-    listed?: boolean;
-};
-
 type CourseSetupLeanLite = {
     courseId: string;
     identity?: CourseSetupIdentityLite;
     pricing?: CourseSetupPricingLite;
     structure?: CourseSetupStructureLite;
     resources?: CourseSetupResourcesLite;
-    publish?: CourseSetupPublishLite;
     updatedAt?: Date;
 };
 
@@ -284,7 +272,6 @@ export async function GET(request: NextRequest) {
                 .filter((s) => !existingIds.has(String(s.courseId)))
                 .map((s): UiCourseRow | null => {
                     const identity = s.identity ?? {};
-                    const publish = s.publish ?? { status: 'draft', listed: true };
                     const pricing = s.pricing ?? {};
                     const structure = s.structure ?? {};
                     const resources = s.resources ?? {};
@@ -298,9 +285,8 @@ export async function GET(request: NextRequest) {
                     const coverImage = String(identity.coverImage ?? '').trim();
 
                     const priceEUR = access === 'free' ? 0 : Number(pricing.price ?? 29);
-                    const listed = Boolean(publish.listed);
 
-                    const statusLabel: UiCourseStatus = setupStatusLabelMap[String(publish.status)] ?? 'Brouillon';
+                    const statusLabel: UiCourseStatus = 'Brouillon';
 
                     // Filtres
                     if (status !== 'all') {
@@ -342,7 +328,7 @@ export async function GET(request: NextRequest) {
                             alt: `Couverture du cours ${title}`,
                         },
                         hrefEdit: `/admin/cours/${String(s.courseId)}/setup/identity`,
-                        hrefPreview: isValidSlug(rawSlug) && publish.status === 'published' && listed ? `/cours/${rawSlug}` : `/admin/cours/${String(s.courseId)}`,
+                        hrefPreview: `/admin/cours/${String(s.courseId)}`,
                         summary: identity.summary || 'Setup en cours…',
                         priceLabel: formatPrice(priceEUR),
                         videoCount: 0,

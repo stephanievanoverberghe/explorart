@@ -14,7 +14,6 @@ import type {
     CourseIdentityData,
     CourseIntentData,
     CoursePricingData,
-    CoursePublishData,
     CourseResourcesData,
     CourseSetupData,
     CourseStructureData,
@@ -110,13 +109,6 @@ function normalizeResources(data: CourseResourcesData): CourseResourcesData {
             title: resource.title.trim(),
             format: resource.format.trim(),
         })),
-    };
-}
-
-function normalizePublish(data: CoursePublishData): CoursePublishData {
-    return {
-        status: data.status,
-        listed: Boolean(data.listed),
     };
 }
 
@@ -238,8 +230,6 @@ export async function createCourseDraft(): Promise<{ courseId: string; slug: str
     const setup = buildDefaultCourseSetup(courseId);
     setup.identity.slug = draftSlug;
     setup.identity.title = course.title;
-    setup.publish.listed = false;
-    setup.publish.status = 'draft';
     await CourseSetup.create(setup);
     await CourseContent.create({ courseId });
 
@@ -265,7 +255,6 @@ export async function saveCourseSetup(
         access: CourseAccessData;
         pricing: CoursePricingData;
         resources: CourseResourcesData;
-        publish: CoursePublishData;
     }>
 ): Promise<CourseSetupData> {
     await connectToDatabase();
@@ -281,7 +270,6 @@ export async function saveCourseSetup(
         access: normalizeAccess(payload.access ?? (current?.access as CourseAccessData) ?? defaults.access),
         pricing: normalizePricing(payload.pricing ?? (current?.pricing as CoursePricingData) ?? defaults.pricing),
         resources: normalizeResources(payload.resources ?? (current?.resources as CourseResourcesData) ?? defaults.resources),
-        publish: normalizePublish(payload.publish ?? (current?.publish as CoursePublishData) ?? defaults.publish),
     };
 
     await CourseSetup.findOneAndUpdate(
@@ -294,7 +282,6 @@ export async function saveCourseSetup(
                 access: next.access,
                 pricing: next.pricing,
                 resources: next.resources,
-                publish: next.publish,
             },
         },
         { upsert: true, new: true }
@@ -321,7 +308,6 @@ export async function saveCourseSetup(
                 hasIntro: next.structure.introMinutes > 0,
                 hasConclusion: next.structure.conclusionMinutes > 0,
                 pinned: next.identity.pinned,
-                listed: next.publish.listed,
             },
         },
         { upsert: true, new: true }
@@ -365,7 +351,7 @@ export async function getCourseAdmin(courseId: string): Promise<AdminCourseDTO |
             hasConclusion: setup.structure.conclusionMinutes > 0,
             pinned: setup.identity.pinned,
             status: 'draft',
-            listed: setup.publish.listed,
+            listed: false,
         });
         courseDoc = created.toObject();
     }
@@ -447,8 +433,8 @@ export async function getCoursePublic(slug: string): Promise<PublicCourseDTO | n
 
 export async function publishCourse(courseId: string): Promise<{ ok: boolean; checklist: ReturnType<typeof buildPublishChecklist> }> {
     await connectToDatabase();
-    const [setupDoc, contentDoc, commerceDoc] = await Promise.all([
-        CourseSetup.findOne({ courseId }).lean(),
+    const [courseDoc, setupDoc, contentDoc, commerceDoc] = await Promise.all([
+        Course.findById(courseId).lean(),
         CourseContent.findOne({ courseId }).lean(),
         CourseCommerce.findOne({ courseId }).lean(),
     ]);
@@ -473,13 +459,40 @@ export async function publishCourse(courseId: string): Promise<{ ok: boolean; ch
     }
 
     const slug = setup.identity.slug || slugify(setup.identity.title);
+    const listed = Boolean(courseDoc?.listed);
+
+    await CourseContent.findOneAndUpdate({ courseId }, { $set: { contentStatus: 'published', contentPublishedAt: new Date() } }, { upsert: true, new: true });
+
+    await CourseCommerce.findOneAndUpdate({ courseId }, { $set: commerce }, { upsert: true, new: true });
+
+    revalidatePath(`/admin/cours/${courseId}`);
+    revalidatePath('/cours');
+    revalidatePath(`/cours/${slug}`);
+
+    return { ok: true, checklist };
+}
+
+export async function updateCourseListing(courseId: string, listed: boolean): Promise<void> {
+    await connectToDatabase();
+    const course = await Course.findOneAndUpdate({ _id: courseId }, { $set: { listed: Boolean(listed) } }, { new: true }).lean();
+    revalidatePath(`/admin/cours/${courseId}`);
+    if (course?.status === 'published') {
+        revalidatePath('/cours');
+        revalidatePath(`/cours/${course.slug}`);
+    }
+}
+
+export async function unpublishCourse(courseId: string): Promise<void> {
+    await connectToDatabase();
+    const course = await Course.findById(courseId).lean();
+    if (!course) return;
 
     await Course.findOneAndUpdate(
         { _id: courseId },
         {
             $set: {
                 status: 'published',
-                listed: setup.publish.listed,
+                listed,
                 publishedAt: new Date(),
                 slug,
             },
@@ -491,22 +504,26 @@ export async function publishCourse(courseId: string): Promise<{ ok: boolean; ch
         { courseId },
         {
             $set: {
-                publish: {
-                    ...setup.publish,
-                    status: 'published',
-                },
+                status: 'draft',
+                listed: false,
+                publishedAt: null,
             },
         },
         { new: true }
     );
 
-    await CourseContent.findOneAndUpdate({ courseId }, { $set: { contentStatus: 'published', contentPublishedAt: new Date() } }, { upsert: true, new: true });
-
-    await CourseCommerce.findOneAndUpdate({ courseId }, { $set: commerce }, { upsert: true, new: true });
+    await CourseContent.findOneAndUpdate(
+        { courseId },
+        {
+            $set: {
+                contentStatus: 'draft',
+                contentPublishedAt: null,
+            },
+        },
+        { upsert: true, new: true }
+    );
 
     revalidatePath(`/admin/cours/${courseId}`);
     revalidatePath('/cours');
-    revalidatePath(`/cours/${slug}`);
-
-    return { ok: true, checklist };
+    revalidatePath(`/cours/${course.slug}`);
 }

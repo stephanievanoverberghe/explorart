@@ -1,13 +1,4 @@
-import type {
-    CourseAccessData,
-    CourseIdentityData,
-    CourseIntentData,
-    CoursePricingData,
-    CoursePublishData,
-    CourseResourcesData,
-    CourseSetupData,
-    CourseStructureData,
-} from '@/types/courseSetup';
+import type { CourseAccessData, CourseIdentityData, CourseIntentData, CoursePricingData, CourseResourcesData, CourseSetupData, CourseStructureData } from '@/types/courseSetup';
 
 function makeId() {
     return crypto.randomUUID();
@@ -70,11 +61,6 @@ export function buildDefaultResources(): CourseResourcesData {
     };
 }
 
-export const defaultPublish: CoursePublishData = {
-    status: 'draft',
-    listed: true,
-};
-
 export function buildDefaultCourseSetup(courseId: string): CourseSetupData {
     return {
         courseId,
@@ -84,6 +70,5 @@ export function buildDefaultCourseSetup(courseId: string): CourseSetupData {
         access: { ...defaultAccess },
         pricing: { ...defaultPricing },
         resources: buildDefaultResources(),
-        publish: { ...defaultPublish },
     };
 }

@@ -62,7 +62,7 @@ export default function SetupResourcesClient({ courseId, initialResources }: Set
     async function handleNext() {
         if (submitting) return;
         await saveDraft();
-        router.push(`/admin/cours/${courseId}/setup/publish`);
+        router.push(`/admin/cours/${courseId}/setup/review`);
     }
 
     return (
@@ -150,7 +150,7 @@ export default function SetupResourcesClient({ courseId, initialResources }: Set
                                 <p className="text-xs uppercase tracking-[0.18em] text-main/55">Résumé</p>
                                 <p className="text-sm text-main">
                                     <span className="font-semibold">{summary}</span>
-                                    <span className="text-main/60"> • prêt pour la publication.</span>
+                                    <span className="text-main/60"> • prêt pour la validation.</span>
                                 </p>
                                 <div className="rounded-2xl border border-perl/60 bg-white p-4">
                                     <p className="text-xs text-main/60">Astuce e-learning</p>

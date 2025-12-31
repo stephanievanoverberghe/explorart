@@ -17,8 +17,6 @@ export type Tone = 'soft' | 'direct' | 'playful';
 
 export type PricingModel = 'one_off' | 'included' | 'bundle';
 
-export type PublishStatus = 'draft' | 'published';
-
 export interface CourseIdentityData {
     title: string;
     slug: string;
@@ -78,11 +76,6 @@ export interface CourseResourcesData {
     resources: CourseResourceData[];
 }
 
-export interface CoursePublishData {
-    status: PublishStatus;
-    listed: boolean;
-}
-
 export interface CourseSetupData {
     courseId: string;
     identity: CourseIdentityData;
@@ -91,5 +84,4 @@ export interface CourseSetupData {
     access: CourseAccessData;
     pricing: CoursePricingData;
     resources: CourseResourcesData;
-    publish: CoursePublishData;
 }

@@ -1,15 +1,6 @@
 import { Schema, model, models, type Document, type Model } from 'mongoose';
 
-import type {
-    CourseAccessData,
-    CourseIdentityData,
-    CourseIntentData,
-    CourseModuleData,
-    CoursePricingData,
-    CoursePublishData,
-    CourseResourcesData,
-    CourseStructureData,
-} from '@/types/courseSetup';
+import type { CourseAccessData, CourseIdentityData, CourseIntentData, CourseModuleData, CoursePricingData, CourseResourcesData, CourseStructureData } from '@/types/courseSetup';
 
 export interface CourseSetupDocument extends Document {
     courseId: string;
@@ -19,7 +10,6 @@ export interface CourseSetupDocument extends Document {
     access: CourseAccessData;
     pricing: CoursePricingData;
     resources: CourseResourcesData;
-    publish: CoursePublishData;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -86,10 +76,6 @@ const courseSetupSchema = new Schema<CourseSetupDocument>(
             videoModules: { type: Boolean, default: true },
             videoConclusion: { type: Boolean, default: true },
             resources: { type: [courseResourceSchema], default: [] },
-        },
-        publish: {
-            status: { type: String, default: 'draft' },
-            listed: { type: Boolean, default: true },
         },
     },
     { timestamps: true }

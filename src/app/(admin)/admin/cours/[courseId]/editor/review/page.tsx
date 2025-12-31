@@ -109,7 +109,7 @@ export default async function EditorReviewPage({ params }: EditorReviewPageProps
             <CourseWizardFooter
                 backHref={`/admin/cours/${courseId}/editor/conclusion`}
                 hubHref={`/admin/cours/${courseId}`}
-                continueHref={`/admin/cours/${courseId}/setup/publish`}
+                continueHref={`/admin/cours/${courseId}/editor/publish`}
                 continueLabel="Continuer (publication)"
                 disableContinue={!checklist.canPublish}
             />

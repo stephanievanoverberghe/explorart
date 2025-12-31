@@ -14,7 +14,6 @@ export default async function AdminCourseHubPage({ params }: { params: { courseI
 
     const statusLabel = course.status === 'published' ? 'Publié' : course.status === 'archived' ? 'Archivé' : 'Brouillon';
     const setupLabel = course.progress.setupComplete ? 'Setup complet' : 'Setup à compléter';
-    const contentLabel = course.progress.contentComplete ? 'Contenu complet' : 'Contenu à compléter';
     const publishLabel = course.progress.publishReady ? 'Prêt à publier' : 'Publication bloquée';
 
     return (
@@ -65,7 +64,7 @@ export default async function AdminCourseHubPage({ params }: { params: { courseI
                                     Continuer le cheminement <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                                 </>
                             }
-                            desc="Identité → Intention → Structure → Accès → Prix → Ressources → Publication"
+                            desc="Identité → Intention → Structure → Accès → Prix → Ressources → Validation"
                         />
 
                         <ActionTile
@@ -76,18 +75,18 @@ export default async function AdminCourseHubPage({ params }: { params: { courseI
                                     Commencer par l’intro <Pencil className="h-4 w-4" />
                                 </>
                             }
-                            desc="Intro → Modules → Conclusion → Review"
+                            desc="Intro → Modules → Conclusion → Review → Publication"
                         />
 
                         <ActionTile
-                            href={`/admin/cours/${courseId}/setup/publish`}
+                            href={`/admin/cours/${courseId}/setup/review`}
                             kicker="Checklist"
                             title={
                                 <>
                                     Voir la progression <ListChecks className="h-4 w-4" />
                                 </>
                             }
-                            desc={`${contentLabel} • ${publishLabel}`}
+                            desc={`${setupLabel} • ${publishLabel}`}
                         />
 
                         <div className="grid gap-2">

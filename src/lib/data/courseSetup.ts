@@ -1,7 +1,7 @@
 import { connectToDatabase } from '@/lib/db/connect';
 import { CourseSetup } from '@/lib/models/CourseSetup';
 import type { CourseSetupData } from '@/types/courseSetup';
-import { buildDefaultResources, buildDefaultStructure, defaultAccess, defaultIdentity, defaultIntent, defaultPricing, defaultPublish } from '@/lib/utils/courseSetupDefaults';
+import { buildDefaultResources, buildDefaultStructure, defaultAccess, defaultIdentity, defaultIntent, defaultPricing } from '@/lib/utils/courseSetupDefaults';
 
 export async function getCourseSetup(courseId: string): Promise<CourseSetupData> {
     await connectToDatabase();
@@ -35,6 +35,5 @@ export async function getCourseSetup(courseId: string): Promise<CourseSetupData>
                   resources: setup.resources.resources?.length ? setup.resources.resources : fallbackResources.resources,
               }
             : fallbackResources,
-        publish: setup?.publish ? { ...defaultPublish, ...setup.publish } : defaultPublish,
     };
 }
