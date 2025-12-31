@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Types } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';
 import { Course } from '@/lib/models/Course';
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+type Context = { params: Promise<{ id: string }> };
+
+export async function DELETE(_req: NextRequest, context: Context) {
     try {
-        const id = params.id;
+        const { id } = await context.params;
 
         if (!id) {
             return NextResponse.json({ error: 'Identifiant requis.' }, { status: 400 });

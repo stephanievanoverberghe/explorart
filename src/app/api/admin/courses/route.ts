@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import type { QueryFilter, SortOrder } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';
 import { Course, type CourseDocument, type CourseStatus } from '@/lib/models/Course';
@@ -63,7 +63,7 @@ function getResourcesLabel(resourceCount: number) {
     return `${resourceCount} ressource${resourceCount > 1 ? 's' : ''}`;
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const page = Math.max(1, Number(searchParams.get('page') ?? 1));
