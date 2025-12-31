@@ -1,21 +1,41 @@
-'use client';
-
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { ChevronLeft, Eye, CheckCircle2, Edit3, Rocket } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { ChevronLeft, CheckCircle2, AlertTriangle, XCircle, ArrowRight } from 'lucide-react';
 
-import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks } from '@/components/admin/courses/CourseUI';
+import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { getCourseContent } from '@/lib/actions/courseContent';
+import { getCourseSetup } from '@/lib/data/courseSetup';
+import { buildEditorChecklist } from '@/lib/utils/courseContentValidation';
 
-/* ------------------------------------------------
-   Editor Review — Lecture & validation
-------------------------------------------------- */
+interface EditorReviewPageProps {
+    params: { courseId: string };
+}
 
-export default function EditorReviewPage() {
-    const { courseId } = useParams<{ courseId: string }>();
+const statusStyles = {
+    ok: 'border-sage/40 bg-sage/10 text-sage',
+    warning: 'border-amber-200 bg-amber-50 text-amber-700',
+    error: 'border-rose/30 bg-rose/10 text-rose',
+} as const;
+
+const statusIcons = {
+    ok: CheckCircle2,
+    warning: AlertTriangle,
+    error: XCircle,
+} as const;
+
+export default async function EditorReviewPage({ params }: EditorReviewPageProps) {
+    const { courseId } = params;
+    const setup = await getCourseSetup(courseId);
+
+    if (!setup) {
+        notFound();
+    }
+
+    const content = await getCourseContent(courseId);
+    const checklist = buildEditorChecklist(courseId, setup, content);
 
     return (
         <div className="space-y-6">
-            {/* TOP BAR */}
             <TopBar
                 backHref={`/admin/cours/${courseId}/editor/conclusion`}
                 backLabel={
@@ -38,89 +58,64 @@ export default function EditorReviewPage() {
                 description="Lis ton cours comme un apprenant. Vérifie la cohérence, le rythme et l’intention globale avant publication."
             />
 
-            {/* INTRO */}
             <Card>
-                <CardHeader title="Introduction" subtitle="Premier contact avec l’apprenant" />
-                <CardBody>
-                    <div className="space-y-3">
-                        <p className="text-sm text-main/75">L’introduction pose le cadre émotionnel du cours : posture, promesse, rythme.</p>
+                <CardHeader title="Checklist éditoriale" subtitle="Validation automatique + conseils" />
+                <CardBody className="space-y-3">
+                    {checklist.items.map((item) => {
+                        const Icon = statusIcons[item.status];
+                        return (
+                            <div key={item.key} className="flex flex-col gap-2 rounded-2xl border border-perl/60 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex items-start gap-3">
+                                    <Icon className={cx('mt-0.5 h-4 w-4', item.status === 'ok' ? 'text-sage' : item.status === 'warning' ? 'text-amber-600' : 'text-rose')} />
+                                    <div>
+                                        <p className="text-sm font-semibold text-main/80">{item.label}</p>
+                                        <p className="text-xs text-main/60">{item.description}</p>
+                                    </div>
+                                </div>
+                                {item.href ? (
+                                    <Link
+                                        href={item.href}
+                                        className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page transition"
+                                    >
+                                        Corriger
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Link>
+                                ) : null}
+                            </div>
+                        );
+                    })}
+                </CardBody>
+            </Card>
 
-                        <Link
-                            href={`/admin/cours/${courseId}/editor/intro`}
-                            className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page transition"
-                        >
-                            <Edit3 className="h-4 w-4" />
-                            Modifier l’introduction
-                        </Link>
+            <Card>
+                <CardHeader title="Synthèse" subtitle="Vue d’ensemble" />
+                <CardBody className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl border border-perl/60 bg-page/40 p-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-main/55">Modules</p>
+                        <p className="mt-2 text-sm text-main/70">{setup.structure.modules.length} modules à parcourir</p>
+                    </div>
+                    <div className={cx('rounded-2xl border p-4', checklist.canPublish ? statusStyles.ok : statusStyles.warning)}>
+                        <p className="text-xs uppercase tracking-[0.18em]">État global</p>
+                        <p className="mt-2 text-sm">{checklist.canPublish ? 'Prêt pour publication' : 'Quelques ajustements requis'}</p>
+                    </div>
+                    <div className={cx('rounded-2xl border p-4', checklist.blockingErrors ? statusStyles.error : statusStyles.ok)}>
+                        <p className="text-xs uppercase tracking-[0.18em]">Blocages</p>
+                        <p className="mt-2 text-sm">{checklist.blockingErrors > 0 ? `${checklist.blockingErrors} point(s) bloquant(s)` : 'Aucun blocage'}</p>
                     </div>
                 </CardBody>
             </Card>
 
-            {/* MODULES */}
-            <Card>
-                <CardHeader title="Modules" subtitle="Parcours principal du cours" />
-                <CardBody>
-                    <div className="space-y-4">
-                        <p className="text-sm text-main/75">Chaque module doit être autonome, clair et fidèle à l’intention du cours.</p>
-
-                        <Link
-                            href={`/admin/cours/${courseId}/editor/modules`}
-                            className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page transition"
-                        >
-                            <Eye className="h-4 w-4" />
-                            Voir les modules
-                        </Link>
-                    </div>
-                </CardBody>
-            </Card>
-
-            {/* CONCLUSION */}
-            <Card>
-                <CardHeader title="Conclusion" subtitle="Clôture & ouverture" />
-                <CardBody>
-                    <div className="space-y-3">
-                        <p className="text-sm text-main/75">La conclusion aide l’apprenant à intégrer ce qu’il a vécu et à continuer seul.</p>
-
-                        <Link
-                            href={`/admin/cours/${courseId}/editor/conclusion`}
-                            className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page transition"
-                        >
-                            <Edit3 className="h-4 w-4" />
-                            Modifier la conclusion
-                        </Link>
-                    </div>
-                </CardBody>
-            </Card>
-
-            {/* CHECK FINAL */}
-            <Card>
-                <CardHeader title="Checklist finale" subtitle="Avant publication" />
-                <CardBody>
-                    <div className="space-y-3 text-sm text-main/75">
-                        <div className="flex items-start gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-sage mt-0.5" />
-                            <span>L’introduction donne envie et rassure.</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-sage mt-0.5" />
-                            <span>Les modules suivent une progression logique.</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-sage mt-0.5" />
-                            <span>La conclusion ferme le parcours sans brusquer.</span>
-                        </div>
-                    </div>
-                </CardBody>
-            </Card>
-
-            {/* ACTION */}
             <div className="flex justify-end pt-2">
                 <Link
                     href={`/admin/cours/${courseId}/editor/publish`}
-                    className="inline-flex items-center gap-2 rounded-full bg-main px-6 py-3 text-sm font-semibold text-white hover:bg-main/90 transition"
+                    className={cx(
+                        'inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition',
+                        checklist.canPublish ? 'bg-main text-white hover:bg-main/90' : 'bg-perl/60 text-main/50 cursor-not-allowed'
+                    )}
+                    aria-disabled={!checklist.canPublish}
                 >
-                    <Rocket className="h-4 w-4" />
-                    Passer à la publication
+                    Continuer vers la publication
+                    <ArrowRight className="h-4 w-4" />
                 </Link>
             </div>
         </div>

@@ -8,14 +8,14 @@ export function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 /** Small badges (top-right, etc.) */
-export function Badge({ children }: { children: ReactNode }) {
-    return <span className="rounded-full border border-perl/60 bg-page/60 px-3 py-1 text-[11px] font-semibold text-main/70">{children}</span>;
+export function Badge({ children, className }: { children: ReactNode; className?: string }) {
+    return <span className={cx('rounded-full border border-perl/60 bg-page/60 px-3 py-1 text-[11px] font-semibold text-main/70', className)}>{children}</span>;
 }
 
 /** Consistent page header (label + title + desc) */
-export function PageHeader({ label, title, description }: { label: string; title: string; description?: ReactNode }) {
+export function PageHeader({ label, title, description, className }: { label: string; title: string; description?: ReactNode; className?: string }) {
     return (
-        <header className="space-y-2">
+        <header className={cx('space-y-2', className)}>
             <span className="section-label section-label-sage">{label}</span>
             <h2 className="font-serif-title text-2xl text-main">{title}</h2>
             {description ? <p className="text-sm text-main/60">{description}</p> : null}
@@ -24,9 +24,9 @@ export function PageHeader({ label, title, description }: { label: string; title
 }
 
 /** Top bar with back + right side slot */
-export function TopBar({ backHref, backLabel, right }: { backHref: string; backLabel: React.ReactNode; right?: ReactNode }) {
+export function TopBar({ backHref, backLabel, right, className }: { backHref: string; backLabel: React.ReactNode; right?: ReactNode; className?: string }) {
     return (
-        <div className="flex items-center justify-between gap-3">
+        <div className={cx('flex items-center justify-between gap-3', className)}>
             <Link
                 href={backHref}
                 className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
@@ -39,13 +39,13 @@ export function TopBar({ backHref, backLabel, right }: { backHref: string; backL
 }
 
 /** Card wrapper */
-export function Card({ children }: { children: ReactNode }) {
-    return <section className="rounded-3xl border border-perl/60 bg-white/95 shadow-sm overflow-hidden">{children}</section>;
+export function Card({ children, className }: { children: ReactNode; className?: string }) {
+    return <section className={cx('rounded-3xl border border-perl/60 bg-white/95 shadow-sm overflow-hidden', className)}>{children}</section>;
 }
 
-export function CardHeader({ title, subtitle, right }: { title: string; subtitle?: ReactNode; right?: ReactNode }) {
+export function CardHeader({ title, subtitle, right, className }: { title: string; subtitle?: ReactNode; right?: ReactNode; className?: string }) {
     return (
-        <div className="px-5 py-4 border-b border-perl/50 bg-page/50 flex items-start justify-between gap-3">
+        <div className={cx('px-5 py-4 border-b border-perl/50 bg-page/50 flex items-start justify-between gap-3', className)}>
             <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.18em] text-main/55">{title}</p>
                 {subtitle ? <p className="mt-1 text-xs text-main/60">{subtitle}</p> : null}
@@ -55,14 +55,28 @@ export function CardHeader({ title, subtitle, right }: { title: string; subtitle
     );
 }
 
-export function CardBody({ children }: { children: ReactNode }) {
-    return <div className="p-5 sm:p-6">{children}</div>;
+export function CardBody({ children, className }: { children: ReactNode; className?: string }) {
+    return <div className={cx('p-5 sm:p-6', className)}>{children}</div>;
 }
 
 /** Action tile */
-export function ActionTile({ href, kicker, title, desc, icon }: { href: string; kicker: string; title: ReactNode; desc?: ReactNode; icon?: ReactNode }) {
+export function ActionTile({
+    href,
+    kicker,
+    title,
+    desc,
+    icon,
+    className,
+}: {
+    href: string;
+    kicker: string;
+    title: ReactNode;
+    desc?: ReactNode;
+    icon?: ReactNode;
+    className?: string;
+}) {
     return (
-        <Link href={href} className="group rounded-3xl border border-perl/60 bg-white p-4 hover:bg-page/50 transition cursor-pointer">
+        <Link href={href} className={cx('group rounded-3xl border border-perl/60 bg-white p-4 hover:bg-page/50 transition cursor-pointer', className)}>
             <p className="text-xs uppercase tracking-[0.18em] text-main/55">{kicker}</p>
             <p className="mt-1 text-sm font-semibold text-main inline-flex items-center gap-2">{title}</p>
             {desc ? <p className="mt-2 text-xs text-main/60">{desc}</p> : null}
@@ -72,9 +86,9 @@ export function ActionTile({ href, kicker, title, desc, icon }: { href: string; 
 }
 
 /** Small shortcut chips row (Hub / Cours etc.) */
-export function QuickLinks({ items }: { items: Array<{ href: string; label: string }> }) {
+export function QuickLinks({ items, className }: { items: Array<{ href: string; label: string }>; className?: string }) {
     return (
-        <div className="flex items-center gap-2">
+        <div className={cx('flex items-center gap-2', className)}>
             {items.map((it) => (
                 <Link
                     key={it.href}

@@ -1,57 +1,286 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { useState } from 'react';
-import { ChevronLeft, Save, Pencil, CheckCircle2, Compass } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ChevronLeft, Save, Pencil, CheckCircle2, Compass, Video, Plus, Trash2, Sparkles } from 'lucide-react';
 
-import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks } from '@/components/admin/courses/CourseUI';
+import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { getModule, saveModule } from '@/lib/actions/courseContent';
+import { getCourseStructureModules } from '@/lib/actions/courseSetup';
+import type { CourseModuleData } from '@/types/courseContent';
+import type { CourseStructureData } from '@/types/courseSetup';
 
-/* ------------------------------------------------
-   Editor Module — FRONT ONLY (clean & strict)
-------------------------------------------------- */
+function Field({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: React.ReactNode }) {
+    return (
+        <div className="space-y-2">
+            <div className="flex items-end justify-between gap-3">
+                <label className="text-xs font-semibold text-main/75">
+                    {label} {required ? <span className="text-rose">*</span> : null}
+                </label>
+                {hint ? <span className="text-[11px] text-main/50">{hint}</span> : null}
+            </div>
+            {children}
+        </div>
+    );
+}
+
+function IconInput({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+    return (
+        <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-main/45">{icon}</div>
+            {children}
+        </div>
+    );
+}
+
+const inputBase =
+    'w-full rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+
+const inputWithIcon =
+    'w-full rounded-2xl border border-perl/70 bg-white pl-10 pr-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+
+const textareaBase =
+    'w-full resize-none rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+
+const emptyModule: CourseModuleData = {
+    badgeLabel: '',
+    title: '',
+    description: '',
+    video: {
+        title: '',
+        youtubeId: '',
+        description: '',
+        note: '',
+        cover: '',
+    },
+    material: { title: 'Matériel', items: [], note: '', highlighted: true },
+    intention: { title: 'Intention', items: [] },
+    exercise: { title: 'Exercice guidé', description: '', steps: [] },
+    extraSections: [],
+};
+
+function hydrateModule(data: CourseModuleData | null, fallbackTitle: string | null): CourseModuleData {
+    return {
+        ...emptyModule,
+        ...data,
+        title: data?.title?.trim() ? data.title : fallbackTitle ?? '',
+        video: { ...emptyModule.video, ...data?.video },
+        material: {
+            ...emptyModule.material,
+            ...data?.material,
+            items: data?.material?.items ?? emptyModule.material?.items ?? [],
+        },
+        intention: {
+            ...emptyModule.intention,
+            ...data?.intention,
+            items: data?.intention?.items ?? emptyModule.intention?.items ?? [],
+        },
+        exercise: {
+            ...emptyModule.exercise,
+            ...data?.exercise,
+            steps: data?.exercise?.steps ?? emptyModule.exercise?.steps ?? [],
+        },
+        extraSections: data?.extraSections ?? [],
+    };
+}
 
 export default function EditorModulePage() {
-    const { courseId } = useParams<{ courseId: string; moduleId: string }>();
+    const router = useRouter();
+    const { courseId, moduleId } = useParams<{ courseId: string; moduleId: string }>();
 
+    const [moduleMeta, setModuleMeta] = useState<CourseStructureData['modules'][number] | null>(null);
+    const [moduleData, setModuleData] = useState<CourseModuleData>(emptyModule);
     const [savedAt, setSavedAt] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
-    /* -------- EN-TÊTE -------- */
-    const [badge, setBadge] = useState('');
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
+    useEffect(() => {
+        if (!courseId || !moduleId) return;
 
-    /* -------- VIDÉO -------- */
-    const [videoTitle, setVideoTitle] = useState('');
-    const [youtubeId, setYoutubeId] = useState('');
-    const [videoDesc, setVideoDesc] = useState('');
+        let mounted = true;
 
-    /* -------- LISTES -------- */
-    const [material, setMaterial] = useState<string[]>([]);
-    const [intention, setIntention] = useState<string[]>([]);
-    const [exerciseSteps, setExerciseSteps] = useState<string[]>([]);
+        Promise.all([getCourseStructureModules(courseId), getModule(courseId, moduleId)])
+            .then(([modules, content]) => {
+                if (!mounted) return;
+                const meta = modules.find((m) => m.id === moduleId) ?? null;
+                setModuleMeta(meta);
+                setModuleData(hydrateModule(content, meta?.title ?? null));
+            })
+            .catch(() => {
+                if (!mounted) return;
+                setModuleData(hydrateModule(null, null));
+            });
 
-    /* -------- helpers -------- */
-    const inputBase =
-        'w-full rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+        return () => {
+            mounted = false;
+        };
+    }, [courseId, moduleId]);
 
-    function addLine(list: string[], setter: (v: string[]) => void) {
-        setter([...list, '']);
+    function updateModule<K extends keyof CourseModuleData>(key: K, value: CourseModuleData[K]) {
+        setModuleData((prev) => ({ ...prev, [key]: value }));
     }
 
-    function updateLine(list: string[], setter: (v: string[]) => void, index: number, value: string) {
-        setter(list.map((item, i) => (i === index ? value : item)));
+    function updateMaterialItem(index: number, value: string) {
+        setModuleData((prev) => ({
+            ...prev,
+            material: {
+                title: prev.material?.title ?? '',
+                note: prev.material?.note ?? '',
+                highlighted: prev.material?.highlighted ?? true,
+                items: (prev.material?.items ?? []).map((item, i) => (i === index ? value : item)),
+            },
+        }));
     }
 
-    function fakeSave() {
-        const now = new Date();
-        setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+    function addMaterialItem() {
+        setModuleData((prev) => ({
+            ...prev,
+            material: {
+                title: prev.material?.title ?? '',
+                note: prev.material?.note ?? '',
+                highlighted: prev.material?.highlighted ?? true,
+                items: [...(prev.material?.items ?? []), ''],
+            },
+        }));
     }
 
-    /* ------------------------------------------------ */
+    function removeMaterialItem(index: number) {
+        setModuleData((prev) => ({
+            ...prev,
+            material: {
+                title: prev.material?.title ?? '',
+                note: prev.material?.note ?? '',
+                highlighted: prev.material?.highlighted ?? true,
+                items: (prev.material?.items ?? []).filter((_, i) => i !== index),
+            },
+        }));
+    }
+
+    function updateIntentionItem(index: number, value: string) {
+        setModuleData((prev) => ({
+            ...prev,
+            intention: {
+                title: prev.intention?.title ?? '',
+                items: (prev.intention?.items ?? []).map((item, i) => (i === index ? value : item)),
+            },
+        }));
+    }
+
+    function addIntentionItem() {
+        setModuleData((prev) => ({
+            ...prev,
+            intention: {
+                title: prev.intention?.title ?? '',
+                items: [...(prev.intention?.items ?? []), ''],
+            },
+        }));
+    }
+
+    function removeIntentionItem(index: number) {
+        setModuleData((prev) => ({
+            ...prev,
+            intention: {
+                title: prev.intention?.title ?? '',
+                items: (prev.intention?.items ?? []).filter((_, i) => i !== index),
+            },
+        }));
+    }
+
+    function updateExerciseStep(index: number, value: string) {
+        setModuleData((prev) => ({
+            ...prev,
+            exercise: {
+                title: prev.exercise?.title ?? '',
+                description: prev.exercise?.description ?? '',
+                steps: (prev.exercise?.steps ?? []).map((step, i) => (i === index ? value : step)),
+            },
+        }));
+    }
+
+    function addExerciseStep() {
+        setModuleData((prev) => ({
+            ...prev,
+            exercise: {
+                title: prev.exercise?.title ?? '',
+                description: prev.exercise?.description ?? '',
+                steps: [...(prev.exercise?.steps ?? []), ''],
+            },
+        }));
+    }
+
+    function removeExerciseStep(index: number) {
+        setModuleData((prev) => ({
+            ...prev,
+            exercise: {
+                title: prev.exercise?.title ?? '',
+                description: prev.exercise?.description ?? '',
+                steps: (prev.exercise?.steps ?? []).filter((_, i) => i !== index),
+            },
+        }));
+    }
+
+    function addExtraSection() {
+        setModuleData((prev) => ({
+            ...prev,
+            extraSections: [...(prev.extraSections ?? []), { title: '', description: '', items: [] }],
+        }));
+    }
+
+    function updateExtraSection(index: number, patch: Partial<NonNullable<CourseModuleData['extraSections']>[number]>) {
+        setModuleData((prev) => {
+            const next = (prev.extraSections ?? []).map((section, i) => (i === index ? { ...section, ...patch } : section));
+            return { ...prev, extraSections: next };
+        });
+    }
+
+    function addExtraItem(index: number) {
+        setModuleData((prev) => {
+            const next = (prev.extraSections ?? []).map((section, i) => (i === index ? { ...section, items: [...(section.items ?? []), ''] } : section));
+            return { ...prev, extraSections: next };
+        });
+    }
+
+    function updateExtraItem(sectionIndex: number, itemIndex: number, value: string) {
+        setModuleData((prev) => {
+            const next = (prev.extraSections ?? []).map((section, i) => {
+                if (i !== sectionIndex) return section;
+                const items = (section.items ?? []).map((item, idx) => (idx === itemIndex ? value : item));
+                return { ...section, items };
+            });
+            return { ...prev, extraSections: next };
+        });
+    }
+
+    function removeExtraItem(sectionIndex: number, itemIndex: number) {
+        setModuleData((prev) => {
+            const next = (prev.extraSections ?? []).map((section, i) => {
+                if (i !== sectionIndex) return section;
+                return { ...section, items: (section.items ?? []).filter((_, idx) => idx !== itemIndex) };
+            });
+            return { ...prev, extraSections: next };
+        });
+    }
+
+    function removeExtraSection(index: number) {
+        setModuleData((prev) => ({
+            ...prev,
+            extraSections: (prev.extraSections ?? []).filter((_, i) => i !== index),
+        }));
+    }
+
+    async function handleSave() {
+        if (!courseId || !moduleId || isSaving) return;
+        setIsSaving(true);
+        try {
+            await saveModule(courseId, moduleId, moduleData);
+            const now = new Date();
+            setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+        } finally {
+            setIsSaving(false);
+        }
+    }
 
     return (
         <div className="space-y-6">
-            {/* TOP BAR */}
             <TopBar
                 backHref={`/admin/cours/${courseId}/editor/modules`}
                 backLabel={
@@ -73,78 +302,162 @@ export default function EditorModulePage() {
                 }
             />
 
-            <PageHeader
-                label="Éditeur • Module"
-                title="Construction du module"
-                description="Un module est une expérience autonome : cadre clair, intention lisible, geste guidé."
-            />
+            <PageHeader label="Éditeur • Module" title={moduleTitle} description="Un module est une expérience autonome : cadre clair, intention lisible, geste guidé." />
 
-            {/* EN-TÊTE */}
             <Card>
                 <CardHeader title="En-tête du module" subtitle="Badge • titre • texte d’introduction" />
-                <CardBody>
-                    <div className="space-y-4">
-                        <input placeholder="Badge (ex : Étape 1 · Retrouver le geste)" value={badge} onChange={(e) => setBadge(e.target.value)} className={inputBase} />
+                <CardBody className="space-y-4">
+                    <Field label="Badge" hint="ex : Étape 1 · Retrouver le geste">
+                        <IconInput icon={<Sparkles className="h-4 w-4" />}>
+                            <input
+                                placeholder="Badge"
+                                value={moduleData.badgeLabel ?? ''}
+                                onChange={(event) => updateModule('badgeLabel', event.target.value)}
+                                className={inputWithIcon}
+                            />
+                        </IconInput>
+                    </Field>
 
-                        <input placeholder="Titre du module" value={title} onChange={(e) => setTitle(e.target.value)} className={inputBase} />
+                    <Field label="Titre" required>
+                        <IconInput icon={<Pencil className="h-4 w-4" />}>
+                            <input
+                                placeholder="Titre du module"
+                                value={moduleData.title}
+                                onChange={(event) => updateModule('title', event.target.value)}
+                                className={inputWithIcon}
+                            />
+                        </IconInput>
+                    </Field>
 
+                    <Field label="Texte d’introduction" hint="contexte, posture, intention">
                         <textarea
                             placeholder="Texte d’introduction du module"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className={`${inputBase} min-h-32`}
+                            value={moduleData.description ?? ''}
+                            onChange={(event) => updateModule('description', event.target.value)}
+                            className={cx(textareaBase, 'min-h-32')}
+                        />
+                    </Field>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader title="Vidéo du module" subtitle="Démonstration ou guidage" />
+                <CardBody className="space-y-4">
+                    <Field label="Titre de la vidéo">
+                        <IconInput icon={<Video className="h-4 w-4" />}>
+                            <input
+                                placeholder="Titre de la vidéo"
+                                value={moduleData.video?.title ?? ''}
+                                onChange={(event) => updateModule('video', { ...moduleData.video, title: event.target.value })}
+                                className={inputWithIcon}
+                            />
+                        </IconInput>
+                    </Field>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <Field label="YouTube ID">
+                            <input
+                                placeholder="Identifiant YouTube"
+                                value={moduleData.video?.youtubeId ?? ''}
+                                onChange={(event) => updateModule('video', { ...moduleData.video, youtubeId: event.target.value })}
+                                className={inputBase}
+                            />
+                        </Field>
+                        <Field label="Cover (optionnel)">
+                            <input
+                                placeholder="/images/module-cover.jpg"
+                                value={moduleData.video?.cover ?? ''}
+                                onChange={(event) => updateModule('video', { ...moduleData.video, cover: event.target.value })}
+                                className={inputBase}
+                            />
+                        </Field>
+                    </div>
+
+                    <Field label="Texte d’accompagnement">
+                        <textarea
+                            placeholder="Texte d’accompagnement"
+                            value={moduleData.video?.description ?? ''}
+                            onChange={(event) => updateModule('video', { ...moduleData.video, description: event.target.value })}
+                            className={cx(textareaBase, 'min-h-24')}
+                        />
+                    </Field>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader title="Matériel recommandé" subtitle="Simple, rassurant" />
+                <CardBody className="space-y-4">
+                    <Field label="Titre de section">
+                        <input
+                            placeholder="Titre de la section"
+                            value={moduleData.material?.title ?? ''}
+                            onChange={(event) => updateModule('material', { ...moduleData.material, title: event.target.value })}
+                            className={inputBase}
+                        />
+                    </Field>
+
+                    <div className="space-y-3">
+                        {(moduleData.material?.items ?? []).map((item, index) => (
+                            <div key={`material-${index}`} className="flex items-center gap-2">
+                                <input value={item} onChange={(event) => updateMaterialItem(index, event.target.value)} className={inputBase} />
+                                <button
+                                    type="button"
+                                    onClick={() => removeMaterialItem(index)}
+                                    className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ))}
+
+                        <button
+                            type="button"
+                            onClick={addMaterialItem}
+                            className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Ajouter du matériel
+                        </button>
+
+                        <textarea
+                            placeholder="Note rassurante (optionnel)"
+                            value={moduleData.material?.note ?? ''}
+                            onChange={(event) => updateModule('material', { ...moduleData.material, note: event.target.value })}
+                            className={cx(textareaBase, 'min-h-11')}
                         />
                     </div>
                 </CardBody>
             </Card>
 
-            {/* VIDÉO */}
-            <Card>
-                <CardHeader title="Vidéo du module" subtitle="Démonstration ou guidage" />
-                <CardBody>
-                    <div className="space-y-4">
-                        <input placeholder="Titre de la vidéo" value={videoTitle} onChange={(e) => setVideoTitle(e.target.value)} className={inputBase} />
-
-                        <input placeholder="YouTube ID" value={youtubeId} onChange={(e) => setYoutubeId(e.target.value)} className={inputBase} />
-
-                        <textarea placeholder="Texte d’accompagnement" value={videoDesc} onChange={(e) => setVideoDesc(e.target.value)} className={`${inputBase} min-h-24`} />
-                    </div>
-                </CardBody>
-            </Card>
-
-            {/* MATÉRIEL */}
-            <Card>
-                <CardHeader title="Matériel recommandé" subtitle="Simple, rassurant" />
-                <CardBody>
-                    <div className="space-y-3">
-                        {material.map((line, i) => (
-                            <input key={i} value={line} onChange={(e) => updateLine(material, setMaterial, i, e.target.value)} className={inputBase} />
-                        ))}
-
-                        <button
-                            type="button"
-                            onClick={() => addLine(material, setMaterial)}
-                            className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
-                        >
-                            <Pencil className="h-4 w-4" />
-                            Ajouter du matériel
-                        </button>
-                    </div>
-                </CardBody>
-            </Card>
-
-            {/* INTENTION */}
             <Card>
                 <CardHeader title="Intention pédagogique" subtitle="Ce qui compte vraiment" />
-                <CardBody>
+                <CardBody className="space-y-4">
+                    <Field label="Titre de section">
+                        <input
+                            placeholder="Titre de la section"
+                            value={moduleData.intention?.title ?? ''}
+                            onChange={(event) => updateModule('intention', { ...moduleData.intention, title: event.target.value })}
+                            className={inputBase}
+                        />
+                    </Field>
+
                     <div className="space-y-3">
-                        {intention.map((line, i) => (
-                            <input key={i} value={line} onChange={(e) => updateLine(intention, setIntention, i, e.target.value)} className={inputBase} />
+                        {(moduleData.intention?.items ?? []).map((item, index) => (
+                            <div key={`intention-${index}`} className="flex items-center gap-2">
+                                <input value={item} onChange={(event) => updateIntentionItem(index, event.target.value)} className={inputBase} />
+                                <button
+                                    type="button"
+                                    onClick={() => removeIntentionItem(index)}
+                                    className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
                         ))}
 
                         <button
                             type="button"
-                            onClick={() => addLine(intention, setIntention)}
+                            onClick={addIntentionItem}
                             className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
                         >
                             <CheckCircle2 className="h-4 w-4" />
@@ -154,18 +467,44 @@ export default function EditorModulePage() {
                 </CardBody>
             </Card>
 
-            {/* EXERCICE */}
             <Card>
                 <CardHeader title="Exercice guidé" subtitle="Pas à pas" />
-                <CardBody>
+                <CardBody className="space-y-4">
+                    <Field label="Titre de section">
+                        <input
+                            placeholder="Titre de la section"
+                            value={moduleData.exercise?.title ?? ''}
+                            onChange={(event) => updateModule('exercise', { ...moduleData.exercise, title: event.target.value })}
+                            className={inputBase}
+                        />
+                    </Field>
+
+                    <Field label="Description" hint="Optionnel">
+                        <textarea
+                            placeholder="Quelques lignes pour cadrer l’exercice"
+                            value={moduleData.exercise?.description ?? ''}
+                            onChange={(event) => updateModule('exercise', { ...moduleData.exercise, description: event.target.value })}
+                            className={cx(textareaBase, 'min-h-24')}
+                        />
+                    </Field>
+
                     <div className="space-y-3">
-                        {exerciseSteps.map((line, i) => (
-                            <input key={i} value={line} onChange={(e) => updateLine(exerciseSteps, setExerciseSteps, i, e.target.value)} className={inputBase} />
+                        {(moduleData.exercise?.steps ?? []).map((step, index) => (
+                            <div key={`exercise-${index}`} className="flex items-center gap-2">
+                                <input value={step} onChange={(event) => updateExerciseStep(index, event.target.value)} className={inputBase} />
+                                <button
+                                    type="button"
+                                    onClick={() => removeExerciseStep(index)}
+                                    className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
                         ))}
 
                         <button
                             type="button"
-                            onClick={() => addLine(exerciseSteps, setExerciseSteps)}
+                            onClick={addExerciseStep}
                             className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
                         >
                             <Compass className="h-4 w-4" />
@@ -175,15 +514,95 @@ export default function EditorModulePage() {
                 </CardBody>
             </Card>
 
-            {/* ACTIONS */}
+            <Card>
+                <CardHeader title="Sections optionnelles" subtitle="Conseils, rappels doux, tips" />
+                <CardBody className="space-y-4">
+                    {(moduleData.extraSections ?? []).map((section, index) => (
+                        <div key={`extra-${index}`} className="rounded-2xl border border-perl/60 bg-page/40 p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-xs uppercase tracking-[0.18em] text-main/55">Section {index + 1}</p>
+                                <button
+                                    type="button"
+                                    onClick={() => removeExtraSection(index)}
+                                    className="inline-flex items-center gap-1 text-xs font-semibold text-rose hover:text-rose/80"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                </button>
+                            </div>
+
+                            <input
+                                placeholder="Titre de la section"
+                                value={section.title}
+                                onChange={(event) => updateExtraSection(index, { title: event.target.value })}
+                                className={inputBase}
+                            />
+
+                            <textarea
+                                placeholder="Description courte (optionnel)"
+                                value={section.description ?? ''}
+                                onChange={(event) => updateExtraSection(index, { description: event.target.value })}
+                                className={cx(textareaBase, 'min-h-20')}
+                            />
+
+                            <div className="space-y-2">
+                                {(section.items ?? []).map((item, itemIndex) => (
+                                    <div key={`extra-item-${itemIndex}`} className="flex items-center gap-2">
+                                        <input value={item} onChange={(event) => updateExtraItem(index, itemIndex, event.target.value)} className={inputBase} />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeExtraItem(index, itemIndex)}
+                                            className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    onClick={() => addExtraItem(index)}
+                                    className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Ajouter une ligne
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+
+                    <button
+                        type="button"
+                        onClick={addExtraSection}
+                        className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Ajouter une section
+                    </button>
+                </CardBody>
+            </Card>
+
             <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
                 <button
                     type="button"
-                    onClick={fakeSave}
-                    className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className={cx(
+                        'inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 transition',
+                        isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-page'
+                    )}
                 >
                     <Save className="h-4 w-4" />
-                    Sauvegarder (mock)
+                    {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => router.push(`/admin/cours/${courseId}/editor/modules`)}
+                    className="inline-flex items-center gap-2 rounded-full bg-main px-5 py-2 text-sm font-semibold text-white hover:bg-main/90"
+                >
+                    Retour aux modules
+                    <ChevronLeft className="h-4 w-4" />
                 </button>
             </div>
 

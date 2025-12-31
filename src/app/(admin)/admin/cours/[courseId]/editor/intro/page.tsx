@@ -1,61 +1,240 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Save, Sparkles, Video, CheckCircle2, HeartHandshake, Compass } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, Sparkles, Video, CheckCircle2, HeartHandshake, Compass, Download, Link2, Trash2, Plus, StickyNote } from 'lucide-react';
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { getIntro, saveIntro } from '@/lib/actions/courseContent';
+import type { CourseIntroData } from '@/types/courseContent';
 
-/* ------------------------------------------------
-   Editor Intro — Expérience d’accueil
-------------------------------------------------- */
+function Field({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: React.ReactNode }) {
+    return (
+        <div className="space-y-2">
+            <div className="flex items-end justify-between gap-3">
+                <label className="text-xs font-semibold text-main/75">
+                    {label} {required ? <span className="text-rose">*</span> : null}
+                </label>
+                {hint ? <span className="text-[11px] text-main/50">{hint}</span> : null}
+            </div>
+            {children}
+        </div>
+    );
+}
+
+function IconInput({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+    return (
+        <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-main/45">{icon}</div>
+            {children}
+        </div>
+    );
+}
+
+const inputBase =
+    'w-full rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+
+const inputWithIcon =
+    'w-full rounded-2xl border border-perl/70 bg-white pl-10 pr-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+
+const textareaBase =
+    'w-full resize-none rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+
+const defaultIntro: CourseIntroData = {
+    badgeLabel: '',
+    title: '',
+    description: '',
+    video: {
+        title: '',
+        description: '',
+        note: '',
+        youtubeId: '',
+        cover: '',
+    },
+    whatYouWillExperience: { title: 'Ce que tu vas vivre', items: [] },
+    whoItsFor: { title: 'Ce cours est pour toi si…', items: [] },
+    downloads: [],
+    howToFollow: { title: 'Comment suivre ce cours', items: [] },
+    material: { title: 'Matériel recommandé', items: [], note: '', highlighted: true },
+    notes: '',
+};
+
+function hydrateIntro(data: CourseIntroData | null): CourseIntroData {
+    if (!data) return defaultIntro;
+
+    return {
+        ...defaultIntro,
+        ...data,
+        video: { ...defaultIntro.video, ...data.video },
+        whatYouWillExperience: {
+            ...defaultIntro.whatYouWillExperience,
+            ...data.whatYouWillExperience,
+            items: data.whatYouWillExperience?.items ?? defaultIntro.whatYouWillExperience?.items ?? [],
+        },
+        whoItsFor: {
+            ...defaultIntro.whoItsFor,
+            ...data.whoItsFor,
+            items: data.whoItsFor?.items ?? defaultIntro.whoItsFor?.items ?? [],
+        },
+        howToFollow: {
+            ...defaultIntro.howToFollow,
+            ...data.howToFollow,
+            items: data.howToFollow?.items ?? defaultIntro.howToFollow?.items ?? [],
+        },
+        material: {
+            ...defaultIntro.material,
+            ...data.material,
+            items: data.material?.items ?? defaultIntro.material?.items ?? [],
+        },
+        downloads: data.downloads ?? [],
+        notes: data.notes ?? '',
+    };
+}
 
 export default function EditorIntroPage() {
     const router = useRouter();
     const { courseId } = useParams<{ courseId: string }>();
 
+    const [intro, setIntro] = useState<CourseIntroData>(defaultIntro);
     const [savedAt, setSavedAt] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
-    /* -------- states -------- */
-    const [badge, setBadge] = useState('');
-    const [title, setTitle] = useState('');
-    const [introText, setIntroText] = useState('');
+    const sectionTitles = useMemo(
+        () => ({
+            experience: intro.whatYouWillExperience?.title ?? '',
+            audience: intro.whoItsFor?.title ?? '',
+            howToFollow: intro.howToFollow?.title ?? '',
+        }),
+        [intro.howToFollow?.title, intro.whatYouWillExperience?.title, intro.whoItsFor?.title]
+    );
 
-    const [videoTitle, setVideoTitle] = useState('');
-    const [videoDesc, setVideoDesc] = useState('');
-    const [youtubeId, setYoutubeId] = useState('');
+    useEffect(() => {
+        if (!courseId) return;
 
-    const [experience, setExperience] = useState<string[]>([]);
-    const [audience, setAudience] = useState<string[]>([]);
-    const [guidelines, setGuidelines] = useState<string[]>([]);
-    const [materials, setMaterials] = useState<string[]>([]);
-    const [materialNote, setMaterialNote] = useState('');
+        let mounted = true;
+        getIntro(courseId)
+            .then((data) => {
+                if (!mounted) return;
+                setIntro(hydrateIntro(data));
+            })
+            .catch(() => {
+                if (!mounted) return;
+                setIntro(defaultIntro);
+            });
 
-    /* -------- helpers -------- */
-    const inputBase =
-        'w-full rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
+        return () => {
+            mounted = false;
+        };
+    }, [courseId]);
 
-    const textareaBase =
-        'w-full resize-none rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
-
-    function fakeSave() {
-        const now = new Date();
-        setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+    function updateIntro<K extends keyof CourseIntroData>(key: K, value: CourseIntroData[K]) {
+        setIntro((prev) => ({ ...prev, [key]: value }));
     }
 
-    function addLine(list: string[], setter: (v: string[]) => void) {
-        setter([...list, '']);
+    function updateSectionTitle(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow', title: string) {
+        setIntro((prev) => ({
+            ...prev,
+            [section]: {
+                title,
+                items: prev[section]?.items ?? [],
+            },
+        }));
     }
 
-    function updateLine(list: string[], setter: (v: string[]) => void, index: number, value: string) {
-        setter(list.map((l, i) => (i === index ? value : l)));
+    function updateList(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow', index: number, value: string) {
+        setIntro((prev) => {
+            const items = prev[section]?.items ?? [];
+            const next = items.map((item, i) => (i === index ? value : item));
+            return { ...prev, [section]: { title: prev[section]?.title ?? '', items: next } };
+        });
     }
 
-    /* ------------------------------------------------ */
+    function addListItem(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow') {
+        setIntro((prev) => {
+            const items = prev[section]?.items ?? [];
+            return { ...prev, [section]: { title: prev[section]?.title ?? '', items: [...items, ''] } };
+        });
+    }
+
+    function removeListItem(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow', index: number) {
+        setIntro((prev) => {
+            const items = prev[section]?.items ?? [];
+            return { ...prev, [section]: { title: prev[section]?.title ?? '', items: items.filter((_, i) => i !== index) } };
+        });
+    }
+
+    function updateMaterialItem(index: number, value: string) {
+        setIntro((prev) => ({
+            ...prev,
+            material: {
+                title: prev.material?.title ?? '',
+                note: prev.material?.note ?? '',
+                highlighted: prev.material?.highlighted ?? true,
+                items: (prev.material?.items ?? []).map((item, i) => (i === index ? value : item)),
+            },
+        }));
+    }
+
+    function addMaterialItem() {
+        setIntro((prev) => ({
+            ...prev,
+            material: {
+                title: prev.material?.title ?? '',
+                note: prev.material?.note ?? '',
+                highlighted: prev.material?.highlighted ?? true,
+                items: [...(prev.material?.items ?? []), ''],
+            },
+        }));
+    }
+
+    function removeMaterialItem(index: number) {
+        setIntro((prev) => ({
+            ...prev,
+            material: {
+                title: prev.material?.title ?? '',
+                note: prev.material?.note ?? '',
+                highlighted: prev.material?.highlighted ?? true,
+                items: (prev.material?.items ?? []).filter((_, i) => i !== index),
+            },
+        }));
+    }
+
+    function updateDownload(index: number, key: 'label' | 'description' | 'href', value: string) {
+        setIntro((prev) => {
+            const downloads = prev.downloads ?? [];
+            const next = downloads.map((download, i) => (i === index ? { ...download, [key]: value } : download));
+            return { ...prev, downloads: next };
+        });
+    }
+
+    function addDownload() {
+        setIntro((prev) => ({
+            ...prev,
+            downloads: [...(prev.downloads ?? []), { label: '', description: '', href: '' }],
+        }));
+    }
+
+    function removeDownload(index: number) {
+        setIntro((prev) => ({
+            ...prev,
+            downloads: (prev.downloads ?? []).filter((_, i) => i !== index),
+        }));
+    }
+
+    async function handleSave() {
+        if (!courseId || isSaving) return;
+        setIsSaving(true);
+        try {
+            await saveIntro(courseId, intro);
+            const now = new Date();
+            setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+        } finally {
+            setIsSaving(false);
+        }
+    }
 
     return (
         <div className="space-y-6">
-            {/* TOP BAR */}
             <TopBar
                 backHref={`/admin/cours/${courseId}`}
                 backLabel={
@@ -83,75 +262,139 @@ export default function EditorIntroPage() {
                 description="Cette page est le premier contact émotionnel avec l’apprenant. Elle doit rassurer, guider et donner envie."
             />
 
-            {/* ---------------- BLOC 1 — ACCUEIL */}
             <Card>
                 <CardHeader title="Message d’accueil" subtitle="Badge + promesse + texte principal" />
-                <CardBody>
-                    <div className="space-y-4">
-                        <input placeholder="Badge (ex : Parcours débutant · Dessin)" value={badge} onChange={(e) => setBadge(e.target.value)} className={inputBase} />
+                <CardBody className="space-y-4">
+                    <Field label="Badge" hint="ex : Parcours débutant · Dessin">
+                        <IconInput icon={<Sparkles className="h-4 w-4" />}>
+                            <input
+                                placeholder="Badge introductif"
+                                value={intro.badgeLabel ?? ''}
+                                onChange={(event) => updateIntro('badgeLabel', event.target.value)}
+                                className={inputWithIcon}
+                            />
+                        </IconInput>
+                    </Field>
 
-                        <input placeholder="Titre principal de l’introduction" value={title} onChange={(e) => setTitle(e.target.value)} className={inputBase} />
+                    <Field label="Titre principal" required hint="Phrase courte et claire">
+                        <IconInput icon={<CheckCircle2 className="h-4 w-4" />}>
+                            <input
+                                placeholder="Titre principal de l’introduction"
+                                value={intro.title}
+                                onChange={(event) => updateIntro('title', event.target.value)}
+                                className={inputWithIcon}
+                            />
+                        </IconInput>
+                    </Field>
 
+                    <Field label="Texte d’accueil" hint="intention, posture, cadre">
                         <textarea
                             placeholder="Message d’accueil : intention, posture, cadre..."
-                            value={introText}
-                            onChange={(e) => setIntroText(e.target.value)}
-                            className={cx(textareaBase, 'min-h-[140px]')}
+                            value={intro.description ?? ''}
+                            onChange={(event) => updateIntro('description', event.target.value)}
+                            className={cx(textareaBase, 'min-h-32')}
                         />
+                    </Field>
 
-                        <div className="rounded-2xl border border-perl/60 bg-page/40 p-4 text-sm text-main/65 flex gap-3">
-                            <Sparkles className="h-5 w-5 text-main/50 shrink-0" />
-                            <p>
-                                Ici, parle comme à une personne réelle.
-                                <br />
-                                Pas de marketing, pas de performance :<strong className="text-main"> une invitation.</strong>
-                            </p>
-                        </div>
+                    <div className="rounded-2xl border border-perl/60 bg-page/40 p-4 text-sm text-main/65 flex gap-3">
+                        <Sparkles className="h-5 w-5 text-main/50 shrink-0" />
+                        <p>
+                            Ici, parle comme à une personne réelle.
+                            <br />
+                            Pas de marketing, pas de performance :<strong className="text-main"> une invitation.</strong>
+                        </p>
                     </div>
                 </CardBody>
             </Card>
 
-            {/* ---------------- BLOC 2 — VIDÉO */}
             <Card>
                 <CardHeader title="Vidéo d’introduction" subtitle="Optionnelle mais très recommandée" />
-                <CardBody>
-                    <div className="space-y-4">
-                        <input placeholder="Titre de la vidéo" value={videoTitle} onChange={(e) => setVideoTitle(e.target.value)} className={inputBase} />
+                <CardBody className="space-y-4">
+                    <Field label="Titre de la vidéo" hint="ce que l’apprenant va ressentir">
+                        <IconInput icon={<Video className="h-4 w-4" />}>
+                            <input
+                                placeholder="Titre de la vidéo"
+                                value={intro.video?.title ?? ''}
+                                onChange={(event) => updateIntro('video', { ...intro.video, title: event.target.value })}
+                                className={inputWithIcon}
+                            />
+                        </IconInput>
+                    </Field>
 
-                        <textarea placeholder="Texte d’accompagnement de la vidéo" value={videoDesc} onChange={(e) => setVideoDesc(e.target.value)} className={textareaBase} />
+                    <Field label="Texte d’accompagnement">
+                        <textarea
+                            placeholder="Texte d’accompagnement de la vidéo"
+                            value={intro.video?.description ?? ''}
+                            onChange={(event) => updateIntro('video', { ...intro.video, description: event.target.value })}
+                            className={textareaBase}
+                        />
+                    </Field>
 
-                        <input placeholder="YouTube ID" value={youtubeId} onChange={(e) => setYoutubeId(e.target.value)} className={inputBase} />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        <Field label="YouTube ID">
+                            <input
+                                placeholder="Identifiant YouTube"
+                                value={intro.video?.youtubeId ?? ''}
+                                onChange={(event) => updateIntro('video', { ...intro.video, youtubeId: event.target.value })}
+                                className={inputBase}
+                            />
+                        </Field>
+                        <Field label="Cover (optionnel)" hint="URL ou chemin interne">
+                            <input
+                                placeholder="/images/intro-cover.jpg"
+                                value={intro.video?.cover ?? ''}
+                                onChange={(event) => updateIntro('video', { ...intro.video, cover: event.target.value })}
+                                className={inputBase}
+                            />
+                        </Field>
+                    </div>
 
-                        <div className="rounded-2xl border border-sage/40 bg-sage/10 p-4 flex gap-3 text-sm text-sage">
-                            <Video className="h-5 w-5 shrink-0" />
-                            <p>
-                                Cette vidéo est ton « mot d’accueil ».
-                                <br />
-                                Elle peut être simple, sincère, sans montage.
-                            </p>
-                        </div>
+                    <div className="rounded-2xl border border-sage/40 bg-sage/10 p-4 flex gap-3 text-sm text-sage">
+                        <Video className="h-5 w-5 shrink-0" />
+                        <p>
+                            Cette vidéo est ton « mot d’accueil ».
+                            <br />
+                            Elle peut être simple, sincère, sans montage.
+                        </p>
                     </div>
                 </CardBody>
             </Card>
 
-            {/* ---------------- BLOC 3 — EXPÉRIENCE */}
             <Card>
                 <CardHeader title="Ce que l’apprenant va vivre" subtitle="Projection, pas programme" />
-                <CardBody>
+                <CardBody className="space-y-4">
+                    <Field label="Titre de section" hint="ex : Ce que tu vas vivre">
+                        <input
+                            placeholder="Titre de la section"
+                            value={sectionTitles.experience}
+                            onChange={(event) => updateSectionTitle('whatYouWillExperience', event.target.value)}
+                            className={inputBase}
+                        />
+                    </Field>
+
                     <div className="space-y-3">
-                        {experience.map((line, i) => (
-                            <input
-                                key={i}
-                                value={line}
-                                onChange={(e) => updateLine(experience, setExperience, i, e.target.value)}
-                                placeholder="Ex : Reprendre un crayon sans pression"
-                                className={inputBase}
-                            />
+                        {(intro.whatYouWillExperience?.items ?? []).map((item, index) => (
+                            <div key={`experience-${index}`} className="flex items-center gap-2">
+                                <input
+                                    value={item}
+                                    onChange={(event) => updateList('whatYouWillExperience', index, event.target.value)}
+                                    placeholder="Ex : Reprendre un crayon sans pression"
+                                    className={inputBase}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeListItem('whatYouWillExperience', index)}
+                                    className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                    aria-label="Supprimer la ligne"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
                         ))}
 
                         <button
                             type="button"
-                            onClick={() => addLine(experience, setExperience)}
+                            onClick={() => addListItem('whatYouWillExperience')}
                             className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
                         >
                             <CheckCircle2 className="h-4 w-4" />
@@ -161,24 +404,41 @@ export default function EditorIntroPage() {
                 </CardBody>
             </Card>
 
-            {/* ---------------- BLOC 4 — À QUI */}
             <Card>
                 <CardHeader title="À qui ce cours est destiné" subtitle="Réassurer, inclure" />
-                <CardBody>
+                <CardBody className="space-y-4">
+                    <Field label="Titre de section" hint="ex : Ce cours est pour toi si…">
+                        <input
+                            placeholder="Titre de la section"
+                            value={sectionTitles.audience}
+                            onChange={(event) => updateSectionTitle('whoItsFor', event.target.value)}
+                            className={inputBase}
+                        />
+                    </Field>
+
                     <div className="space-y-3">
-                        {audience.map((line, i) => (
-                            <input
-                                key={i}
-                                value={line}
-                                onChange={(e) => updateLine(audience, setAudience, i, e.target.value)}
-                                placeholder="Ex : Tu débutes et tu doutes"
-                                className={inputBase}
-                            />
+                        {(intro.whoItsFor?.items ?? []).map((item, index) => (
+                            <div key={`audience-${index}`} className="flex items-center gap-2">
+                                <input
+                                    value={item}
+                                    onChange={(event) => updateList('whoItsFor', index, event.target.value)}
+                                    placeholder="Ex : Tu débutes et tu doutes"
+                                    className={inputBase}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeListItem('whoItsFor', index)}
+                                    className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                    aria-label="Supprimer la ligne"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
                         ))}
 
                         <button
                             type="button"
-                            onClick={() => addLine(audience, setAudience)}
+                            onClick={() => addListItem('whoItsFor')}
                             className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
                         >
                             <HeartHandshake className="h-4 w-4" />
@@ -188,24 +448,93 @@ export default function EditorIntroPage() {
                 </CardBody>
             </Card>
 
-            {/* ---------------- BLOC 5 — COMMENT SUIVRE */}
+            <Card>
+                <CardHeader title="Téléchargements" subtitle="Fiches, ressources ou supports" />
+                <CardBody className="space-y-4">
+                    {(intro.downloads ?? []).map((download, index) => (
+                        <div key={`download-${index}`} className="space-y-2 rounded-2xl border border-perl/60 bg-page/40 p-4">
+                            <div className="flex items-center justify-between">
+                                <p className="text-xs uppercase tracking-[0.18em] text-main/55">Ressource {index + 1}</p>
+                                <button
+                                    type="button"
+                                    onClick={() => removeDownload(index)}
+                                    className="inline-flex items-center gap-1 text-xs font-semibold text-rose hover:text-rose/80"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                </button>
+                            </div>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                <IconInput icon={<Download className="h-4 w-4" />}>
+                                    <input
+                                        placeholder="Nom du fichier"
+                                        value={download.label}
+                                        onChange={(event) => updateDownload(index, 'label', event.target.value)}
+                                        className={inputWithIcon}
+                                    />
+                                </IconInput>
+                                <IconInput icon={<Link2 className="h-4 w-4" />}>
+                                    <input
+                                        placeholder="Lien de téléchargement"
+                                        value={download.href}
+                                        onChange={(event) => updateDownload(index, 'href', event.target.value)}
+                                        className={inputWithIcon}
+                                    />
+                                </IconInput>
+                            </div>
+                            <textarea
+                                placeholder="Petite description"
+                                value={download.description}
+                                onChange={(event) => updateDownload(index, 'description', event.target.value)}
+                                className={textareaBase}
+                            />
+                        </div>
+                    ))}
+
+                    <button
+                        type="button"
+                        onClick={addDownload}
+                        className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
+                    >
+                        <Download className="h-4 w-4" />
+                        Ajouter un téléchargement
+                    </button>
+                </CardBody>
+            </Card>
             <Card>
                 <CardHeader title="Comment suivre ce cours" subtitle="Cadre, rythme, liberté" />
-                <CardBody>
+                <CardBody className="space-y-4">
+                    <Field label="Titre de section">
+                        <input
+                            placeholder="Titre de la section"
+                            value={sectionTitles.howToFollow}
+                            onChange={(event) => updateSectionTitle('howToFollow', event.target.value)}
+                            className={inputBase}
+                        />
+                    </Field>
                     <div className="space-y-3">
-                        {guidelines.map((line, i) => (
-                            <input
-                                key={i}
-                                value={line}
-                                onChange={(e) => updateLine(guidelines, setGuidelines, i, e.target.value)}
-                                placeholder="Ex : Avance dans l’ordre, sans te presser"
-                                className={inputBase}
-                            />
+                        {(intro.howToFollow?.items ?? []).map((item, index) => (
+                            <div key={`how-${index}`} className="flex items-center gap-2">
+                                <input
+                                    value={item}
+                                    onChange={(event) => updateList('howToFollow', index, event.target.value)}
+                                    placeholder="Ex : Avance dans l’ordre, sans te presser"
+                                    className={inputBase}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeListItem('howToFollow', index)}
+                                    className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                    aria-label="Supprimer la ligne"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
                         ))}
 
                         <button
                             type="button"
-                            onClick={() => addLine(guidelines, setGuidelines)}
+                            onClick={() => addListItem('howToFollow')}
                             className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
                         >
                             <Compass className="h-4 w-4" />
@@ -215,34 +544,51 @@ export default function EditorIntroPage() {
                 </CardBody>
             </Card>
 
-            {/* ---------------- BLOC 6 — MATÉRIEL */}
             <Card>
                 <CardHeader title="Matériel recommandé" subtitle="Simple, accessible, sans obligation" />
-                <CardBody>
-                    <div className="space-y-4">
-                        {materials.map((line, i) => (
-                            <input
-                                key={i}
-                                value={line}
-                                onChange={(e) => updateLine(materials, setMaterials, i, e.target.value)}
-                                placeholder="Ex : Un carnet ou quelques feuilles A4"
-                                className={inputBase}
-                            />
+                <CardBody className="space-y-4">
+                    <Field label="Titre de section">
+                        <input
+                            placeholder="Titre de la section"
+                            value={intro.material?.title ?? ''}
+                            onChange={(event) => updateIntro('material', { ...intro.material, title: event.target.value, items: intro.material?.items ?? [] })}
+                            className={inputBase}
+                        />
+                    </Field>
+
+                    <div className="space-y-3">
+                        {(intro.material?.items ?? []).map((item, index) => (
+                            <div key={`material-${index}`} className="flex items-center gap-2">
+                                <input
+                                    value={item}
+                                    onChange={(event) => updateMaterialItem(index, event.target.value)}
+                                    placeholder="Ex : Un carnet ou quelques feuilles A4"
+                                    className={inputBase}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeMaterialItem(index)}
+                                    className="inline-flex items-center justify-center rounded-full border border-perl/70 bg-white p-2 text-main/70 hover:bg-page"
+                                    aria-label="Supprimer la ligne"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
                         ))}
 
                         <button
                             type="button"
-                            onClick={() => addLine(materials, setMaterials)}
+                            onClick={addMaterialItem}
                             className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-xs font-semibold text-main/80 hover:bg-page"
                         >
-                            <CheckCircle2 className="h-4 w-4" />
+                            <Plus className="h-4 w-4" />
                             Ajouter un élément
                         </button>
 
                         <textarea
                             placeholder="Note complémentaire (ex : commence avec ce que tu as, le matériel n’est pas un frein…)"
-                            value={materialNote}
-                            onChange={(e) => setMaterialNote(e.target.value)}
+                            value={intro.material?.note ?? ''}
+                            onChange={(event) => updateIntro('material', { ...intro.material, note: event.target.value, items: intro.material?.items ?? [] })}
                             className={cx(textareaBase, 'min-h-11')}
                         />
 
@@ -258,15 +604,33 @@ export default function EditorIntroPage() {
                 </CardBody>
             </Card>
 
-            {/* ---------------- ACTIONS */}
+            <Card>
+                <CardHeader title="Notes & indications" subtitle="Infos complémentaires" />
+                <CardBody className="space-y-4">
+                    <Field label="Notes pour l’apprenant" hint="optionnel">
+                        <IconInput icon={<StickyNote className="h-4 w-4" />}>
+                            <textarea
+                                placeholder="Notes libres (conditions, posture, encouragements… )"
+                                value={intro.notes ?? ''}
+                                onChange={(event) => updateIntro('notes', event.target.value)}
+                                className={cx(textareaBase, 'min-h-24 pl-10 pr-4')}
+                            />
+                        </IconInput>
+                    </Field>
+                </CardBody>
+            </Card>
             <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
                 <button
                     type="button"
-                    onClick={fakeSave}
-                    className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 hover:bg-page"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className={cx(
+                        'inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-5 py-2 text-sm font-semibold text-main/80 transition',
+                        isSaving ? 'opacity-60 cursor-not-allowed' : 'hover:bg-page'
+                    )}
                 >
                     <Save className="h-4 w-4" />
-                    Sauvegarder (mock)
+                    {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
                 </button>
 
                 <button

@@ -25,14 +25,13 @@ export default function CourseEditorLayout({ children }: { children: React.React
 
     return (
         <div className="space-y-5">
-            {/* BARRE RETOUR */}
             <div className="flex items-center justify-between gap-3">
                 <Link
-                    href={`${base}`}
+                    href={base}
                     className="inline-flex items-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 hover:bg-page transition cursor-pointer"
                 >
                     <ChevronLeft className="h-4 w-4" />
-                    Retour au HUB
+                    Retour à l’aperçu
                 </Link>
 
                 <Link
@@ -43,18 +42,17 @@ export default function CourseEditorLayout({ children }: { children: React.React
                 </Link>
             </div>
 
-            {/* STEPPER EDITOR */}
             <section className="rounded-3xl border border-perl/60 bg-white/95 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-perl/50 bg-page/50">
                     <p className="text-xs uppercase tracking-[0.18em] text-main/55">Éditeur du cours</p>
-                    <p className="mt-1 text-xs text-main/60">Construction du contenu réel (modules, exercices, intentions).</p>
+                    <p className="mt-1 text-xs text-main/60">Structure validée, place au contenu (intro, modules, conclusion).</p>
                 </div>
 
                 <div className="p-4 sm:p-5">
                     <div className="flex flex-wrap gap-2">
                         {steps.map((step) => {
                             const href = courseId ? `${base}${step.hrefSuffix}` : '/admin/cours';
-                            const active = pathname === href || pathname.startsWith(href + '/');
+                            const active = pathname === href || pathname.startsWith(`${href}/`);
 
                             return (
                                 <Link
@@ -76,7 +74,6 @@ export default function CourseEditorLayout({ children }: { children: React.React
                 </div>
             </section>
 
-            {/* CONTENU */}
             {children}
         </div>
     );

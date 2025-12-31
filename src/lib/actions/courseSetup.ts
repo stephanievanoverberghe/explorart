@@ -52,6 +52,12 @@ export async function savePublish(courseId: string, payload: CoursePublishData) 
     await updateCourseSetupSection(courseId, 'publish', payload);
 }
 
+export async function getCourseStructureModules(courseId: string): Promise<CourseStructureData['modules']> {
+    await connectToDatabase();
+    const setup = await CourseSetup.findOne({ courseId }).lean();
+    return setup?.structure?.modules ?? [];
+}
+
 /* ---------------------------------------------
    Finalisation avant passage à l'éditeur
    - valide title + slug

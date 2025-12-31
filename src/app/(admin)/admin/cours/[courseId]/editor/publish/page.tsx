@@ -1,23 +1,36 @@
-'use client';
-
-import { useParams } from 'next/navigation';
-import { useState } from 'react';
-import { ChevronLeft, CheckCircle2, Eye, Lock, Rocket } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { ChevronLeft, CheckCircle2, Eye, Lock, Rocket, AlertTriangle } from 'lucide-react';
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
+import { getCourseContent, publishCourseContent } from '@/lib/actions/courseContent';
+import { getCourseSetup } from '@/lib/data/courseSetup';
+import { buildEditorChecklist } from '@/lib/utils/courseContentValidation';
 
-/* ------------------------------------------------
-   Editor Publish — Validation finale
-------------------------------------------------- */
+interface EditorPublishPageProps {
+    params: { courseId: string };
+}
 
-export default function EditorPublishPage() {
-    const { courseId } = useParams<{ courseId: string }>();
+export default async function EditorPublishPage({ params }: EditorPublishPageProps) {
+    const { courseId } = params;
+    const setup = await getCourseSetup(courseId);
 
-    const [status, setStatus] = useState<'draft' | 'published'>('draft');
+    if (!setup) {
+        notFound();
+    }
+
+    const content = await getCourseContent(courseId);
+    const checklist = buildEditorChecklist(courseId, setup, content);
+    const status = content?.contentStatus ?? 'draft';
+    const isPublished = status === 'published';
+
+    async function handlePublish() {
+        'use server';
+        if (!checklist.canPublish) return;
+        await publishCourseContent(courseId);
+    }
 
     return (
         <div className="space-y-6">
-            {/* TOP BAR */}
             <TopBar
                 backHref={`/admin/cours/${courseId}/editor/review`}
                 backLabel={
@@ -36,75 +49,78 @@ export default function EditorPublishPage() {
 
             <PageHeader label="Étape finale" title="Publication du cours" description="Dernière vérification avant de rendre le cours visible." />
 
-            {/* ÉTAT */}
             <Card>
-                <CardHeader title="Statut du cours" subtitle="Visibilité actuelle" />
+                <CardHeader title="Statut du contenu" subtitle="Visibilité actuelle" />
                 <CardBody>
                     <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm">
-                            {status === 'draft' ? (
+                            {isPublished ? (
                                 <>
-                                    <Lock className="h-4 w-4 text-main/60" />
-                                    <span className="text-main/70">Cours en brouillon</span>
+                                    <Eye className="h-4 w-4 text-sage" />
+                                    <span className="text-sage font-semibold">Contenu publié</span>
                                 </>
                             ) : (
                                 <>
-                                    <Eye className="h-4 w-4 text-sage" />
-                                    <span className="text-sage font-semibold">Cours publié</span>
+                                    <Lock className="h-4 w-4 text-main/60" />
+                                    <span className="text-main/70">Contenu en brouillon</span>
                                 </>
                             )}
                         </div>
 
-                        <p className="text-xs text-main/60">En brouillon, le cours n’est visible que par toi.</p>
+                        <p className="text-xs text-main/60">En brouillon, le contenu n’est visible que par toi.</p>
                     </div>
                 </CardBody>
             </Card>
 
-            {/* CHECKLIST */}
             <Card>
                 <CardHeader title="Checklist de publication" subtitle="Avant de publier" />
                 <CardBody>
                     <div className="space-y-3 text-sm text-main/75">
-                        <div className="flex gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-sage mt-0.5" />
-                            <span>Introduction complète et cohérente</span>
-                        </div>
-                        <div className="flex gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-sage mt-0.5" />
-                            <span>Modules construits et autonomes</span>
-                        </div>
-                        <div className="flex gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-sage mt-0.5" />
-                            <span>Conclusion présente et ouverte</span>
-                        </div>
+                        {checklist.items.map((item) => (
+                            <div key={item.key} className="flex gap-2">
+                                <CheckCircle2 className={cx('h-4 w-4 mt-0.5', item.status === 'ok' ? 'text-sage' : 'text-main/30')} />
+                                <span>{item.label}</span>
+                            </div>
+                        ))}
                     </div>
                 </CardBody>
             </Card>
 
-            {/* ACTION */}
             <Card>
-                <CardHeader title="Mettre en ligne" subtitle="Action irréversible (mais modifiable ensuite)" />
+                <CardHeader title="Mettre en ligne" subtitle="Action réversible (contenu modifiable)" />
                 <CardBody>
                     <div className="space-y-4">
                         <p className="text-sm text-main/70">
-                            Une fois publié, le cours sera visible selon ses paramètres (gratuit / premium).
+                            Une fois publié, le contenu sera visible selon les paramètres du cours.
                             <br />
                             Tu pourras toujours revenir modifier son contenu.
                         </p>
 
-                        <button
-                            type="button"
-                            onClick={() => setStatus('published')}
-                            className={cx(
-                                'inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition',
-                                status === 'published' ? 'bg-sage/15 text-sage border border-sage/40' : 'bg-main text-white hover:bg-main/90'
-                            )}
-                        >
-                            <Rocket className="h-4 w-4" />
-                            Publier le cours
-                        </button>
+                        {!checklist.canPublish ? (
+                            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 flex gap-2">
+                                <AlertTriangle className="h-5 w-5" />
+                                <div>
+                                    <p className="font-semibold">Publication bloquée</p>
+                                    <p>Corrige les points bloquants dans la review avant de publier.</p>
+                                </div>
+                            </div>
+                        ) : null}
 
-                        {status === 'published' && <p className="text-xs text-sage">✔ Le cours est maintenant publié.</p>}
+                        <form action={handlePublish}>
+                            <button
+                                type="submit"
+                                disabled={!checklist.canPublish || isPublished}
+                                className={cx(
+                                    'inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition',
+                                    !checklist.canPublish || isPublished ? 'bg-sage/15 text-sage border border-sage/40 cursor-not-allowed' : 'bg-main text-white hover:bg-main/90'
+                                )}
+                            >
+                                <Rocket className="h-4 w-4" />
+                                {isPublished ? 'Cours publié' : 'Publier le contenu'}
+                            </button>
+                        </form>
+
+                        {isPublished && <p className="text-xs text-sage">✔ Le contenu est maintenant publié.</p>}
                     </div>
                 </CardBody>
             </Card>
