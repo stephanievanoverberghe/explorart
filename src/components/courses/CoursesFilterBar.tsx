@@ -8,8 +8,8 @@ import { levelOptions, pillarFilters } from './course-filters-data';
 import type { PillarSlug } from '@/components/categories/category-data';
 
 interface Props {
-    level: 'all' | 'beginner' | 'intermediate';
-    setLevel: (v: 'all' | 'beginner' | 'intermediate') => void;
+    level: 'all' | 'beginner' | 'intermediate' | 'advanced';
+    setLevel: (v: 'all' | 'beginner' | 'intermediate' | 'advanced') => void;
 
     pillar: 'all' | PillarSlug;
     setPillar: (v: 'all' | PillarSlug) => void;

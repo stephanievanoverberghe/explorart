@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
         );
 
         const normalizedCourses: UiCourseRow[] = courses
-            .map((course) => {
+            .map((course): UiCourseRow => {
                 const modulesCount = normalizeModulesCount(course);
                 const studentsCount = purchaseMap.get(course.slug) ?? 0;
 

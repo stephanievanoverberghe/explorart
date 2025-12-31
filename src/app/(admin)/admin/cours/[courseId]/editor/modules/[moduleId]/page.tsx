@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { ChevronLeft, Pencil, CheckCircle2, Compass, Video, Plus, Trash2, Sparkles } from 'lucide-react';
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
@@ -98,7 +98,6 @@ function hydrateModule(data: CourseModuleData | null, fallbackTitle: string | nu
 }
 
 export default function EditorModulePage() {
-    const router = useRouter();
     const { courseId, moduleId } = useParams<{ courseId: string; moduleId: string }>();
 
     const [moduleMeta, setModuleMeta] = useState<CourseStructureData['modules'][number] | null>(null);

@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { Types } from 'mongoose';
 import { connectToDatabase } from '@/lib/db/connect';
 import { Course } from '@/lib/models/Course';
 import { CourseCommerce } from '@/lib/models/CourseCommerce';
@@ -17,7 +18,7 @@ import type {
     CourseSetupData,
     CourseStructureData,
 } from '@/types/courseSetup';
-import type { CourseCommerceData } from '@/types/courseCommerce';
+import type { CourseCommerceData, CourseCouponData, CoursePromotionData } from '@/types/courseCommerce';
 import type { CourseContentData } from '@/types/courseContent';
 import { buildDefaultCourseSetup } from '@/lib/utils//courseSetupDefaults';
 import { computeCommerce } from '@/lib/utils/courseCommerce';
@@ -128,7 +129,13 @@ function parsePrice(value: string) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-function normalizeCommerceDoc(courseId: string, doc: Partial<CourseCommerceData> | null | undefined): CourseCommerceData {
+type CommerceDocLike = Partial<CourseCommerceData> & {
+    updatedAt?: string | Date;
+    promotions?: Array<CoursePromotionData & { startsAt?: string | Date; endsAt?: string | Date }>;
+    coupons?: Array<CourseCouponData & { startsAt?: string | Date; endsAt?: string | Date }>;
+};
+
+function normalizeCommerceDoc(courseId: string, doc: CommerceDocLike | null | undefined): CourseCommerceData {
     const promotions = (doc?.promotions ?? []).map((promo) => ({
         ...promo,
         startsAt: promo.startsAt ? new Date(promo.startsAt).toISOString() : undefined,
@@ -319,6 +326,10 @@ export async function saveCourseSetup(
 }
 
 export async function getCourseAdmin(courseId: string): Promise<AdminCourseDTO | null> {
+    if (!Types.ObjectId.isValid(courseId)) {
+        return null;
+    }
+
     await connectToDatabase();
     const [course, setupDoc, contentDoc, commerceDoc] = await Promise.all([
         Course.findById(courseId).lean(),
@@ -362,7 +373,7 @@ export async function getCourseAdmin(courseId: string): Promise<AdminCourseDTO |
           }
         : null;
 
-    const commerce = commerceDoc ? normalizeCommerceDoc(courseId, commerceDoc as CourseCommerceData) : await buildCourseCommerce(courseId, setup);
+    const commerce = commerceDoc ? normalizeCommerceDoc(courseId, commerceDoc) : await buildCourseCommerce(courseId, setup);
 
     const checklist = buildPublishChecklist(courseId, setup, content, commerce);
 
@@ -374,7 +385,7 @@ export async function getCourseAdmin(courseId: string): Promise<AdminCourseDTO |
         listed: courseDoc.listed,
         coverImage: courseDoc.coverImage,
         level: courseDoc.level,
-        pillarSlug: courseDoc.pillarSlug,
+        pillarSlug: courseDoc.pillarSlug as AdminCourseDTO['pillarSlug'],
         pillarLabel: courseDoc.pillarLabel,
         durationMinutes: courseDoc.durationMinutes,
         modulesCount: courseDoc.modulesCount,
@@ -404,7 +415,7 @@ export async function getCoursePublic(slug: string): Promise<PublicCourseDTO | n
     if (!contentDoc || contentDoc.contentStatus !== 'published') return null;
 
     const setup = setupDoc ? (setupDoc as CourseSetupData) : buildDefaultCourseSetup(String(course._id));
-    const commerce = commerceDoc ? normalizeCommerceDoc(String(course._id), commerceDoc as CourseCommerceData) : await buildCourseCommerce(String(course._id), setup);
+    const commerce = commerceDoc ? normalizeCommerceDoc(String(course._id), commerceDoc) : await buildCourseCommerce(String(course._id), setup);
 
     return {
         id: String(course._id),
@@ -413,7 +424,7 @@ export async function getCoursePublic(slug: string): Promise<PublicCourseDTO | n
         tagline: course.tagline,
         summary: course.summary,
         level: course.level,
-        pillarSlug: course.pillarSlug,
+        pillarSlug: course.pillarSlug as PublicCourseDTO['pillarSlug'],
         pillarLabel: course.pillarLabel,
         coverImage: course.coverImage || '/images/cours/commencer-ici-cover.png',
         durationMinutes: course.durationMinutes,
@@ -443,7 +454,7 @@ export async function publishCourse(courseId: string): Promise<{ ok: boolean; ch
           }
         : null;
 
-    const commerce = commerceDoc ? normalizeCommerceDoc(courseId, commerceDoc as CourseCommerceData) : await buildCourseCommerce(courseId, setup);
+    const commerce = commerceDoc ? normalizeCommerceDoc(courseId, commerceDoc) : await buildCourseCommerce(courseId, setup);
 
     const checklist = buildPublishChecklist(courseId, setup, content, commerce);
 

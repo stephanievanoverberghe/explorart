@@ -1,4 +1,5 @@
-import type { CourseStatus } from '@/lib/models/Course';
+import type { CourseLevel, CourseStatus } from '@/lib/models/Course';
+import type { PillarSlug } from '@/components/categories/category-data';
 import type { CourseCommerceData } from '@/types/courseCommerce';
 import type { CourseContentData } from '@/types/courseContent';
 import type { CourseSetupData } from '@/types/courseSetup';
@@ -16,8 +17,8 @@ export interface AdminCourseDTO {
     status: CourseStatus;
     listed: boolean;
     coverImage: string;
-    level: string;
-    pillarSlug: string;
+    level: CourseLevel;
+    pillarSlug: PillarSlug;
     pillarLabel: string;
     durationMinutes: number;
     modulesCount: number;
@@ -34,8 +35,8 @@ export interface PublicCourseDTO {
     title: string;
     tagline: string;
     summary?: string;
-    level: string;
-    pillarSlug: string;
+    level: CourseLevel;
+    pillarSlug: PillarSlug;
     pillarLabel: string;
     coverImage: string;
     durationMinutes: number;
