@@ -7,7 +7,7 @@ import { ChevronLeft, Save, Pencil, CheckCircle2, Compass, Video, Plus, Trash2, 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
 import { getModule, saveModule } from '@/lib/actions/courseContent';
 import { getCourseStructureModules } from '@/lib/actions/courseSetup';
-import type { CourseModuleData } from '@/types/courseContent';
+import type { CourseModuleData, CourseModuleVideo, CourseModuleListSection } from '@/types/courseContent';
 import type { CourseStructureData } from '@/types/courseSetup';
 
 function Field({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: React.ReactNode }) {
@@ -42,45 +42,57 @@ const inputWithIcon =
 const textareaBase =
     'w-full resize-none rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
 
+/** Factories : garantissent les champs requis */
+const makeVideo = (partial?: Partial<CourseModuleVideo>): CourseModuleVideo => ({
+    title: partial?.title ?? '',
+    youtubeId: partial?.youtubeId ?? '',
+    description: partial?.description ?? '',
+    note: partial?.note ?? '',
+    cover: partial?.cover ?? '',
+});
+
+const makeListSection = (fallbackTitle: string, partial?: Partial<CourseModuleListSection>): CourseModuleListSection => ({
+    title: partial?.title ?? fallbackTitle,
+    items: partial?.items ?? [],
+});
+
 const emptyModule: CourseModuleData = {
     badgeLabel: '',
     title: '',
     description: '',
-    video: {
-        title: '',
-        youtubeId: '',
-        description: '',
-        note: '',
-        cover: '',
-    },
+    video: makeVideo(),
     material: { title: 'Matériel', items: [], note: '', highlighted: true },
-    intention: { title: 'Intention', items: [] },
+    intention: makeListSection('Intention'),
     exercise: { title: 'Exercice guidé', description: '', steps: [] },
     extraSections: [],
 };
 
 function hydrateModule(data: CourseModuleData | null, fallbackTitle: string | null): CourseModuleData {
+    const safeTitle = (data?.title ?? '').trim() ? (data!.title as string) : fallbackTitle ?? '';
+
     return {
-        ...emptyModule,
-        ...data,
-        title: data?.title?.trim() ? data.title : fallbackTitle ?? '',
-        video: { ...emptyModule.video, ...data?.video },
+        badgeLabel: data?.badgeLabel ?? '',
+        title: safeTitle,
+        description: data?.description ?? '',
+        video: makeVideo(data?.video),
         material: {
-            ...emptyModule.material,
-            ...data?.material,
-            items: data?.material?.items ?? emptyModule.material?.items ?? [],
+            title: data?.material?.title ?? emptyModule.material!.title,
+            items: data?.material?.items ?? [],
+            note: data?.material?.note ?? '',
+            highlighted: data?.material?.highlighted ?? true,
         },
-        intention: {
-            ...emptyModule.intention,
-            ...data?.intention,
-            items: data?.intention?.items ?? emptyModule.intention?.items ?? [],
-        },
+        intention: makeListSection('Intention', data?.intention),
         exercise: {
-            ...emptyModule.exercise,
-            ...data?.exercise,
-            steps: data?.exercise?.steps ?? emptyModule.exercise?.steps ?? [],
+            title: data?.exercise?.title ?? emptyModule.exercise!.title,
+            description: data?.exercise?.description ?? '',
+            steps: data?.exercise?.steps ?? [],
         },
-        extraSections: data?.extraSections ?? [],
+        extraSections:
+            data?.extraSections?.map((s) => ({
+                title: s.title ?? '',
+                description: s.description ?? '',
+                items: s.items ?? [],
+            })) ?? [],
     };
 }
 
@@ -92,6 +104,12 @@ export default function EditorModulePage() {
     const [moduleData, setModuleData] = useState<CourseModuleData>(emptyModule);
     const [savedAt, setSavedAt] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    const moduleTitle = useMemo(() => {
+        const fromMeta = moduleMeta?.title?.trim();
+        const fromContent = moduleData.title?.trim();
+        return fromMeta || fromContent || 'Module';
+    }, [moduleMeta?.title, moduleData.title]);
 
     useEffect(() => {
         if (!courseId || !moduleId) return;
@@ -119,103 +137,101 @@ export default function EditorModulePage() {
         setModuleData((prev) => ({ ...prev, [key]: value }));
     }
 
-    function updateMaterialItem(index: number, value: string) {
+    function updateVideo(patch: Partial<CourseModuleVideo>) {
+        setModuleData((prev) => ({
+            ...prev,
+            video: makeVideo({ ...prev.video, ...patch }),
+        }));
+    }
+
+    function updateMaterial(patch: Partial<NonNullable<CourseModuleData['material']>>) {
         setModuleData((prev) => ({
             ...prev,
             material: {
-                title: prev.material?.title ?? '',
+                title: prev.material?.title ?? emptyModule.material!.title,
+                items: prev.material?.items ?? [],
                 note: prev.material?.note ?? '',
                 highlighted: prev.material?.highlighted ?? true,
-                items: (prev.material?.items ?? []).map((item, i) => (i === index ? value : item)),
+                ...patch,
             },
         }));
+    }
+
+    function updateMaterialItem(index: number, value: string) {
+        updateMaterial({
+            items: (moduleData.material?.items ?? []).map((item, i) => (i === index ? value : item)),
+        });
     }
 
     function addMaterialItem() {
-        setModuleData((prev) => ({
-            ...prev,
-            material: {
-                title: prev.material?.title ?? '',
-                note: prev.material?.note ?? '',
-                highlighted: prev.material?.highlighted ?? true,
-                items: [...(prev.material?.items ?? []), ''],
-            },
-        }));
+        updateMaterial({
+            items: [...(moduleData.material?.items ?? []), ''],
+        });
     }
 
     function removeMaterialItem(index: number) {
+        updateMaterial({
+            items: (moduleData.material?.items ?? []).filter((_, i) => i !== index),
+        });
+    }
+
+    function updateIntentionTitle(title: string) {
         setModuleData((prev) => ({
             ...prev,
-            material: {
-                title: prev.material?.title ?? '',
-                note: prev.material?.note ?? '',
-                highlighted: prev.material?.highlighted ?? true,
-                items: (prev.material?.items ?? []).filter((_, i) => i !== index),
-            },
+            intention: makeListSection('Intention', { ...prev.intention, title }),
         }));
     }
 
     function updateIntentionItem(index: number, value: string) {
-        setModuleData((prev) => ({
-            ...prev,
-            intention: {
-                title: prev.intention?.title ?? '',
-                items: (prev.intention?.items ?? []).map((item, i) => (i === index ? value : item)),
-            },
-        }));
+        setModuleData((prev) => {
+            const current = prev.intention ?? makeListSection('Intention');
+            const items = current.items.map((item, i) => (i === index ? value : item));
+            return { ...prev, intention: { ...current, items } };
+        });
     }
 
     function addIntentionItem() {
-        setModuleData((prev) => ({
-            ...prev,
-            intention: {
-                title: prev.intention?.title ?? '',
-                items: [...(prev.intention?.items ?? []), ''],
-            },
-        }));
+        setModuleData((prev) => {
+            const current = prev.intention ?? makeListSection('Intention');
+            return { ...prev, intention: { ...current, items: [...current.items, ''] } };
+        });
     }
 
     function removeIntentionItem(index: number) {
+        setModuleData((prev) => {
+            const current = prev.intention ?? makeListSection('Intention');
+            return { ...prev, intention: { ...current, items: current.items.filter((_, i) => i !== index) } };
+        });
+    }
+
+    function updateExercise(patch: Partial<NonNullable<CourseModuleData['exercise']>>) {
         setModuleData((prev) => ({
             ...prev,
-            intention: {
-                title: prev.intention?.title ?? '',
-                items: (prev.intention?.items ?? []).filter((_, i) => i !== index),
+            exercise: {
+                title: prev.exercise?.title ?? emptyModule.exercise!.title,
+                description: prev.exercise?.description ?? '',
+                steps: prev.exercise?.steps ?? [],
+                ...patch,
             },
         }));
     }
 
     function updateExerciseStep(index: number, value: string) {
-        setModuleData((prev) => ({
-            ...prev,
-            exercise: {
-                title: prev.exercise?.title ?? '',
-                description: prev.exercise?.description ?? '',
-                steps: (prev.exercise?.steps ?? []).map((step, i) => (i === index ? value : step)),
-            },
-        }));
+        updateExercise({
+            steps: (moduleData.exercise?.steps ?? []).map((step, i) => (i === index ? value : step)),
+        });
     }
 
     function addExerciseStep() {
-        setModuleData((prev) => ({
-            ...prev,
-            exercise: {
-                title: prev.exercise?.title ?? '',
-                description: prev.exercise?.description ?? '',
-                steps: [...(prev.exercise?.steps ?? []), ''],
-            },
-        }));
+        updateExercise({
+            steps: [...(moduleData.exercise?.steps ?? []), ''],
+        });
     }
 
     function removeExerciseStep(index: number) {
-        setModuleData((prev) => ({
-            ...prev,
-            exercise: {
-                title: prev.exercise?.title ?? '',
-                description: prev.exercise?.description ?? '',
-                steps: (prev.exercise?.steps ?? []).filter((_, i) => i !== index),
-            },
-        }));
+        updateExercise({
+            steps: (moduleData.exercise?.steps ?? []).filter((_, i) => i !== index),
+        });
     }
 
     function addExtraSection() {
@@ -227,7 +243,18 @@ export default function EditorModulePage() {
 
     function updateExtraSection(index: number, patch: Partial<NonNullable<CourseModuleData['extraSections']>[number]>) {
         setModuleData((prev) => {
-            const next = (prev.extraSections ?? []).map((section, i) => (i === index ? { ...section, ...patch } : section));
+            const next = (prev.extraSections ?? []).map((section, i) => {
+                if (i !== index) return section;
+
+                return {
+                    ...section,
+                    ...patch,
+                    title: patch.title ?? section.title ?? '',
+                    description: patch.description ?? section.description ?? '',
+                    items: patch.items ?? section.items ?? [],
+                };
+            });
+
             return { ...prev, extraSections: next };
         });
     }
@@ -348,7 +375,7 @@ export default function EditorModulePage() {
                             <input
                                 placeholder="Titre de la vidéo"
                                 value={moduleData.video?.title ?? ''}
-                                onChange={(event) => updateModule('video', { ...moduleData.video, title: event.target.value })}
+                                onChange={(event) => updateVideo({ title: event.target.value })}
                                 className={inputWithIcon}
                             />
                         </IconInput>
@@ -359,7 +386,7 @@ export default function EditorModulePage() {
                             <input
                                 placeholder="Identifiant YouTube"
                                 value={moduleData.video?.youtubeId ?? ''}
-                                onChange={(event) => updateModule('video', { ...moduleData.video, youtubeId: event.target.value })}
+                                onChange={(event) => updateVideo({ youtubeId: event.target.value })}
                                 className={inputBase}
                             />
                         </Field>
@@ -367,7 +394,7 @@ export default function EditorModulePage() {
                             <input
                                 placeholder="/images/module-cover.jpg"
                                 value={moduleData.video?.cover ?? ''}
-                                onChange={(event) => updateModule('video', { ...moduleData.video, cover: event.target.value })}
+                                onChange={(event) => updateVideo({ cover: event.target.value })}
                                 className={inputBase}
                             />
                         </Field>
@@ -377,7 +404,7 @@ export default function EditorModulePage() {
                         <textarea
                             placeholder="Texte d’accompagnement"
                             value={moduleData.video?.description ?? ''}
-                            onChange={(event) => updateModule('video', { ...moduleData.video, description: event.target.value })}
+                            onChange={(event) => updateVideo({ description: event.target.value })}
                             className={cx(textareaBase, 'min-h-24')}
                         />
                     </Field>
@@ -391,7 +418,7 @@ export default function EditorModulePage() {
                         <input
                             placeholder="Titre de la section"
                             value={moduleData.material?.title ?? ''}
-                            onChange={(event) => updateModule('material', { ...moduleData.material, title: event.target.value })}
+                            onChange={(event) => updateMaterial({ title: event.target.value })}
                             className={inputBase}
                         />
                     </Field>
@@ -422,7 +449,7 @@ export default function EditorModulePage() {
                         <textarea
                             placeholder="Note rassurante (optionnel)"
                             value={moduleData.material?.note ?? ''}
-                            onChange={(event) => updateModule('material', { ...moduleData.material, note: event.target.value })}
+                            onChange={(event) => updateMaterial({ note: event.target.value })}
                             className={cx(textareaBase, 'min-h-11')}
                         />
                     </div>
@@ -436,7 +463,7 @@ export default function EditorModulePage() {
                         <input
                             placeholder="Titre de la section"
                             value={moduleData.intention?.title ?? ''}
-                            onChange={(event) => updateModule('intention', { ...moduleData.intention, title: event.target.value })}
+                            onChange={(event) => updateIntentionTitle(event.target.value)}
                             className={inputBase}
                         />
                     </Field>
@@ -474,7 +501,7 @@ export default function EditorModulePage() {
                         <input
                             placeholder="Titre de la section"
                             value={moduleData.exercise?.title ?? ''}
-                            onChange={(event) => updateModule('exercise', { ...moduleData.exercise, title: event.target.value })}
+                            onChange={(event) => updateExercise({ title: event.target.value })}
                             className={inputBase}
                         />
                     </Field>
@@ -483,7 +510,7 @@ export default function EditorModulePage() {
                         <textarea
                             placeholder="Quelques lignes pour cadrer l’exercice"
                             value={moduleData.exercise?.description ?? ''}
-                            onChange={(event) => updateModule('exercise', { ...moduleData.exercise, description: event.target.value })}
+                            onChange={(event) => updateExercise({ description: event.target.value })}
                             className={cx(textareaBase, 'min-h-24')}
                         />
                     </Field>
@@ -533,7 +560,7 @@ export default function EditorModulePage() {
 
                             <input
                                 placeholder="Titre de la section"
-                                value={section.title}
+                                value={section.title ?? ''}
                                 onChange={(event) => updateExtraSection(index, { title: event.target.value })}
                                 className={inputBase}
                             />

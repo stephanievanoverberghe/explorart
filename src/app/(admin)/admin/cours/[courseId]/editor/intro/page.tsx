@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Save, Sparkles, Video, CheckCircle2, HeartHa
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
 import { getIntro, saveIntro } from '@/lib/actions/courseContent';
-import type { CourseIntroData } from '@/types/courseContent';
+import type { CourseIntroData, CourseIntroVideo, CourseIntroSectionList, CourseIntroDownload } from '@/types/courseContent';
 
 function Field({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: React.ReactNode }) {
     return (
@@ -40,21 +40,29 @@ const inputWithIcon =
 const textareaBase =
     'w-full resize-none rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
 
+/** Factories (évite title?: string) */
+const makeVideo = (partial?: Partial<CourseIntroVideo>): CourseIntroVideo => ({
+    title: partial?.title ?? '',
+    description: partial?.description ?? '',
+    note: partial?.note ?? '',
+    youtubeId: partial?.youtubeId ?? '',
+    cover: partial?.cover ?? '',
+});
+
+const makeSection = (fallbackTitle: string, partial?: Partial<CourseIntroSectionList>): CourseIntroSectionList => ({
+    title: partial?.title ?? fallbackTitle,
+    items: partial?.items ?? [],
+});
+
 const defaultIntro: CourseIntroData = {
     badgeLabel: '',
     title: '',
     description: '',
-    video: {
-        title: '',
-        description: '',
-        note: '',
-        youtubeId: '',
-        cover: '',
-    },
-    whatYouWillExperience: { title: 'Ce que tu vas vivre', items: [] },
-    whoItsFor: { title: 'Ce cours est pour toi si…', items: [] },
+    video: makeVideo(),
+    whatYouWillExperience: makeSection('Ce que tu vas vivre'),
+    whoItsFor: makeSection('Ce cours est pour toi si…'),
     downloads: [],
-    howToFollow: { title: 'Comment suivre ce cours', items: [] },
+    howToFollow: makeSection('Comment suivre ce cours'),
     material: { title: 'Matériel recommandé', items: [], note: '', highlighted: true },
     notes: '',
 };
@@ -63,30 +71,20 @@ function hydrateIntro(data: CourseIntroData | null): CourseIntroData {
     if (!data) return defaultIntro;
 
     return {
-        ...defaultIntro,
-        ...data,
-        video: { ...defaultIntro.video, ...data.video },
-        whatYouWillExperience: {
-            ...defaultIntro.whatYouWillExperience,
-            ...data.whatYouWillExperience,
-            items: data.whatYouWillExperience?.items ?? defaultIntro.whatYouWillExperience?.items ?? [],
-        },
-        whoItsFor: {
-            ...defaultIntro.whoItsFor,
-            ...data.whoItsFor,
-            items: data.whoItsFor?.items ?? defaultIntro.whoItsFor?.items ?? [],
-        },
-        howToFollow: {
-            ...defaultIntro.howToFollow,
-            ...data.howToFollow,
-            items: data.howToFollow?.items ?? defaultIntro.howToFollow?.items ?? [],
-        },
-        material: {
-            ...defaultIntro.material,
-            ...data.material,
-            items: data.material?.items ?? defaultIntro.material?.items ?? [],
-        },
+        badgeLabel: data.badgeLabel ?? '',
+        title: data.title ?? '',
+        description: data.description ?? '',
+        video: makeVideo(data.video),
+        whatYouWillExperience: makeSection('Ce que tu vas vivre', data.whatYouWillExperience),
+        whoItsFor: makeSection('Ce cours est pour toi si…', data.whoItsFor),
+        howToFollow: makeSection('Comment suivre ce cours', data.howToFollow),
         downloads: data.downloads ?? [],
+        material: {
+            title: data.material?.title ?? defaultIntro.material!.title,
+            items: data.material?.items ?? [],
+            note: data.material?.note ?? '',
+            highlighted: data.material?.highlighted ?? true,
+        },
         notes: data.notes ?? '',
     };
 }
@@ -131,35 +129,51 @@ export default function EditorIntroPage() {
         setIntro((prev) => ({ ...prev, [key]: value }));
     }
 
+    function updateVideo(patch: Partial<CourseIntroVideo>) {
+        setIntro((prev) => ({
+            ...prev,
+            video: makeVideo({ ...prev.video, ...patch }),
+        }));
+    }
+
     function updateSectionTitle(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow', title: string) {
         setIntro((prev) => ({
             ...prev,
-            [section]: {
-                title,
-                items: prev[section]?.items ?? [],
-            },
+            [section]: makeSection(
+                section === 'whatYouWillExperience' ? 'Ce que tu vas vivre' : section === 'whoItsFor' ? 'Ce cours est pour toi si…' : 'Comment suivre ce cours',
+                { ...prev[section], title }
+            ),
         }));
     }
 
     function updateList(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow', index: number, value: string) {
         setIntro((prev) => {
-            const items = prev[section]?.items ?? [];
-            const next = items.map((item, i) => (i === index ? value : item));
-            return { ...prev, [section]: { title: prev[section]?.title ?? '', items: next } };
+            const current =
+                prev[section] ??
+                makeSection(section === 'whatYouWillExperience' ? 'Ce que tu vas vivre' : section === 'whoItsFor' ? 'Ce cours est pour toi si…' : 'Comment suivre ce cours');
+
+            const items = current.items.map((item, i) => (i === index ? value : item));
+            return { ...prev, [section]: { ...current, items } };
         });
     }
 
     function addListItem(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow') {
         setIntro((prev) => {
-            const items = prev[section]?.items ?? [];
-            return { ...prev, [section]: { title: prev[section]?.title ?? '', items: [...items, ''] } };
+            const current =
+                prev[section] ??
+                makeSection(section === 'whatYouWillExperience' ? 'Ce que tu vas vivre' : section === 'whoItsFor' ? 'Ce cours est pour toi si…' : 'Comment suivre ce cours');
+
+            return { ...prev, [section]: { ...current, items: [...current.items, ''] } };
         });
     }
 
     function removeListItem(section: 'whatYouWillExperience' | 'whoItsFor' | 'howToFollow', index: number) {
         setIntro((prev) => {
-            const items = prev[section]?.items ?? [];
-            return { ...prev, [section]: { title: prev[section]?.title ?? '', items: items.filter((_, i) => i !== index) } };
+            const current =
+                prev[section] ??
+                makeSection(section === 'whatYouWillExperience' ? 'Ce que tu vas vivre' : section === 'whoItsFor' ? 'Ce cours est pour toi si…' : 'Comment suivre ce cours');
+
+            return { ...prev, [section]: { ...current, items: current.items.filter((_, i) => i !== index) } };
         });
     }
 
@@ -167,7 +181,7 @@ export default function EditorIntroPage() {
         setIntro((prev) => ({
             ...prev,
             material: {
-                title: prev.material?.title ?? '',
+                title: prev.material?.title ?? defaultIntro.material!.title,
                 note: prev.material?.note ?? '',
                 highlighted: prev.material?.highlighted ?? true,
                 items: (prev.material?.items ?? []).map((item, i) => (i === index ? value : item)),
@@ -179,7 +193,7 @@ export default function EditorIntroPage() {
         setIntro((prev) => ({
             ...prev,
             material: {
-                title: prev.material?.title ?? '',
+                title: prev.material?.title ?? defaultIntro.material!.title,
                 note: prev.material?.note ?? '',
                 highlighted: prev.material?.highlighted ?? true,
                 items: [...(prev.material?.items ?? []), ''],
@@ -191,7 +205,7 @@ export default function EditorIntroPage() {
         setIntro((prev) => ({
             ...prev,
             material: {
-                title: prev.material?.title ?? '',
+                title: prev.material?.title ?? defaultIntro.material!.title,
                 note: prev.material?.note ?? '',
                 highlighted: prev.material?.highlighted ?? true,
                 items: (prev.material?.items ?? []).filter((_, i) => i !== index),
@@ -199,7 +213,7 @@ export default function EditorIntroPage() {
         }));
     }
 
-    function updateDownload(index: number, key: 'label' | 'description' | 'href', value: string) {
+    function updateDownload(index: number, key: keyof CourseIntroDownload, value: string) {
         setIntro((prev) => {
             const downloads = prev.downloads ?? [];
             const next = downloads.map((download, i) => (i === index ? { ...download, [key]: value } : download));
@@ -315,7 +329,7 @@ export default function EditorIntroPage() {
                             <input
                                 placeholder="Titre de la vidéo"
                                 value={intro.video?.title ?? ''}
-                                onChange={(event) => updateIntro('video', { ...intro.video, title: event.target.value })}
+                                onChange={(event) => updateVideo({ title: event.target.value })}
                                 className={inputWithIcon}
                             />
                         </IconInput>
@@ -325,7 +339,7 @@ export default function EditorIntroPage() {
                         <textarea
                             placeholder="Texte d’accompagnement de la vidéo"
                             value={intro.video?.description ?? ''}
-                            onChange={(event) => updateIntro('video', { ...intro.video, description: event.target.value })}
+                            onChange={(event) => updateVideo({ description: event.target.value })}
                             className={textareaBase}
                         />
                     </Field>
@@ -335,7 +349,7 @@ export default function EditorIntroPage() {
                             <input
                                 placeholder="Identifiant YouTube"
                                 value={intro.video?.youtubeId ?? ''}
-                                onChange={(event) => updateIntro('video', { ...intro.video, youtubeId: event.target.value })}
+                                onChange={(event) => updateVideo({ youtubeId: event.target.value })}
                                 className={inputBase}
                             />
                         </Field>
@@ -343,7 +357,7 @@ export default function EditorIntroPage() {
                             <input
                                 placeholder="/images/intro-cover.jpg"
                                 value={intro.video?.cover ?? ''}
-                                onChange={(event) => updateIntro('video', { ...intro.video, cover: event.target.value })}
+                                onChange={(event) => updateVideo({ cover: event.target.value })}
                                 className={inputBase}
                             />
                         </Field>
@@ -501,6 +515,7 @@ export default function EditorIntroPage() {
                     </button>
                 </CardBody>
             </Card>
+
             <Card>
                 <CardHeader title="Comment suivre ce cours" subtitle="Cadre, rythme, liberté" />
                 <CardBody className="space-y-4">
@@ -515,12 +530,7 @@ export default function EditorIntroPage() {
                     <div className="space-y-3">
                         {(intro.howToFollow?.items ?? []).map((item, index) => (
                             <div key={`how-${index}`} className="flex items-center gap-2">
-                                <input
-                                    value={item}
-                                    onChange={(event) => updateList('howToFollow', index, event.target.value)}
-                                    placeholder="Ex : Avance dans l’ordre, sans te presser"
-                                    className={inputBase}
-                                />
+                                <input value={item} onChange={(event) => updateList('howToFollow', index, event.target.value)} className={inputBase} />
                                 <button
                                     type="button"
                                     onClick={() => removeListItem('howToFollow', index)}
@@ -551,7 +561,14 @@ export default function EditorIntroPage() {
                         <input
                             placeholder="Titre de la section"
                             value={intro.material?.title ?? ''}
-                            onChange={(event) => updateIntro('material', { ...intro.material, title: event.target.value, items: intro.material?.items ?? [] })}
+                            onChange={(event) =>
+                                updateIntro('material', {
+                                    title: event.target.value,
+                                    items: intro.material?.items ?? [],
+                                    note: intro.material?.note ?? '',
+                                    highlighted: intro.material?.highlighted ?? true,
+                                })
+                            }
                             className={inputBase}
                         />
                     </Field>
@@ -559,12 +576,7 @@ export default function EditorIntroPage() {
                     <div className="space-y-3">
                         {(intro.material?.items ?? []).map((item, index) => (
                             <div key={`material-${index}`} className="flex items-center gap-2">
-                                <input
-                                    value={item}
-                                    onChange={(event) => updateMaterialItem(index, event.target.value)}
-                                    placeholder="Ex : Un carnet ou quelques feuilles A4"
-                                    className={inputBase}
-                                />
+                                <input value={item} onChange={(event) => updateMaterialItem(index, event.target.value)} className={inputBase} />
                                 <button
                                     type="button"
                                     onClick={() => removeMaterialItem(index)}
@@ -588,7 +600,14 @@ export default function EditorIntroPage() {
                         <textarea
                             placeholder="Note complémentaire (ex : commence avec ce que tu as, le matériel n’est pas un frein…)"
                             value={intro.material?.note ?? ''}
-                            onChange={(event) => updateIntro('material', { ...intro.material, note: event.target.value, items: intro.material?.items ?? [] })}
+                            onChange={(event) =>
+                                updateIntro('material', {
+                                    title: intro.material?.title ?? defaultIntro.material!.title,
+                                    items: intro.material?.items ?? [],
+                                    note: event.target.value,
+                                    highlighted: intro.material?.highlighted ?? true,
+                                })
+                            }
                             className={cx(textareaBase, 'min-h-11')}
                         />
 
@@ -619,6 +638,7 @@ export default function EditorIntroPage() {
                     </Field>
                 </CardBody>
             </Card>
+
             <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
                 <button
                     type="button"

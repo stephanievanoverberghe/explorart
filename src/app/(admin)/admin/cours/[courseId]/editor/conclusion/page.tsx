@@ -6,7 +6,7 @@ import { ChevronLeft, Save, Compass, HeartHandshake, Link2, Trash2, Video, Spark
 
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
 import { getConclusion, saveConclusion } from '@/lib/actions/courseContent';
-import type { CourseConclusionData } from '@/types/courseContent';
+import type { CourseConclusionData, CourseModuleListSection, CourseModuleVideo } from '@/types/courseContent';
 
 function Field({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: React.ReactNode }) {
     return (
@@ -40,21 +40,29 @@ const inputWithIcon =
 const textareaBase =
     'w-full resize-none rounded-2xl border border-perl/70 bg-white px-4 py-3 text-sm text-main outline-none transition hover:bg-page/50 focus:border-main focus:ring-2 focus:ring-main/10';
 
+/** Factories (évite title?: string) */
+const makeVideo = (partial?: Partial<CourseModuleVideo>): CourseModuleVideo => ({
+    title: partial?.title ?? '',
+    youtubeId: partial?.youtubeId ?? '',
+    description: partial?.description ?? '',
+    note: partial?.note ?? '',
+    cover: partial?.cover ?? '',
+});
+
+const makeList = (title: string, partial?: Partial<CourseModuleListSection>): CourseModuleListSection => ({
+    title: partial?.title ?? title,
+    items: partial?.items ?? [],
+});
+
 const defaultConclusion: CourseConclusionData = {
     badgeLabel: '',
     title: '',
     description: '',
-    video: {
-        title: '',
-        description: '',
-        youtubeId: '',
-        note: '',
-        cover: '',
-    },
-    quickReview: { title: 'Faire le point', items: [] },
+    video: makeVideo(),
+    quickReview: makeList('Faire le point'),
     personalPrompt: { title: 'Phrase intérieure', description: '' },
     softReminder: { title: 'Rappel doux', description: '' },
-    continueAfter: { title: 'Continuer après le cours', items: [] },
+    continueAfter: makeList('Continuer après le cours'),
     links: [],
 };
 
@@ -62,13 +70,20 @@ function hydrateConclusion(data: CourseConclusionData | null): CourseConclusionD
     if (!data) return defaultConclusion;
 
     return {
-        ...defaultConclusion,
-        ...data,
-        video: { ...defaultConclusion.video, ...data.video },
-        quickReview: { ...defaultConclusion.quickReview, ...data.quickReview, items: data.quickReview?.items ?? [] },
-        personalPrompt: { ...defaultConclusion.personalPrompt, ...data.personalPrompt },
-        softReminder: { ...defaultConclusion.softReminder, ...data.softReminder },
-        continueAfter: { ...defaultConclusion.continueAfter, ...data.continueAfter, items: data.continueAfter?.items ?? [] },
+        badgeLabel: data.badgeLabel ?? '',
+        title: data.title ?? '',
+        description: data.description ?? '',
+        video: makeVideo(data.video),
+        quickReview: makeList('Faire le point', data.quickReview),
+        personalPrompt: {
+            title: data.personalPrompt?.title ?? defaultConclusion.personalPrompt!.title,
+            description: data.personalPrompt?.description ?? '',
+        },
+        softReminder: {
+            title: data.softReminder?.title ?? defaultConclusion.softReminder!.title,
+            description: data.softReminder?.description ?? '',
+        },
+        continueAfter: makeList('Continuer après le cours', data.continueAfter),
         links: data.links ?? [],
     };
 }
@@ -103,34 +118,44 @@ export default function EditorConclusionPage() {
         setConclusion((prev) => ({ ...prev, [key]: value }));
     }
 
-    function updateList(section: 'quickReview' | 'continueAfter', index: number, value: string) {
+    function updateVideo(patch: Partial<CourseModuleVideo>) {
         setConclusion((prev) => ({
             ...prev,
-            [section]: {
-                title: prev[section]?.title ?? '',
-                items: (prev[section]?.items ?? []).map((item, i) => (i === index ? value : item)),
-            },
+            video: makeVideo({ ...prev.video, ...patch }),
         }));
+    }
+
+    function updateListSection(section: 'quickReview' | 'continueAfter', patch: Partial<CourseModuleListSection>) {
+        setConclusion((prev) => {
+            const current = prev[section];
+            const fallbackTitle = section === 'quickReview' ? 'Faire le point' : 'Continuer après le cours';
+            return {
+                ...prev,
+                [section]: makeList(fallbackTitle, { ...current, ...patch }),
+            };
+        });
+    }
+
+    function updateListItem(section: 'quickReview' | 'continueAfter', index: number, value: string) {
+        setConclusion((prev) => {
+            const current = prev[section] ?? makeList(section === 'quickReview' ? 'Faire le point' : 'Continuer après le cours');
+            const items = current.items.map((item, i) => (i === index ? value : item));
+            return { ...prev, [section]: { ...current, items } };
+        });
     }
 
     function addListItem(section: 'quickReview' | 'continueAfter') {
-        setConclusion((prev) => ({
-            ...prev,
-            [section]: {
-                title: prev[section]?.title ?? '',
-                items: [...(prev[section]?.items ?? []), ''],
-            },
-        }));
+        setConclusion((prev) => {
+            const current = prev[section] ?? makeList(section === 'quickReview' ? 'Faire le point' : 'Continuer après le cours');
+            return { ...prev, [section]: { ...current, items: [...current.items, ''] } };
+        });
     }
 
     function removeListItem(section: 'quickReview' | 'continueAfter', index: number) {
-        setConclusion((prev) => ({
-            ...prev,
-            [section]: {
-                title: prev[section]?.title ?? '',
-                items: (prev[section]?.items ?? []).filter((_, i) => i !== index),
-            },
-        }));
+        setConclusion((prev) => {
+            const current = prev[section] ?? makeList(section === 'quickReview' ? 'Faire le point' : 'Continuer après le cours');
+            return { ...prev, [section]: { ...current, items: current.items.filter((_, i) => i !== index) } };
+        });
     }
 
     function updateLink(index: number, key: 'label' | 'href' | 'description', value: string) {
@@ -231,7 +256,7 @@ export default function EditorConclusionPage() {
                             <input
                                 placeholder="Titre de la vidéo"
                                 value={conclusion.video?.title ?? ''}
-                                onChange={(event) => updateConclusion('video', { ...conclusion.video, title: event.target.value })}
+                                onChange={(event) => updateVideo({ title: event.target.value })}
                                 className={inputWithIcon}
                             />
                         </IconInput>
@@ -241,7 +266,7 @@ export default function EditorConclusionPage() {
                         <textarea
                             placeholder="Texte d’accompagnement"
                             value={conclusion.video?.description ?? ''}
-                            onChange={(event) => updateConclusion('video', { ...conclusion.video, description: event.target.value })}
+                            onChange={(event) => updateVideo({ description: event.target.value })}
                             className={textareaBase}
                         />
                     </Field>
@@ -251,7 +276,7 @@ export default function EditorConclusionPage() {
                             <input
                                 placeholder="Identifiant YouTube"
                                 value={conclusion.video?.youtubeId ?? ''}
-                                onChange={(event) => updateConclusion('video', { ...conclusion.video, youtubeId: event.target.value })}
+                                onChange={(event) => updateVideo({ youtubeId: event.target.value })}
                                 className={inputBase}
                             />
                         </Field>
@@ -259,7 +284,7 @@ export default function EditorConclusionPage() {
                             <input
                                 placeholder="/images/conclusion-cover.jpg"
                                 value={conclusion.video?.cover ?? ''}
-                                onChange={(event) => updateConclusion('video', { ...conclusion.video, cover: event.target.value })}
+                                onChange={(event) => updateVideo({ cover: event.target.value })}
                                 className={inputBase}
                             />
                         </Field>
@@ -274,9 +299,7 @@ export default function EditorConclusionPage() {
                         <input
                             placeholder="Titre de la section"
                             value={conclusion.quickReview?.title ?? ''}
-                            onChange={(event) =>
-                                updateConclusion('quickReview', { ...conclusion.quickReview, title: event.target.value, items: conclusion.quickReview?.items ?? [] })
-                            }
+                            onChange={(event) => updateListSection('quickReview', { title: event.target.value })}
                             className={inputBase}
                         />
                     </Field>
@@ -284,7 +307,7 @@ export default function EditorConclusionPage() {
                     <div className="space-y-3">
                         {(conclusion.quickReview?.items ?? []).map((item, index) => (
                             <div key={`review-${index}`} className="flex items-center gap-2">
-                                <input value={item} onChange={(event) => updateList('quickReview', index, event.target.value)} className={inputBase} />
+                                <input value={item} onChange={(event) => updateListItem('quickReview', index, event.target.value)} className={inputBase} />
                                 <button
                                     type="button"
                                     onClick={() => removeListItem('quickReview', index)}
@@ -314,14 +337,24 @@ export default function EditorConclusionPage() {
                         <input
                             placeholder="Titre de la section"
                             value={conclusion.personalPrompt?.title ?? ''}
-                            onChange={(event) => updateConclusion('personalPrompt', { ...conclusion.personalPrompt, title: event.target.value })}
+                            onChange={(event) =>
+                                updateConclusion('personalPrompt', {
+                                    title: event.target.value,
+                                    description: conclusion.personalPrompt?.description ?? '',
+                                })
+                            }
                             className={inputBase}
                         />
                     </Field>
                     <textarea
                         placeholder="Invite l’apprenant à formuler sa propre phrase clé"
                         value={conclusion.personalPrompt?.description ?? ''}
-                        onChange={(event) => updateConclusion('personalPrompt', { ...conclusion.personalPrompt, description: event.target.value })}
+                        onChange={(event) =>
+                            updateConclusion('personalPrompt', {
+                                title: conclusion.personalPrompt?.title ?? 'Phrase intérieure',
+                                description: event.target.value,
+                            })
+                        }
                         className={cx(textareaBase, 'min-h-24')}
                     />
                 </CardBody>
@@ -334,14 +367,24 @@ export default function EditorConclusionPage() {
                         <input
                             placeholder="Titre de la section"
                             value={conclusion.softReminder?.title ?? ''}
-                            onChange={(event) => updateConclusion('softReminder', { ...conclusion.softReminder, title: event.target.value })}
+                            onChange={(event) =>
+                                updateConclusion('softReminder', {
+                                    title: event.target.value,
+                                    description: conclusion.softReminder?.description ?? '',
+                                })
+                            }
                             className={inputBase}
                         />
                     </Field>
                     <textarea
                         placeholder="Petit rappel bienveillant"
                         value={conclusion.softReminder?.description ?? ''}
-                        onChange={(event) => updateConclusion('softReminder', { ...conclusion.softReminder, description: event.target.value })}
+                        onChange={(event) =>
+                            updateConclusion('softReminder', {
+                                title: conclusion.softReminder?.title ?? 'Rappel doux',
+                                description: event.target.value,
+                            })
+                        }
                         className={cx(textareaBase, 'min-h-24')}
                     />
                 </CardBody>
@@ -354,9 +397,7 @@ export default function EditorConclusionPage() {
                         <input
                             placeholder="Titre de la section"
                             value={conclusion.continueAfter?.title ?? ''}
-                            onChange={(event) =>
-                                updateConclusion('continueAfter', { ...conclusion.continueAfter, title: event.target.value, items: conclusion.continueAfter?.items ?? [] })
-                            }
+                            onChange={(event) => updateListSection('continueAfter', { title: event.target.value })}
                             className={inputBase}
                         />
                     </Field>
@@ -364,7 +405,7 @@ export default function EditorConclusionPage() {
                     <div className="space-y-3">
                         {(conclusion.continueAfter?.items ?? []).map((item, index) => (
                             <div key={`continue-${index}`} className="flex items-center gap-2">
-                                <input value={item} onChange={(event) => updateList('continueAfter', index, event.target.value)} className={inputBase} />
+                                <input value={item} onChange={(event) => updateListItem('continueAfter', index, event.target.value)} className={inputBase} />
                                 <button
                                     type="button"
                                     onClick={() => removeListItem('continueAfter', index)}
