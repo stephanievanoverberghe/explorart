@@ -174,6 +174,7 @@ function MobileCourseCard({ course, onOpen }: { course: Course; onOpen: () => vo
                     <p className="text-xs text-main/60 wrap-break-words">
                         {course.level} • {course.duration} • {course.students} • {course.priceLabel}
                     </p>
+                    <p className="text-[0.7rem] text-main/55">Slug : {course.slug}</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -200,6 +201,7 @@ function MobileCourseCard({ course, onOpen }: { course: Course; onOpen: () => vo
                     ) : null}
                 </div>
 
+                {course.summary ? <p className="text-xs text-main/65 line-clamp-2">{course.summary}</p> : null}
                 <p className="text-xs text-main/60">{course.resourcesLabel}</p>
 
                 <div className="pt-1">
@@ -265,6 +267,8 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
 
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [slugCopied, setSlugCopied] = useState(false);
+    const slugCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [query, setQuery] = useState('');
     const [page, setPage] = useState(meta.page);
@@ -373,6 +377,28 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
         setFlagFree(false);
         setFlagPinned(false);
         setPage(1);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (slugCopyTimeoutRef.current) {
+                clearTimeout(slugCopyTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleCopySlug = async (slug: string) => {
+        if (!slug) return;
+        if (slugCopyTimeoutRef.current) {
+            clearTimeout(slugCopyTimeoutRef.current);
+        }
+        try {
+            await navigator.clipboard.writeText(slug);
+            setSlugCopied(true);
+            slugCopyTimeoutRef.current = setTimeout(() => setSlugCopied(false), 2000);
+        } catch {
+            setSlugCopied(false);
+        }
     };
 
     return (
@@ -628,6 +654,8 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
                                                     {course.level} • {course.duration} • {course.students} • {course.modulesCount} modules + intro • {course.videoCount} vidéos •{' '}
                                                     {course.resourceCount} ressources • {course.priceLabel}
                                                 </p>
+                                                <p className="text-[0.7rem] text-main/55">Slug : {course.slug}</p>
+                                                {course.summary ? <p className="text-[0.7rem] text-main/60 line-clamp-1">{course.summary}</p> : null}
                                             </div>
                                         </div>
 
@@ -747,6 +775,20 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
                                 {selectedCourse.level} • {selectedCourse.duration} • {selectedCourse.students} • {selectedCourse.priceLabel}
                             </p>
 
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-main/70">
+                                <span className="rounded-full border border-perl/60 bg-white px-3 py-1 font-semibold">Slug : {selectedCourse.slug}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => handleCopySlug(selectedCourse.slug)}
+                                    className={cx(
+                                        'rounded-full border px-3 py-1 font-semibold transition',
+                                        slugCopied ? 'border-sage/50 bg-sage/10 text-sage' : 'border-perl/60 bg-page/60 text-main/70 hover:bg-ivory'
+                                    )}
+                                >
+                                    {slugCopied ? 'Slug copié' : 'Copier le slug'}
+                                </button>
+                            </div>
+
                             <div className="flex flex-wrap gap-2">
                                 <Pill className="border-perl/60 bg-page/70 text-main/70">{selectedCourse.modulesCount} modules</Pill>
                                 <Pill className="border-perl/60 bg-page/70 text-main/70">Intro incluse</Pill>
@@ -775,11 +817,17 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
                                 </Link>
 
                                 <Link
-                                    href={selectedCourse.hrefPreview}
+                                    href={
+                                        selectedCourse.status === 'Publié'
+                                            ? `/cours/${selectedCourse.slug}`
+                                            : selectedCourse.hrefEdit.includes('/setup/identity')
+                                            ? selectedCourse.hrefEdit
+                                            : `/admin/cours/${selectedCourse.id}/editor/review`
+                                    }
                                     className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-perl/70 bg-white px-4 py-2 text-sm font-semibold text-main/80 transition hover:border-main/50 hover:bg-page"
                                 >
                                     <Eye className="h-4 w-4" />
-                                    Prévisualiser
+                                    {selectedCourse.status === 'Publié' ? 'Voir la page' : 'Prévisualiser'}
                                     <ChevronRight className="h-4 w-4" />
                                 </Link>
 

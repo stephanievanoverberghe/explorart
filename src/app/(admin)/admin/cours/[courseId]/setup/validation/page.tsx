@@ -8,16 +8,14 @@ import { getCourseAdmin } from '@/lib/actions/courseAdmin';
 import { buildSetupChecklist } from '@/lib/utils/courseSetupValidation';
 
 interface SetupValidationPageProps {
-    params: { courseId: string };
+    params: Promise<{ courseId: string }>;
 }
 
 export default async function SetupValidationPage({ params }: SetupValidationPageProps) {
-    const { courseId } = params;
-    const adminCourse = await getCourseAdmin(courseId);
+    const { courseId } = await params;
 
-    if (!adminCourse) {
-        notFound();
-    }
+    const adminCourse = await getCourseAdmin(courseId);
+    if (!adminCourse) notFound();
 
     const checklist = buildSetupChecklist(courseId, adminCourse.setup, adminCourse.commerce);
     const missingItems = checklist.items.filter((item) => item.status === 'missing');

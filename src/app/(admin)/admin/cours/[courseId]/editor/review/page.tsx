@@ -1,3 +1,4 @@
+// src/app/(admin)/admin/cours/[courseId]/editor/review/page.tsx
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronLeft, CheckCircle2, AlertTriangle, XCircle, ArrowRight } from 'lucide-react';
@@ -9,7 +10,7 @@ import { getCourseSetup } from '@/lib/data/courseSetup';
 import { buildEditorChecklist } from '@/lib/utils/courseContentValidation';
 
 interface EditorReviewPageProps {
-    params: { courseId: string };
+    params: Promise<{ courseId: string }>;
 }
 
 const statusStyles = {
@@ -25,12 +26,10 @@ const statusIcons = {
 } as const;
 
 export default async function EditorReviewPage({ params }: EditorReviewPageProps) {
-    const { courseId } = params;
-    const setup = await getCourseSetup(courseId);
+    const { courseId } = await params;
 
-    if (!setup) {
-        notFound();
-    }
+    const setup = await getCourseSetup(courseId);
+    if (!setup) notFound();
 
     const content = await getCourseContent(courseId);
     const checklist = buildEditorChecklist(courseId, setup, content);
@@ -73,6 +72,7 @@ export default async function EditorReviewPage({ params }: EditorReviewPageProps
                                         <p className="text-xs text-main/60">{item.description}</p>
                                     </div>
                                 </div>
+
                                 {item.href ? (
                                     <Link
                                         href={item.href}
@@ -95,10 +95,12 @@ export default async function EditorReviewPage({ params }: EditorReviewPageProps
                         <p className="text-xs uppercase tracking-[0.18em] text-main/55">Modules</p>
                         <p className="mt-2 text-sm text-main/70">{setup.structure.modules.length} modules à parcourir</p>
                     </div>
+
                     <div className={cx('rounded-2xl border p-4', checklist.canPublish ? statusStyles.ok : statusStyles.warning)}>
                         <p className="text-xs uppercase tracking-[0.18em]">État global</p>
                         <p className="mt-2 text-sm">{checklist.canPublish ? 'Prêt pour publication' : 'Quelques ajustements requis'}</p>
                     </div>
+
                     <div className={cx('rounded-2xl border p-4', checklist.blockingErrors ? statusStyles.error : statusStyles.ok)}>
                         <p className="text-xs uppercase tracking-[0.18em]">Blocages</p>
                         <p className="mt-2 text-sm">{checklist.blockingErrors > 0 ? `${checklist.blockingErrors} point(s) bloquant(s)` : 'Aucun blocage'}</p>

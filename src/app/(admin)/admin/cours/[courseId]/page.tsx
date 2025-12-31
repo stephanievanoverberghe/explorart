@@ -4,13 +4,11 @@ import { ActionTile, Badge, Card, CardBody, CardHeader, PageHeader, TopBar, Quic
 import { getCourseAdmin } from '@/lib/actions/courseAdmin';
 import { notFound } from 'next/navigation';
 
-export default async function AdminCourseHubPage({ params }: { params: { courseId: string } }) {
-    const { courseId } = params;
-    const course = await getCourseAdmin(courseId);
+export default async function AdminCourseHubPage({ params }: { params: Promise<{ courseId: string }> }) {
+    const { courseId } = await params;
 
-    if (!course) {
-        notFound();
-    }
+    const course = await getCourseAdmin(courseId);
+    if (!course) notFound();
 
     const statusLabel = course.status === 'published' ? 'Publié' : course.status === 'archived' ? 'Archivé' : 'Brouillon';
     const setupLabel = course.progress.setupComplete ? 'Setup complet' : 'Setup à compléter';

@@ -228,6 +228,9 @@ export async function GET(request: NextRequest) {
                 const priceValue = commerce.computed.effectivePrice;
                 const pinned = Boolean((course as { pinned?: boolean }).pinned);
 
+                const editHref = `/admin/cours/${String(course._id)}/setup/identity`;
+                const previewHref = course.status === 'published' ? `/cours/${course.slug}` : `/admin/cours/${String(course._id)}/editor/review`;
+
                 return {
                     id: String(course._id),
                     slug: course.slug,
@@ -246,8 +249,8 @@ export async function GET(request: NextRequest) {
                         src: course.coverImage || '/images/cours/commencer-ici-cover.png',
                         alt: `Couverture du cours ${course.title}`,
                     },
-                    hrefEdit: `/admin/cours/${String(course._id)}`,
-                    hrefPreview: `/cours/${course.slug}`,
+                    hrefEdit: editHref,
+                    hrefPreview: previewHref,
                     summary: course.summary || course.tagline,
                     priceLabel: formatPrice(priceValue ?? 0),
                     videoCount: 0,
@@ -328,7 +331,7 @@ export async function GET(request: NextRequest) {
                             alt: `Couverture du cours ${title}`,
                         },
                         hrefEdit: `/admin/cours/${String(s.courseId)}/setup/identity`,
-                        hrefPreview: `/admin/cours/${String(s.courseId)}`,
+                        hrefPreview: `/admin/cours/${String(s.courseId)}/editor/review`,
                         summary: identity.summary || 'Setup en cours…',
                         priceLabel: formatPrice(priceEUR),
                         videoCount: 0,
