@@ -270,6 +270,8 @@ export async function GET(request: NextRequest) {
             const setups = (await CourseSetup.find({}).sort({ updatedAt: -1 }).limit(500).lean()) as unknown as CourseSetupLeanLite[];
 
             const existingIds = new Set(normalizedCourses.map((c) => c.id));
+            const existingSlugs = new Set(normalizedCourses.map((c) => c.slug));
+            const seenSetupSlugs = new Set<string>();
 
             setupRows = setups
                 .filter((s) => !existingIds.has(String(s.courseId)))
@@ -310,7 +312,15 @@ export async function GET(request: NextRequest) {
                     const modulesCount = Array.isArray(structure.modules) ? structure.modules.length : 0;
                     const resourceCount = Array.isArray(resources.resources) ? resources.resources.length : 0;
 
-                    const safeSlug = isValidSlug(rawSlug) ? rawSlug : `draft-${String(s.courseId).slice(-6)}`;
+                    const normalizedSlug = rawSlug.toLowerCase();
+                    if (isValidSlug(normalizedSlug)) {
+                        if (existingSlugs.has(normalizedSlug) || seenSetupSlugs.has(normalizedSlug)) {
+                            return null;
+                        }
+                        seenSetupSlugs.add(normalizedSlug);
+                    }
+
+                    const safeSlug = isValidSlug(normalizedSlug) ? normalizedSlug : `draft-${String(s.courseId).slice(-6)}`;
 
                     return {
                         id: String(s.courseId),

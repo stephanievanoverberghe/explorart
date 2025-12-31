@@ -153,6 +153,21 @@ function ensureCourseSlug(courseId: string, setup: CourseSetupData) {
     return slugCandidate || `draft-${courseId.slice(-6)}`;
 }
 
+async function assertCourseSlugAvailable(courseId: string, slug: string) {
+    const normalized = slug.trim().toLowerCase();
+    if (!normalized) return;
+
+    const existingCourse = await Course.findOne({ slug: normalized, _id: { $ne: courseId } }).lean();
+    if (existingCourse) {
+        throw new Error('Ce slug est déjà utilisé par un autre cours.');
+    }
+
+    const existingSetup = await CourseSetup.findOne({ 'identity.slug': normalized, courseId: { $ne: courseId } }).lean();
+    if (existingSetup) {
+        throw new Error('Ce slug est déjà utilisé par un autre brouillon.');
+    }
+}
+
 function normalizeCommerceDoc(courseId: string, doc: CommerceDocLike | null | undefined): CourseCommerceData {
     const promotions = (doc?.promotions ?? []).map((promo) => ({
         ...promo,
@@ -333,6 +348,7 @@ export async function saveCourseSetup(courseId: string, payload: CourseSetupPayl
 
     const current = (await CourseSetup.findOne({ courseId }).lean()) as CourseSetupData | null;
     const next = buildNextSetup(courseId, current, payload);
+    await assertCourseSlugAvailable(courseId, next.identity.slug);
 
     await CourseSetup.findOneAndUpdate(
         { courseId },
@@ -372,6 +388,7 @@ export async function updateCourseSetupSlice(
 
         const current = (await CourseSetup.findOne({ courseId }).lean()) as CourseSetupData | null;
         const next = buildNextSetup(courseId, current, { [sliceName]: sliceData } as CourseSetupPayload);
+        await assertCourseSlugAvailable(courseId, next.identity.slug);
 
         await CourseSetup.findOneAndUpdate(
             { courseId },

@@ -96,6 +96,7 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
 
     const [submitting, setSubmitting] = useState(false);
     const [savedAt, setSavedAt] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const suggestedSlug = useMemo(() => slugify(title), [title]);
 
@@ -106,6 +107,7 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
     async function saveDraft() {
         if (submitting) return;
         setSubmitting(true);
+        setError(null);
 
         try {
             await updateCourseIdentity(courseId, {
@@ -120,6 +122,11 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
 
             const now = new Date();
             setSavedAt(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+            return true;
+        } catch (caughtError) {
+            const message = caughtError instanceof Error ? caughtError.message : 'Erreur inconnue.';
+            setError(message);
+            return false;
         } finally {
             setSubmitting(false);
         }
@@ -127,8 +134,10 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
 
     async function saveAndContinue() {
         if (!canContinue || submitting) return;
-        await saveDraft();
-        router.push(`/admin/cours/${courseId}/setup/intent`);
+        const ok = await saveDraft();
+        if (ok) {
+            router.push(`/admin/cours/${courseId}/setup/intent`);
+        }
     }
 
     return (
@@ -159,6 +168,8 @@ export default function SetupIdentityClient({ courseId, initialIdentity }: Setup
                     </>
                 }
             />
+
+            {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
 
             <Card>
                 <CardHeader
