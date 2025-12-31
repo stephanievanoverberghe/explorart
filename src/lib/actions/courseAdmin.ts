@@ -253,7 +253,6 @@ export async function createCourseDraft(): Promise<{ courseId: string; slug: str
     });
     await CourseCommerce.create(commerce);
 
-    revalidatePath('/admin/cours');
     return { courseId, slug: draftSlug };
 }
 

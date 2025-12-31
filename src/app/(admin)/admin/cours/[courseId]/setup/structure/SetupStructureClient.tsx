@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Plus, GripVertical, ArrowUp, ArrowDown, Trash2, Clock, Layers, BookOpen, Flag, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
+import { ChevronLeft, Plus, GripVertical, ArrowUp, ArrowDown, Trash2, Clock, Layers, BookOpen, Flag, AlertTriangle, Info } from 'lucide-react';
 import { Badge, Card, CardBody, CardHeader, PageHeader, TopBar, QuickLinks, cx } from '@/components/admin/courses/CourseUI';
 import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFooter';
 import { updateCourseStructure } from '@/lib/actions/courseSetup';
@@ -202,7 +202,7 @@ export default function SetupStructureClient({ courseId, initialStructure }: Set
                 title="Structure du cours"
                 description={
                     <>
-                        On transforme l’intention en plan : <span className="font-semibold text-main">Intro → Modules → Conclusion</span>. (Conclusion intégrée ✅)
+                        On transforme l’intention en plan : <span className="font-semibold text-main">Intro → Modules → Conclusion</span>.
                     </>
                 }
             />
@@ -222,12 +222,6 @@ export default function SetupStructureClient({ courseId, initialStructure }: Set
                                 <span className="inline-flex items-center gap-1.5">
                                     <Layers className="h-3.5 w-3.5" />
                                     {modules.length} module{modules.length > 1 ? 's' : ''}
-                                </span>
-                            </Pill>
-                            <Pill className="border-sage/40 bg-sage/10 text-sage">
-                                <span className="inline-flex items-center gap-1.5">
-                                    <CheckCircle2 className="h-3.5 w-3.5" />
-                                    Conclusion incluse
                                 </span>
                             </Pill>
                         </span>

@@ -562,7 +562,7 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
                             </button>
                         </div>
                     ) : (
-                        courses.map((course) => <MobileCourseCard key={course.id} course={course} onOpen={() => openCourse(course)} />)
+                        courses.map((course) => <MobileCourseCard key={course.id || course.slug} course={course} onOpen={() => openCourse(course)} />)
                     )}
                 </div>
 
@@ -585,7 +585,7 @@ export function CoursesPageClient({ initialData }: { initialData: CourseListResp
 
                             return (
                                 <button
-                                    key={course.id}
+                                    key={course.id || course.slug}
                                     type="button"
                                     onClick={() => openCourse(course)}
                                     className="w-full text-left px-4 sm:px-5 py-4 hover:bg-page/60 transition cursor-pointer overflow-x-hidden"
