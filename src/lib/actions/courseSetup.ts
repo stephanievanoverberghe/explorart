@@ -4,13 +4,18 @@
 import { connectToDatabase } from '@/lib/db/connect';
 import { CourseSetup } from '@/lib/models/CourseSetup';
 import type { CourseAccessData, CourseIdentityData, CourseIntentData, CoursePricingData, CourseResourcesData, CourseStructureData } from '@/types/courseSetup';
-import { saveCourseSetup } from '@/lib/actions/courseAdmin';
+import { updateCourseSetupSlice } from '@/lib/actions/courseAdmin';
 
 /* ---------------------------------------------
    Generic update helper
 ---------------------------------------------- */
-async function updateCourseSetupSection<T>(courseId: string, section: string, payload: T) {
-    await saveCourseSetup(courseId, { [section]: payload } as Record<string, T>);
+type CourseSetupSlice = Parameters<typeof updateCourseSetupSlice>[1];
+
+async function updateCourseSetupSection<T>(courseId: string, section: CourseSetupSlice, payload: T) {
+    const result = await updateCourseSetupSlice(courseId, section, payload as never);
+    if (!result.ok) {
+        throw new Error(result.error);
+    }
 }
 
 export async function updateCourseIdentity(courseId: string, payload: CourseIdentityData) {

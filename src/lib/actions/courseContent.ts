@@ -6,6 +6,7 @@ import { CourseContent } from '@/lib/models/CourseContent';
 import { CourseSetup } from '@/lib/models/CourseSetup';
 import type { CourseConclusionData, CourseContentData, CourseIntroData, CourseModuleData, CourseContentStatus } from '@/types/courseContent';
 import { normalizeConclusion, normalizeIntro, normalizeModule } from '@/lib/utils/courseFactories';
+import { updateCourseContentSlice } from '@/lib/actions/courseAdmin';
 
 export async function getIntro(courseId: string): Promise<CourseIntroData | null> {
     await connectToDatabase();
@@ -14,8 +15,10 @@ export async function getIntro(courseId: string): Promise<CourseIntroData | null
 }
 
 export async function saveIntro(courseId: string, payload: CourseIntroData): Promise<void> {
-    await saveCourseIntro(courseId, payload);
-    revalidatePath(`/admin/cours/${courseId}/editor/intro`);
+    const result = await updateCourseContentSlice(courseId, 'intro', { intro: payload });
+    if (!result.ok) {
+        throw new Error(result.error);
+    }
 }
 
 export async function getModule(courseId: string, moduleId: string): Promise<CourseModuleData | null> {
@@ -26,8 +29,10 @@ export async function getModule(courseId: string, moduleId: string): Promise<Cou
 }
 
 export async function saveModule(courseId: string, moduleId: string, payload: CourseModuleData): Promise<void> {
-    await saveCourseModule(courseId, moduleId, payload);
-    revalidatePath(`/admin/cours/${courseId}/editor/modules/${moduleId}`);
+    const result = await updateCourseContentSlice(courseId, 'module', { moduleId, module: payload });
+    if (!result.ok) {
+        throw new Error(result.error);
+    }
 }
 
 export async function getConclusion(courseId: string): Promise<CourseConclusionData | null> {
@@ -37,8 +42,10 @@ export async function getConclusion(courseId: string): Promise<CourseConclusionD
 }
 
 export async function saveConclusion(courseId: string, payload: CourseConclusionData): Promise<void> {
-    await saveCourseConclusion(courseId, payload);
-    revalidatePath(`/admin/cours/${courseId}/editor/conclusion`);
+    const result = await updateCourseContentSlice(courseId, 'conclusion', { conclusion: payload });
+    if (!result.ok) {
+        throw new Error(result.error);
+    }
 }
 
 export async function getCourseContent(courseId: string): Promise<CourseContentData | null> {

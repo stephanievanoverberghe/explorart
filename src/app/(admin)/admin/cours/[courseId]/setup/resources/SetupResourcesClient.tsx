@@ -62,7 +62,7 @@ export default function SetupResourcesClient({ courseId, initialResources }: Set
     async function handleNext() {
         if (submitting) return;
         await saveDraft();
-        router.push(`/admin/cours/${courseId}/setup/review`);
+        router.push(`/admin/cours/${courseId}/setup/validation`);
     }
 
     return (

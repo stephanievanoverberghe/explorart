@@ -7,11 +7,11 @@ import { CourseWizardFooter } from '@/components/admin/courses/CourseWizardFoote
 import { getCourseAdmin } from '@/lib/actions/courseAdmin';
 import { buildSetupChecklist } from '@/lib/utils/courseSetupValidation';
 
-interface SetupReviewPageProps {
+interface SetupValidationPageProps {
     params: { courseId: string };
 }
 
-export default async function SetupReviewPage({ params }: SetupReviewPageProps) {
+export default async function SetupValidationPage({ params }: SetupValidationPageProps) {
     const { courseId } = params;
     const adminCourse = await getCourseAdmin(courseId);
 

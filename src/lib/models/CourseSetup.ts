@@ -17,9 +17,9 @@ export interface CourseSetupDocument extends Document {
 const courseModuleSchema = new Schema<CourseModuleData>(
     {
         id: { type: String, required: true },
-        title: { type: String, required: true, trim: true },
-        goal: { type: String, required: true, trim: true },
-        minutes: { type: Number, required: true },
+        title: { type: String, default: '', trim: true },
+        goal: { type: String, default: '', trim: true },
+        minutes: { type: Number, default: 0 },
     },
     { _id: false }
 );
@@ -27,8 +27,8 @@ const courseModuleSchema = new Schema<CourseModuleData>(
 const courseResourceSchema = new Schema(
     {
         id: { type: String, required: true },
-        title: { type: String, required: true, trim: true },
-        format: { type: String, required: true, trim: true },
+        title: { type: String, default: '', trim: true },
+        format: { type: String, default: '', trim: true },
     },
     { _id: false }
 );

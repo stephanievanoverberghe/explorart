@@ -81,7 +81,7 @@ const CourseModuleSchema = new Schema(
 const CourseConclusionSchema = new Schema(
     {
         badgeLabel: { type: String },
-        title: { type: String, required: true },
+        title: { type: String, default: '' },
         description: { type: String },
         video: { type: CourseVideoSchema },
         quickReview: { type: CourseSectionListSchema },

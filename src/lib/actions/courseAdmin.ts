@@ -11,11 +11,12 @@ import { CourseSetup } from '@/lib/models/CourseSetup';
 import type { AdminCourseDTO, PublicCourseDTO } from '@/types/courseDto';
 import type { CourseAccessData, CourseIdentityData, CourseIntentData, CoursePricingData, CourseResourcesData, CourseSetupData, CourseStructureData } from '@/types/courseSetup';
 import type { CourseCommerceData, CourseCouponData, CoursePromotionData } from '@/types/courseCommerce';
-import type { CourseContentData } from '@/types/courseContent';
+import type { CourseConclusionData, CourseContentData, CourseIntroData, CourseModuleData } from '@/types/courseContent';
 import { buildDefaultCourseSetup } from '@/lib/utils//courseSetupDefaults';
 import { computeCommerce } from '@/lib/utils/courseCommerce';
 import { buildPublishChecklist } from '@/lib/utils/coursePublishValidation';
 import { slugify } from '@/lib/utils//slugify';
+import { normalizeConclusion, normalizeIntro, normalizeModule } from '@/lib/utils/courseFactories';
 
 const pillarLabels: Record<string, string> = {
     'dessin-peinture': 'Dessin & Peinture',
@@ -126,6 +127,32 @@ type CommerceDocLike = Omit<Partial<CourseCommerceData>, 'updatedAt' | 'promotio
     coupons?: Array<Omit<CourseCouponData, 'startsAt' | 'endsAt'> & { startsAt?: string | Date; endsAt?: string | Date }>;
 };
 
+type CourseSetupPayload = Partial<{
+    identity: CourseIdentityData;
+    intent: CourseIntentData;
+    structure: CourseStructureData;
+    access: CourseAccessData;
+    pricing: CoursePricingData;
+    resources: CourseResourcesData;
+}>;
+
+type CourseSetupSlice = keyof CourseSetupPayload;
+
+type CourseContentSlice = 'intro' | 'module' | 'conclusion';
+
+type UpdateResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
+function assertValidCourseId(courseId: string) {
+    if (!Types.ObjectId.isValid(courseId)) {
+        throw new Error('Identifiant de cours invalide.');
+    }
+}
+
+function ensureCourseSlug(courseId: string, setup: CourseSetupData) {
+    const slugCandidate = setup.identity.slug || slugify(setup.identity.title);
+    return slugCandidate || `draft-${courseId.slice(-6)}`;
+}
+
 function normalizeCommerceDoc(courseId: string, doc: CommerceDocLike | null | undefined): CourseCommerceData {
     const promotions = (doc?.promotions ?? []).map((promo) => ({
         ...promo,
@@ -154,6 +181,20 @@ function normalizeCommerceDoc(courseId: string, doc: CommerceDocLike | null | un
     };
 
     return computeCommerce(commerce);
+}
+
+function buildNextSetup(courseId: string, current: CourseSetupData | null, payload: CourseSetupPayload): CourseSetupData {
+    const defaults = buildDefaultCourseSetup(courseId);
+
+    return {
+        courseId,
+        identity: normalizeIdentity(payload.identity ?? current?.identity ?? defaults.identity),
+        intent: normalizeIntent(payload.intent ?? current?.intent ?? defaults.intent),
+        structure: normalizeStructure(payload.structure ?? current?.structure ?? defaults.structure),
+        access: normalizeAccess(payload.access ?? current?.access ?? defaults.access),
+        pricing: normalizePricing(payload.pricing ?? current?.pricing ?? defaults.pricing),
+        resources: normalizeResources(payload.resources ?? current?.resources ?? defaults.resources),
+    };
 }
 
 async function buildCourseCommerce(courseId: string, setup: CourseSetupData): Promise<CourseCommerceData> {
@@ -191,6 +232,54 @@ async function buildCourseCommerce(courseId: string, setup: CourseSetupData): Pr
         computed: { effectivePrice: 0 },
         updatedAt: existing?.updatedAt?.toISOString(),
     });
+}
+
+function buildAggregateUpdate(setup: CourseSetupData, content?: CourseContentData | null) {
+    const durationMinutes = computeDuration(setup.structure);
+
+    return {
+        slug: ensureCourseSlug(setup.courseId, setup),
+        title: setup.identity.title || 'Cours sans titre',
+        tagline: setup.intent.promise,
+        level: mapLevel(setup.identity.level),
+        pillarSlug: setup.identity.pillar,
+        pillarLabel: pillarLabels[setup.identity.pillar] ?? 'Dessin & Peinture',
+        coverImage: setup.identity.coverImage,
+        durationLabel: getDurationLabel(durationMinutes),
+        durationMinutes,
+        modulesCount: setup.structure.modules.length,
+        hasIntro: Boolean(content?.intro) || setup.structure.introMinutes > 0,
+        hasConclusion: Boolean(content?.conclusion) || setup.structure.conclusionMinutes > 0,
+        pinned: setup.identity.pinned,
+    };
+}
+
+function revalidateCourseAdmin(courseId: string) {
+    revalidatePath('/admin/cours');
+    revalidatePath(`/admin/cours/${courseId}`);
+}
+
+function revalidateCoursePublic(slug: string) {
+    revalidatePath('/cours');
+    revalidatePath(`/cours/${slug}`);
+}
+
+export async function updateCourseAggregateFromSetup(courseId: string, setup: CourseSetupData, content?: CourseContentData | null) {
+    const aggregate = buildAggregateUpdate(setup, content);
+
+    const course = await Course.findOneAndUpdate(
+        { _id: courseId },
+        {
+            $set: aggregate,
+            $setOnInsert: {
+                status: 'draft',
+                listed: false,
+            },
+        },
+        { upsert: true, new: true }
+    ).lean();
+
+    return { course, aggregate };
 }
 
 export async function createCourseDraft(): Promise<{ courseId: string; slug: string }> {
@@ -238,31 +327,12 @@ export async function createCourseDraft(): Promise<{ courseId: string; slug: str
     return { courseId, slug: draftSlug };
 }
 
-export async function saveCourseSetup(
-    courseId: string,
-    payload: Partial<{
-        identity: CourseIdentityData;
-        intent: CourseIntentData;
-        structure: CourseStructureData;
-        access: CourseAccessData;
-        pricing: CoursePricingData;
-        resources: CourseResourcesData;
-    }>
-): Promise<CourseSetupData> {
+export async function saveCourseSetup(courseId: string, payload: CourseSetupPayload): Promise<CourseSetupData> {
+    assertValidCourseId(courseId);
     await connectToDatabase();
 
-    const current = await CourseSetup.findOne({ courseId }).lean();
-    const defaults = buildDefaultCourseSetup(courseId);
-
-    const next: CourseSetupData = {
-        courseId,
-        identity: normalizeIdentity(payload.identity ?? (current?.identity as CourseIdentityData) ?? defaults.identity),
-        intent: normalizeIntent(payload.intent ?? (current?.intent as CourseIntentData) ?? defaults.intent),
-        structure: normalizeStructure(payload.structure ?? (current?.structure as CourseStructureData) ?? defaults.structure),
-        access: normalizeAccess(payload.access ?? (current?.access as CourseAccessData) ?? defaults.access),
-        pricing: normalizePricing(payload.pricing ?? (current?.pricing as CoursePricingData) ?? defaults.pricing),
-        resources: normalizeResources(payload.resources ?? (current?.resources as CourseResourcesData) ?? defaults.resources),
-    };
+    const current = (await CourseSetup.findOne({ courseId }).lean()) as CourseSetupData | null;
+    const next = buildNextSetup(courseId, current, payload);
 
     await CourseSetup.findOneAndUpdate(
         { courseId },
@@ -279,37 +349,156 @@ export async function saveCourseSetup(
         { upsert: true, new: true }
     );
 
-    const durationMinutes = computeDuration(next.structure);
-    const modulesCount = next.structure.modules.length;
-    const durationLabel = getDurationLabel(durationMinutes);
-
-    await Course.findOneAndUpdate(
-        { _id: courseId },
-        {
-            $set: {
-                slug: next.identity.slug || slugify(next.identity.title),
-                title: next.identity.title || 'Cours sans titre',
-                tagline: next.intent.promise,
-                level: mapLevel(next.identity.level),
-                pillarSlug: next.identity.pillar,
-                pillarLabel: pillarLabels[next.identity.pillar] ?? 'Dessin & Peinture',
-                coverImage: next.identity.coverImage,
-                durationLabel,
-                durationMinutes,
-                modulesCount,
-                hasIntro: next.structure.introMinutes > 0,
-                hasConclusion: next.structure.conclusionMinutes > 0,
-                pinned: next.identity.pinned,
-            },
-        },
-        { upsert: true, new: true }
-    );
+    const { course } = await updateCourseAggregateFromSetup(courseId, next);
 
     const commerce = await buildCourseCommerce(courseId, next);
     await CourseCommerce.findOneAndUpdate({ courseId }, { $set: commerce }, { upsert: true, new: true });
 
-    revalidatePath(`/admin/cours/${courseId}`);
+    revalidateCourseAdmin(courseId);
+    if (course?.status === 'published') {
+        revalidateCoursePublic(course.slug);
+    }
     return next;
+}
+
+export async function updateCourseSetupSlice(
+    courseId: string,
+    sliceName: CourseSetupSlice,
+    sliceData: CourseSetupPayload[CourseSetupSlice]
+): Promise<UpdateResult<CourseSetupData>> {
+    try {
+        assertValidCourseId(courseId);
+        await connectToDatabase();
+
+        const current = (await CourseSetup.findOne({ courseId }).lean()) as CourseSetupData | null;
+        const next = buildNextSetup(courseId, current, { [sliceName]: sliceData } as CourseSetupPayload);
+
+        await CourseSetup.findOneAndUpdate(
+            { courseId },
+            {
+                $set: {
+                    identity: next.identity,
+                    intent: next.intent,
+                    structure: next.structure,
+                    access: next.access,
+                    pricing: next.pricing,
+                    resources: next.resources,
+                },
+            },
+            { upsert: true, new: true }
+        );
+
+        const contentDoc = await CourseContent.findOne({ courseId }).lean();
+        const content: CourseContentData | null = contentDoc
+            ? {
+                  intro: contentDoc.intro ?? undefined,
+                  modules: (contentDoc.modules as CourseContentData['modules']) ?? {},
+                  conclusion: contentDoc.conclusion ?? undefined,
+                  contentStatus: contentDoc.contentStatus ?? undefined,
+                  contentPublishedAt: contentDoc.contentPublishedAt?.toISOString(),
+              }
+            : null;
+
+        const { course } = await updateCourseAggregateFromSetup(courseId, next, content);
+
+        const commerce = await buildCourseCommerce(courseId, next);
+        await CourseCommerce.findOneAndUpdate({ courseId }, { $set: commerce }, { upsert: true, new: true });
+
+        revalidateCourseAdmin(courseId);
+        if (course?.status === 'published') {
+            revalidateCoursePublic(course.slug);
+        }
+
+        return { ok: true, data: next };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Erreur inconnue.';
+        return { ok: false, error: message };
+    }
+}
+
+export async function updateCourseContentSlice(
+    courseId: string,
+    sliceName: CourseContentSlice,
+    payload: { intro: CourseIntroData } | { moduleId: string; module: CourseModuleData } | { conclusion: CourseConclusionData }
+): Promise<UpdateResult<null>> {
+    try {
+        assertValidCourseId(courseId);
+        await connectToDatabase();
+
+        if (sliceName === 'intro' && 'intro' in payload) {
+            const normalized = normalizeIntro(payload.intro);
+            await CourseContent.findOneAndUpdate({ courseId }, { $set: { intro: normalized } }, { upsert: true, new: true });
+        }
+
+        if (sliceName === 'conclusion' && 'conclusion' in payload) {
+            const normalized = normalizeConclusion(payload.conclusion);
+            await CourseContent.findOneAndUpdate({ courseId }, { $set: { conclusion: normalized } }, { upsert: true, new: true });
+        }
+
+        if (sliceName === 'module' && 'moduleId' in payload) {
+            const setup = await CourseSetup.findOne({ courseId }).lean();
+            const modules = (setup?.structure?.modules as Array<{ id: string; title?: string }> | undefined) ?? [];
+            const exists = modules.some((module) => module.id === payload.moduleId);
+
+            if (!exists) {
+                return { ok: false, error: 'Module introuvable pour ce cours.' };
+            }
+
+            const fallbackTitle = modules.find((module) => module.id === payload.moduleId)?.title ?? '';
+            const normalized = normalizeModule(payload.module, fallbackTitle);
+            await CourseContent.findOneAndUpdate({ courseId }, { $set: { [`modules.${payload.moduleId}`]: normalized } }, { upsert: true, new: true });
+        }
+
+        const setupDoc = await CourseSetup.findOne({ courseId }).lean();
+        const setup = setupDoc ? (setupDoc as CourseSetupData) : buildDefaultCourseSetup(courseId);
+
+        const contentDoc = await CourseContent.findOne({ courseId }).lean();
+        const content: CourseContentData | null = contentDoc
+            ? {
+                  intro: contentDoc.intro ?? undefined,
+                  modules: (contentDoc.modules as CourseContentData['modules']) ?? {},
+                  conclusion: contentDoc.conclusion ?? undefined,
+                  contentStatus: contentDoc.contentStatus ?? undefined,
+                  contentPublishedAt: contentDoc.contentPublishedAt?.toISOString(),
+              }
+            : null;
+
+        const { course } = await updateCourseAggregateFromSetup(courseId, setup, content);
+
+        revalidateCourseAdmin(courseId);
+        if (course?.status === 'published') {
+            revalidateCoursePublic(course.slug);
+        }
+
+        return { ok: true, data: null };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Erreur inconnue.';
+        return { ok: false, error: message };
+    }
+}
+
+export async function updateCourseCommerce(courseId: string, patch: Partial<CourseCommerceData>): Promise<UpdateResult<CourseCommerceData>> {
+    try {
+        assertValidCourseId(courseId);
+        await connectToDatabase();
+
+        const existing = await CourseCommerce.findOne({ courseId }).lean();
+        const merged = normalizeCommerceDoc(courseId, { ...existing, ...patch });
+        const next = computeCommerce(merged);
+
+        const updated = await CourseCommerce.findOneAndUpdate({ courseId }, { $set: next }, { upsert: true, new: true }).lean();
+
+        const course = await Course.findById(courseId).lean();
+        revalidateCourseAdmin(courseId);
+        if (course?.status === 'published') {
+            revalidateCoursePublic(course.slug);
+        }
+
+        return { ok: true, data: normalizeCommerceDoc(courseId, updated) };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Erreur inconnue.';
+        return { ok: false, error: message };
+    }
 }
 
 export async function getCourseAdmin(courseId: string): Promise<AdminCourseDTO | null> {
@@ -424,9 +613,9 @@ export async function getCoursePublic(slug: string): Promise<PublicCourseDTO | n
 }
 
 export async function publishCourse(courseId: string): Promise<{ ok: boolean; checklist: ReturnType<typeof buildPublishChecklist> }> {
+    assertValidCourseId(courseId);
     await connectToDatabase();
-    const [courseDoc, setupDoc, contentDoc, commerceDoc] = await Promise.all([
-        Course.findById(courseId).lean(),
+    const [setupDoc, contentDoc, commerceDoc] = await Promise.all([
         CourseSetup.findOne({ courseId }).lean(),
         CourseContent.findOne({ courseId }).lean(),
         CourseCommerce.findOne({ courseId }).lean(),
@@ -451,31 +640,41 @@ export async function publishCourse(courseId: string): Promise<{ ok: boolean; ch
         return { ok: false, checklist };
     }
 
-    const slug = setup.identity.slug || slugify(setup.identity.title);
-    const listed = Boolean(courseDoc?.listed);
+    const slug = ensureCourseSlug(courseId, setup);
 
     await CourseContent.findOneAndUpdate({ courseId }, { $set: { contentStatus: 'published', contentPublishedAt: new Date() } }, { upsert: true, new: true });
 
     await CourseCommerce.findOneAndUpdate({ courseId }, { $set: commerce }, { upsert: true, new: true });
 
-    revalidatePath(`/admin/cours/${courseId}`);
-    revalidatePath('/cours');
-    revalidatePath(`/cours/${slug}`);
+    await Course.findOneAndUpdate(
+        { _id: courseId },
+        {
+            $set: {
+                status: 'published',
+                publishedAt: new Date(),
+            },
+        },
+        { new: true }
+    );
+
+    revalidateCourseAdmin(courseId);
+    revalidateCoursePublic(slug);
 
     return { ok: true, checklist };
 }
 
 export async function updateCourseListing(courseId: string, listed: boolean): Promise<void> {
+    assertValidCourseId(courseId);
     await connectToDatabase();
     const course = await Course.findOneAndUpdate({ _id: courseId }, { $set: { listed: Boolean(listed) } }, { new: true }).lean();
-    revalidatePath(`/admin/cours/${courseId}`);
+    revalidateCourseAdmin(courseId);
     if (course?.status === 'published') {
-        revalidatePath('/cours');
-        revalidatePath(`/cours/${course.slug}`);
+        revalidateCoursePublic(course.slug);
     }
 }
 
 export async function unpublishCourse(courseId: string): Promise<void> {
+    assertValidCourseId(courseId);
     await connectToDatabase();
     const course = await Course.findById(courseId).lean();
     if (!course) return;
@@ -503,7 +702,6 @@ export async function unpublishCourse(courseId: string): Promise<void> {
         { upsert: true, new: true }
     );
 
-    revalidatePath(`/admin/cours/${courseId}`);
-    revalidatePath('/cours');
-    revalidatePath(`/cours/${course.slug}`);
+    revalidateCourseAdmin(courseId);
+    revalidateCoursePublic(course.slug);
 }

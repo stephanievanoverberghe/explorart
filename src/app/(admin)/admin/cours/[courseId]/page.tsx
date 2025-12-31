@@ -79,7 +79,7 @@ export default async function AdminCourseHubPage({ params }: { params: { courseI
                         />
 
                         <ActionTile
-                            href={`/admin/cours/${courseId}/setup/review`}
+                            href={`/admin/cours/${courseId}/setup/validation`}
                             kicker="Checklist"
                             title={
                                 <>

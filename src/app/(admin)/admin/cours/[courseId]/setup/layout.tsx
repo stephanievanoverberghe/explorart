@@ -16,7 +16,7 @@ const steps = [
     { key: 'access', label: 'Accès', hrefSuffix: '/setup/access' },
     { key: 'pricing', label: 'Prix', hrefSuffix: '/setup/pricing' },
     { key: 'resources', label: 'Ressources', hrefSuffix: '/setup/resources' },
-    { key: 'review', label: 'Validation', hrefSuffix: '/setup/review' },
+    { key: 'validation', label: 'Validation', hrefSuffix: '/setup/validation' },
 ] as const;
 
 export default function CourseSetupLayout({ children }: { children: React.ReactNode }) {

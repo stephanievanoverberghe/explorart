@@ -641,7 +641,7 @@ export default function EditorIntroPage() {
             </Card>
 
             <CourseWizardFooter
-                backHref={`/admin/cours/${courseId}/setup/review`}
+                backHref={`/admin/cours/${courseId}/setup/validation`}
                 hubHref={`/admin/cours/${courseId}`}
                 onSave={handleSave}
                 onContinue={() => router.push(`/admin/cours/${courseId}/editor/modules`)}
